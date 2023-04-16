@@ -1,0 +1,3 @@
+/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles/AbilityFramework.dir
+/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles/edit_cache.dir
+/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,9 @@
+plugins:
+  A:
+    enabled: true
+  B:
+    enabled: true
+  C:
+    enabled: false
+  D:
+    enabled: true
