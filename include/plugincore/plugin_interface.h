@@ -27,6 +27,7 @@ namespace plugs
     struct PluginInfo{
         std::string name;
         bool enabled;
+        bool exists;
         bool activated;
     };
 
@@ -37,10 +38,12 @@ namespace plugs
         ~PluginLoader();
         PluginInterface *getPlugin();
         void releasePlugin();
+        void listPlugins();
     private:
         std::vector<PluginInfo> plugin_list;
         void loadConfigs(std::string path);
         void loadPlugins(std::string path);
+        bool pluginExists(std::string path, std::string name);
     };
 
 }

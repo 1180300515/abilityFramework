@@ -117,6 +117,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named Module_A
+
+# Build rule for target.
+Module_A: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Module_A
+.PHONY : Module_A
+
+# fast build rule for target.
+Module_A/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Module_A.dir/build.make CMakeFiles/Module_A.dir/build
+.PHONY : Module_A/fast
+
+#=============================================================================
 # Target rules for targets named AbilityFramework
 
 # Build rule for target.
@@ -153,6 +166,33 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/plugincore/pluginload.o: src/plugincore/pluginload.cpp.o
+.PHONY : src/plugincore/pluginload.o
+
+# target to build an object file
+src/plugincore/pluginload.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Module_A.dir/build.make CMakeFiles/Module_A.dir/src/plugincore/pluginload.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/plugincore/pluginload.cpp.o
+.PHONY : src/plugincore/pluginload.cpp.o
+
+src/plugincore/pluginload.i: src/plugincore/pluginload.cpp.i
+.PHONY : src/plugincore/pluginload.i
+
+# target to preprocess a source file
+src/plugincore/pluginload.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Module_A.dir/build.make CMakeFiles/Module_A.dir/src/plugincore/pluginload.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/plugincore/pluginload.cpp.i
+.PHONY : src/plugincore/pluginload.cpp.i
+
+src/plugincore/pluginload.s: src/plugincore/pluginload.cpp.s
+.PHONY : src/plugincore/pluginload.s
+
+# target to generate assembly for a file
+src/plugincore/pluginload.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Module_A.dir/build.make CMakeFiles/Module_A.dir/src/plugincore/pluginload.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/plugincore/pluginload.cpp.s
+.PHONY : src/plugincore/pluginload.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -162,9 +202,13 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... AbilityFramework"
+	@echo "... Module_A"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/plugincore/pluginload.o"
+	@echo "... src/plugincore/pluginload.i"
+	@echo "... src/plugincore/pluginload.s"
 .PHONY : help
 
 

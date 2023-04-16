@@ -1,0 +1,2 @@
+/Library/Developer/CommandLineTools/usr/bin/ar qc lib/modules/libModule_A.a CMakeFiles/Module_A.dir/src/plugincore/pluginload.cpp.o
+/Library/Developer/CommandLineTools/usr/bin/ranlib lib/modules/libModule_A.a

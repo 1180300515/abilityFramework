@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/clang++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/Users/luozhaoxin/Documents/AbilityFrameworkCpp/include -I/Users/luozhaoxin/Documents/AbilityFrameworkCpp/{YAML_INCLUDE_DIR} -isystem /opt/homebrew/include
+CXX_INCLUDES = -I/Users/luozhaoxin/Documents/AbilityFrameworkCpp/include -I/Users/luozhaoxin/Documents/AbilityFrameworkCpp/{YAML_INCLUDE_DIR} -I/Users/luozhaoxin/Documents/AbilityFrameworkCpp/include/plugincore -isystem /opt/homebrew/include
 
 CXX_FLAGSarm64 = -std=c++11 -O3 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk
 

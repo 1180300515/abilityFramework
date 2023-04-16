@@ -8,8 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/Users/luozhaoxin/Documents/AbilityFrameworkCpp/src/main.cpp" "CMakeFiles/AbilityFramework.dir/src/main.cpp.o" "gcc" "CMakeFiles/AbilityFramework.dir/src/main.cpp.o.d"
-  "/Users/luozhaoxin/Documents/AbilityFrameworkCpp/src/plugincore/pluginload.cpp" "CMakeFiles/AbilityFramework.dir/src/plugincore/pluginload.cpp.o" "gcc" "CMakeFiles/AbilityFramework.dir/src/plugincore/pluginload.cpp.o.d"
+  "/Users/luozhaoxin/Documents/AbilityFrameworkCpp/src/plugincore/pluginload.cpp" "CMakeFiles/Module_A.dir/src/plugincore/pluginload.cpp.o" "gcc" "CMakeFiles/Module_A.dir/src/plugincore/pluginload.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

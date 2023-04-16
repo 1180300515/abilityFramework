@@ -244,6 +244,12 @@ EXECUTABLE_OUTPUT_PATH:PATH=
 //Single output directory for building all libraries.
 LIBRARY_OUTPUT_PATH:PATH=
 
+//Dependencies for the target
+Module_A_LIB_DEPENDS:STATIC=general;yaml-cpp;
+
+//The directory containing a CMake configuration file for yaml-cpp.
+yaml-cpp_DIR:PATH=/opt/homebrew/share/cmake/yaml-cpp
+
 
 ########################
 # INTERNAL cache entries

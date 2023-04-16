@@ -1,9 +1,13 @@
 plugins:
   A:
     enabled: true
+    path: "./lib/modules"
   B:
     enabled: true
+    path: "./lib/modules"
   C:
     enabled: false
+    path: "./lib/modules"
   D:
     enabled: true
+    path: "./lib/modules"
