@@ -12,7 +12,7 @@ int main()
 {
     std::cout << "Hello World!" << std::endl;
     SubjectManager *subjectManager = new SubjectManager();
-    auto AMplugin = new PluginLoader("/Users/luozhaoxin/Documents/AbilityFrameworkCpp/config/testconfig.yaml");
+    auto AMplugin = new PluginLoader("../config/testconfig.yaml");
     AMplugin->listPlugins();
     auto laninfo = new LANinfo();
     subjectManager->addSubject(laninfo);
