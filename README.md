@@ -4,9 +4,9 @@
 
 已完成：
 - [x] Observer和Subject抽象
-- [*] 插件PluginInterface抽象
-- [*] 实现Plugin动态库编译和加载
-- [*] 加载后的Plugin可向Subject发送消息
+- [x] 插件PluginInterface抽象
+- [x] 实现Plugin动态库编译和加载
+- [x] 加载后的Plugin可向Subject发送消息
 
 TODO：
 - [ ] 修复Subject中其他Observer收不到消息的问题
