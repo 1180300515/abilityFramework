@@ -130,6 +130,32 @@ Module_A/fast:
 .PHONY : Module_A/fast
 
 #=============================================================================
+# Target rules for targets named ability_mgr
+
+# Build rule for target.
+ability_mgr: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ability_mgr
+.PHONY : ability_mgr
+
+# fast build rule for target.
+ability_mgr/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ability_mgr.dir/build.make CMakeFiles/ability_mgr.dir/build
+.PHONY : ability_mgr/fast
+
+#=============================================================================
+# Target rules for targets named connection_mgr
+
+# Build rule for target.
+connection_mgr: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 connection_mgr
+.PHONY : connection_mgr
+
+# fast build rule for target.
+connection_mgr/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/connection_mgr.dir/build.make CMakeFiles/connection_mgr.dir/build
+.PHONY : connection_mgr/fast
+
+#=============================================================================
 # Target rules for targets named AbilityFramework
 
 # Build rule for target.
@@ -141,6 +167,78 @@ AbilityFramework: cmake_check_build_system
 AbilityFramework/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/build
 .PHONY : AbilityFramework/fast
+
+src/abilitymanager/abimanager.o: src/abilitymanager/abimanager.cpp.o
+.PHONY : src/abilitymanager/abimanager.o
+
+# target to build an object file
+src/abilitymanager/abimanager.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ability_mgr.dir/build.make CMakeFiles/ability_mgr.dir/src/abilitymanager/abimanager.cpp.o
+.PHONY : src/abilitymanager/abimanager.cpp.o
+
+src/abilitymanager/abimanager.i: src/abilitymanager/abimanager.cpp.i
+.PHONY : src/abilitymanager/abimanager.i
+
+# target to preprocess a source file
+src/abilitymanager/abimanager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ability_mgr.dir/build.make CMakeFiles/ability_mgr.dir/src/abilitymanager/abimanager.cpp.i
+.PHONY : src/abilitymanager/abimanager.cpp.i
+
+src/abilitymanager/abimanager.s: src/abilitymanager/abimanager.cpp.s
+.PHONY : src/abilitymanager/abimanager.s
+
+# target to generate assembly for a file
+src/abilitymanager/abimanager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ability_mgr.dir/build.make CMakeFiles/ability_mgr.dir/src/abilitymanager/abimanager.cpp.s
+.PHONY : src/abilitymanager/abimanager.cpp.s
+
+src/connmanager/connmanager.o: src/connmanager/connmanager.cpp.o
+.PHONY : src/connmanager/connmanager.o
+
+# target to build an object file
+src/connmanager/connmanager.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/connection_mgr.dir/build.make CMakeFiles/connection_mgr.dir/src/connmanager/connmanager.cpp.o
+.PHONY : src/connmanager/connmanager.cpp.o
+
+src/connmanager/connmanager.i: src/connmanager/connmanager.cpp.i
+.PHONY : src/connmanager/connmanager.i
+
+# target to preprocess a source file
+src/connmanager/connmanager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/connection_mgr.dir/build.make CMakeFiles/connection_mgr.dir/src/connmanager/connmanager.cpp.i
+.PHONY : src/connmanager/connmanager.cpp.i
+
+src/connmanager/connmanager.s: src/connmanager/connmanager.cpp.s
+.PHONY : src/connmanager/connmanager.s
+
+# target to generate assembly for a file
+src/connmanager/connmanager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/connection_mgr.dir/build.make CMakeFiles/connection_mgr.dir/src/connmanager/connmanager.cpp.s
+.PHONY : src/connmanager/connmanager.cpp.s
+
+src/eventhandler/eventhandler.o: src/eventhandler/eventhandler.cpp.o
+.PHONY : src/eventhandler/eventhandler.o
+
+# target to build an object file
+src/eventhandler/eventhandler.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/eventhandler/eventhandler.cpp.o
+.PHONY : src/eventhandler/eventhandler.cpp.o
+
+src/eventhandler/eventhandler.i: src/eventhandler/eventhandler.cpp.i
+.PHONY : src/eventhandler/eventhandler.i
+
+# target to preprocess a source file
+src/eventhandler/eventhandler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/eventhandler/eventhandler.cpp.i
+.PHONY : src/eventhandler/eventhandler.cpp.i
+
+src/eventhandler/eventhandler.s: src/eventhandler/eventhandler.cpp.s
+.PHONY : src/eventhandler/eventhandler.s
+
+# target to generate assembly for a file
+src/eventhandler/eventhandler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/eventhandler/eventhandler.cpp.s
+.PHONY : src/eventhandler/eventhandler.cpp.s
 
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
@@ -203,6 +301,17 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... AbilityFramework"
 	@echo "... Module_A"
+	@echo "... ability_mgr"
+	@echo "... connection_mgr"
+	@echo "... src/abilitymanager/abimanager.o"
+	@echo "... src/abilitymanager/abimanager.i"
+	@echo "... src/abilitymanager/abimanager.s"
+	@echo "... src/connmanager/connmanager.o"
+	@echo "... src/connmanager/connmanager.i"
+	@echo "... src/connmanager/connmanager.s"
+	@echo "... src/eventhandler/eventhandler.o"
+	@echo "... src/eventhandler/eventhandler.i"
+	@echo "... src/eventhandler/eventhandler.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

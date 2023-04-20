@@ -1,0 +1,1 @@
+/usr/bin/clang++ -std=c++17 -O3 -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -dynamiclib -Wl,-headerpad_max_install_names -o lib/modules/libability_mgr.dylib -install_name @rpath/libability_mgr.dylib CMakeFiles/ability_mgr.dir/src/abilitymanager/abimanager.cpp.o 

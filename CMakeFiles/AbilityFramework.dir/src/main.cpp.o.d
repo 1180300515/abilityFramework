@@ -732,4 +732,9 @@ CMakeFiles/AbilityFramework.dir/src/main.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk/usr/include/_types/_nl_item.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk/usr/include/c++/v1/__bsd_locale_defaults.h \
   /Users/luozhaoxin/Documents/AbilityFrameworkCpp/include/plugincore/plugin_interface.h \
-  /Users/luozhaoxin/Documents/AbilityFrameworkCpp/include/plugincore/obs_interface.h
+  /Users/luozhaoxin/Documents/AbilityFrameworkCpp/include/plugincore/obs_interface.h \
+  /Users/luozhaoxin/Documents/AbilityFrameworkCpp/include/plugincore/event_interface.h \
+  /Users/luozhaoxin/Documents/AbilityFrameworkCpp/include/plugincore/subject_mgr.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk/usr/include/c++/v1/map \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk/usr/include/c++/v1/__tree \
+  /Users/luozhaoxin/Documents/AbilityFrameworkCpp/include/eventhandler/eventhandler.h

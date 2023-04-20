@@ -64,6 +64,8 @@ CMAKE_BINARY_DIR = /Users/luozhaoxin/Documents/AbilityFrameworkCpp
 
 # The main recursive "all" target.
 all: CMakeFiles/Module_A.dir/all
+all: CMakeFiles/ability_mgr.dir/all
+all: CMakeFiles/connection_mgr.dir/all
 all: CMakeFiles/AbilityFramework.dir/all
 .PHONY : all
 
@@ -73,6 +75,8 @@ preinstall:
 
 # The main recursive "clean" target.
 clean: CMakeFiles/Module_A.dir/clean
+clean: CMakeFiles/ability_mgr.dir/clean
+clean: CMakeFiles/connection_mgr.dir/clean
 clean: CMakeFiles/AbilityFramework.dir/clean
 .PHONY : clean
 
@@ -83,7 +87,7 @@ clean: CMakeFiles/AbilityFramework.dir/clean
 CMakeFiles/Module_A.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Module_A.dir/build.make CMakeFiles/Module_A.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Module_A.dir/build.make CMakeFiles/Module_A.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles --progress-num=4,5 "Built target Module_A"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles --progress-num=5,6 "Built target Module_A"
 .PHONY : CMakeFiles/Module_A.dir/all
 
 # Build rule for subdir invocation for target.
@@ -103,18 +107,70 @@ CMakeFiles/Module_A.dir/clean:
 .PHONY : CMakeFiles/Module_A.dir/clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/ability_mgr.dir
+
+# All Build rule for target.
+CMakeFiles/ability_mgr.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ability_mgr.dir/build.make CMakeFiles/ability_mgr.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ability_mgr.dir/build.make CMakeFiles/ability_mgr.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles --progress-num=7,8 "Built target ability_mgr"
+.PHONY : CMakeFiles/ability_mgr.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/ability_mgr.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/ability_mgr.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles 0
+.PHONY : CMakeFiles/ability_mgr.dir/rule
+
+# Convenience name for target.
+ability_mgr: CMakeFiles/ability_mgr.dir/rule
+.PHONY : ability_mgr
+
+# clean rule for target.
+CMakeFiles/ability_mgr.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ability_mgr.dir/build.make CMakeFiles/ability_mgr.dir/clean
+.PHONY : CMakeFiles/ability_mgr.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/connection_mgr.dir
+
+# All Build rule for target.
+CMakeFiles/connection_mgr.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/connection_mgr.dir/build.make CMakeFiles/connection_mgr.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/connection_mgr.dir/build.make CMakeFiles/connection_mgr.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles --progress-num=9,10 "Built target connection_mgr"
+.PHONY : CMakeFiles/connection_mgr.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/connection_mgr.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/connection_mgr.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles 0
+.PHONY : CMakeFiles/connection_mgr.dir/rule
+
+# Convenience name for target.
+connection_mgr: CMakeFiles/connection_mgr.dir/rule
+.PHONY : connection_mgr
+
+# clean rule for target.
+CMakeFiles/connection_mgr.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/connection_mgr.dir/build.make CMakeFiles/connection_mgr.dir/clean
+.PHONY : CMakeFiles/connection_mgr.dir/clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/AbilityFramework.dir
 
 # All Build rule for target.
 CMakeFiles/AbilityFramework.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles --progress-num=1,2,3 "Built target AbilityFramework"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles --progress-num=1,2,3,4 "Built target AbilityFramework"
 .PHONY : CMakeFiles/AbilityFramework.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/AbilityFramework.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/AbilityFramework.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles 0
 .PHONY : CMakeFiles/AbilityFramework.dir/rule

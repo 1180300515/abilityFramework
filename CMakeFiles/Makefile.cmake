@@ -52,5 +52,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/Module_A.dir/DependInfo.cmake"
+  "CMakeFiles/ability_mgr.dir/DependInfo.cmake"
+  "CMakeFiles/connection_mgr.dir/DependInfo.cmake"
   "CMakeFiles/AbilityFramework.dir/DependInfo.cmake"
   )

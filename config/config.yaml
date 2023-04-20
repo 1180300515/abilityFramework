@@ -1,13 +1,13 @@
 plugins:
-  A:
+  ability_mgr:
     enabled: true
-    path: "./lib/modules"
-  B:
+    path: "lib/modules"
+  connection_mgr:
     enabled: true
-    path: "./lib/modules"
+    path: "lib/modules"
   C:
     enabled: false
-    path: "./lib/modules"
+    path: "lib/modules"
   D:
     enabled: true
-    path: "./lib/modules"
+    path: "lib/modules"

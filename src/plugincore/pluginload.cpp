@@ -17,6 +17,7 @@ namespace plugs
         for (auto plugin : plugin_list)
         {
             std::cout << "Plugin: " << plugin.name << std::endl;
+            std::cout << "\tPath: " << plugin.path << std::endl;
             std::cout << "\tEnabled: " << (plugin.enabled ? "√" : "×") << std::endl;
             std::cout << "\tExists: " << (plugin.exists ? "√" : "×") << std::endl;
             std::cout << "\tActivated: " << (plugin.activated ? "√" : "×") << std::endl;
@@ -37,22 +38,88 @@ namespace plugs
         {
             PluginInfo plugin;
             plugin.name = it->first.as<std::string>();
+            plugin.path = it->second["path"].as<std::string>() + "/lib" + plugin.name + ".dylib";
             plugin.enabled = it->second["enabled"].as<bool>();
-            plugin.exists = pluginExists(it->second["path"].as<std::string>(), plugin.name);
+            plugin.exists = pluginExists(plugin.path);
             plugin_list.push_back(plugin);
+        }
+        loadPlugins();
+    }
+
+    void PluginLoader::loadPlugins()
+    {
+        for (auto& plugin : plugin_list)
+        {
+            if (plugin.enabled && plugin.exists)
+            {
+                void *handle = dlopen(plugin.path.c_str(), RTLD_LAZY);
+                if (!handle)
+                {
+                    std::cerr << "Cannot open library: " << dlerror() << '\n';
+                    plugin.activated = false;
+                    continue;
+                }
+
+                // load the symbols
+                CreatePluginFunc createPlugin = (CreatePluginFunc)dlsym(handle, "CreatePluginFunc");
+                const char *dlsym_error = dlerror();
+                if (dlsym_error)
+                {
+                    std::cerr << "Cannot load symbol 'CreatePluginFunc': " << dlsym_error << '\n';
+                    dlclose(handle);
+                    plugin.activated = false;
+                    continue;
+                }
+
+                DestroyPluginFunc destroyPlugin = (DestroyPluginFunc)dlsym(handle, "DestroyPluginFunc");
+                dlsym_error = dlerror();
+                if (dlsym_error)
+                {
+                    std::cerr << "Cannot load symbol 'DestroyPluginFunc': " << dlsym_error << '\n';
+                    dlclose(handle);
+                    plugin.activated = false;
+                    continue;
+                }
+
+                // use the symbols to do the calculation
+                std::unique_ptr<PluginInterface> plugin_interface(createPlugin());
+                // plugin_interface->execute();
+                plugin.activated = true;
+                std::cout << "Plugin " << plugin.name << ":" << plugin.activated << std::endl;
+                addPlugin(plugin.name, std::move(plugin_interface));
+                //destroyPlugin(plugin.get());
+            }
         }
     }
 
-    void PluginLoader::loadPlugins(std::string path)
+    std::vector<std::pair<std::string, std::unique_ptr<PluginInterface>>>& PluginLoader::getPlugins()
     {
-
+        return pluginsload;
     }
 
-    bool pluginExists(std::string path, std::string name)
+    bool PluginLoader::pluginExists(std::string path)
     {
-        std::string fullPath = path + "/" + name + ".a";
-        std::ifstream file(fullPath);
+        std::ifstream file(path);
         return file.good();
+    }
+
+    void PluginLoader::addPlugin(const std::string& name, std::unique_ptr<PluginInterface> plugin)
+    {
+        pluginsload.emplace_back(name, std::move(plugin));
+    }
+
+    void PluginLoader::executePlugin(const std::string& name, SubjectManager* subjectManager)
+    {
+        std::cout << "Execute plugin: " << name << std::endl;
+        for (auto& plugin : pluginsload)
+        {
+            std::cout << "Plugin name: " << plugin.first << std::endl;
+            if (plugin.first == name)
+            {
+                std::cout << "Find plugin: " << name << std::endl;
+                plugin.second->execute(subjectManager);
+            }
+        }
     }
 
 }
