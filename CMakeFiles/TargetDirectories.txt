@@ -1,6 +1,0 @@
-/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles/Module_A.dir
-/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles/ability_mgr.dir
-/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles/connection_mgr.dir
-/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles/AbilityFramework.dir
-/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles/edit_cache.dir
-/Users/luozhaoxin/Documents/AbilityFrameworkCpp/CMakeFiles/rebuild_cache.dir

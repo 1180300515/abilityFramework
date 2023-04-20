@@ -31,7 +31,7 @@ namespace plugs
             return true;
         }
         void transportMessage2Subject(SubjectManager* subjectManager, std::string subjectName, std::string message){
-            Subject* subject = subjectManager->getSubject(subjectName);
+            auto* subject = subjectManager->getSubject(subjectName);
             std::cout << "Sending message from " << getName() << " to " << subjectName << std::endl; 
             if(subject){
                 std::cout << "Subject not null" << std::endl;

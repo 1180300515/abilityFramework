@@ -1,1 +1,0 @@
-/usr/bin/clang++ -std=c++17 -O3 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -dynamiclib -Wl,-headerpad_max_install_names -o lib/modules/libModule_A.dylib -install_name @rpath/libModule_A.dylib CMakeFiles/Module_A.dir/src/plugincore/pluginload.cpp.o  -Wl,-rpath,/opt/homebrew/lib /opt/homebrew/lib/libyaml-cpp.0.7.0.dylib 

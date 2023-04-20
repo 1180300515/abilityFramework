@@ -18,7 +18,8 @@
                 "path": [
                     "/opt/homebrew/include/"
                 ]
-            }
+            },
+            "configurationProvider": "ms-vscode.makefile-tools"
         }
     ],
     "version": 4

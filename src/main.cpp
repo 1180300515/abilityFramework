@@ -7,7 +7,7 @@
 
 using namespace plugs;
 
-// generate helloworld code
+
 int main()
 {
     std::cout << "Hello World!" << std::endl;
