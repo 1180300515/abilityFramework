@@ -34,53 +34,54 @@ public:
         }
     }
 
-
-
-private:
     std::map<std::string, Subject *> subjects;
 };
 
 class LANinfo : public Subject {
     public:
-    LANinfo() : Subject("LANinfo") {}
+    
+    std::vector<Observer *> observers = std::vector<Observer *>();
+    LANinfo() : Subject("LANinfo", observers), observers() {}
     void registerObserver(Observer *observer) override {
+        // std::cout << "Registering observer address: " << observer << std::endl;
         observers.push_back(observer);
-        std::cout << "observer num: " << observers.size() << std::endl;
+        // std::cout << "observer num: " << observers.size() << std::endl;
+        // std::cout << "observer addresses are: " << std::endl;
+        // for (auto &obs : observers) {
+        //     std::cout << obs << std::endl;
+        // }
     }
-    void unregisterObserver(Observer *observer) override {
-        observers.erase(std::remove(observers.begin(), observers.end(), observer), observers.end());
-    }
-    void notifyObservers(const std::string &message) override {
-        for (auto &observer : observers) {
-            observer->update(message);
-        }
-    }
-
-    void getObserverNums()
+    
+    void transportMessage(Observer *observer, const std::string &message) override
     {
-        std::cout << "Observer nums: " << observers.size() << std::endl;
-    }
-
-    void transportMessage(Observer *observer, const std::string &message)
-    {
-        std::cout << "count dot" << std::endl;
+        // std::cout << "param in Observer address : " << observer <<  std::endl;
         for (auto &obs : observers)
         {
-            std::cout << "count dot" << std::endl;
+            // std::cout << "count dot 2" << std::endl;
+            // std::cout << "obs: " << obs << std::endl;
+            // std::cout << "observer: " << observer << std::endl;
             if (obs != observer)
             {
+                // std::cout << "obs not null" << std::endl;
                 obs->update(message);
             }
         }
     }
 
+    void getObserverNums() override
+    {
+        std::cout << "Observer nums: " << observers.size() << std::endl;
+    }
 
-
-
-
-    // private:
-    std::vector<Observer*> observers;
-
+    void unregisterObserver(Observer *observer) override {
+        observers.erase(std::remove(observers.begin(), observers.end(), observer), observers.end());
+    }
+    void notifyObservers(const std::string &message) override {
+        for (auto &observer : Subject::observers) {
+            observer->update(message);
+        }
+    }
+    // // private:
 };
 
 #endif // SUBJECT_MGR_H
