@@ -42,5 +42,5 @@ target_include_directories(connection_mgr PUBLIC ${CMAKE_SOURCE_DIR}/include/con
 target_link_libraries(connection_mgr)
 
 
-add_executable(${PROJECT_NAME} src/main.cpp src/plugincore/pluginload.cpp src/eventhandler/eventhandler.cpp ${CMAKE_DL_LIBS})
+add_executable(${PROJECT_NAME} src/main.cpp src/plugincore/pluginload.cpp src/eventhandler/eventhandler.cpp)
 target_link_libraries(AbilityFramework yaml-cpp)
