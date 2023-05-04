@@ -17,7 +17,7 @@ int main()
     // std::cout << "LANinfo Observer vector size: " << laninfo->observers.size() << std::endl;
     SubjectManager *subjectManager = new SubjectManager();
     // std::cout << "subjectManager address :" << subjectManager << std::endl;
-    auto AMplugin = new PluginLoader("/Users/luozhaoxin/Documents/AbilityFrameworkCpp/config/testconfig.yaml");
+    auto AMplugin = new PluginLoader("./config/testconfig.yaml");
     AMplugin->listPlugins();
     subjectManager->addSubject(laninfo);
 

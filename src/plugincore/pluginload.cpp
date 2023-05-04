@@ -40,7 +40,7 @@ namespace plugs
         {
             PluginInfo plugin;
             plugin.name = it->first.as<std::string>();
-            plugin.path = it->second["path"].as<std::string>() + "/lib" + plugin.name + ".dylib";
+            plugin.path = it->second["path"].as<std::string>() + "/lib" + plugin.name + ".so";
             plugin.enabled = it->second["enabled"].as<bool>();
             plugin.exists = pluginExists(plugin.path);
             plugin_list.push_back(plugin);

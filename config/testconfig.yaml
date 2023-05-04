@@ -1,13 +1,13 @@
 plugins:
   ability_mgr:
     enabled: true
-    path: "/Users/luozhaoxin/Documents/AbilityFrameworkCpp/lib/modules"
+    path: "./lib/modules"
   connection_mgr:
     enabled: true
-    path: "/Users/luozhaoxin/Documents/AbilityFrameworkCpp/lib/modules"
+    path: "./lib/modules"
   C:
     enabled: false
-    path: "/Users/luozhaoxin/Documents/AbilityFrameworkCpp/lib/modules"
+    path: "./lib/modules"
   D:
     enabled: true
-    path: "/Users/luozhaoxin/Documents/AbilityFrameworkCpp/lib/modules"
+    path: "./lib/modules"
