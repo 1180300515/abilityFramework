@@ -5,6 +5,7 @@
 #define PLUGIN_INTERFACE_H
 
 #include <string>
+#include <memory>
 
 namespace plugs
 {
