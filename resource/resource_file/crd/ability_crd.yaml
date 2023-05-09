@@ -1,0 +1,142 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: abilities.stable.example.com
+spec:
+  group: stable.example.com
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: define ability spec
+          type: object
+          required:
+            - level
+            - abilityname
+            - description
+            - followed
+            - spec
+            - ApiList
+          properties:
+            level:
+              description: the level
+              type: string
+              enum:
+                - "1"
+                - "2"
+                - "3"
+            abilityname:
+              description: the ability name
+              type: string
+            description:
+              description: the resource description
+              type: string
+            followed:
+              description: the name to follow
+              type: string
+            required:
+              type: array
+              items:
+                type: string
+            spec:
+              description: the spec part
+              type: object
+            ApiList:
+              description: api list
+              items:
+                description: descrip a api struct
+                required:
+                  - ApiType
+                  - ApiName
+                  - inputparam
+                properties:
+                  ApiType:
+                    description: describe the api protocol
+                    type: string
+                    enum:
+                      - RPC
+                      - REST
+                      - CUSTOM
+                  ApiName:
+                    description: rpcfunc full name
+                    type: string
+                  description:
+                    description: the rpc func description
+                    type: string
+                  inputparam:
+                    description: the input of the rpcfunc
+                    items:
+                      description: the param list
+                      required:
+                        - paramname
+                        - paramtype
+                        - index
+                      properties:
+                        paramname:
+                          description: the param name
+                          type: string
+                        paramtype:
+                          description: the param value type
+                          enum:
+                            - boolean
+                            - bytes
+                            - double
+                            - float
+                            - int
+                            - string
+                          type: string
+                        index:
+                          description: the index of the param
+                          type: string
+                      type: object
+                    type: array
+                  returnparam:
+                    description: the return of the rpcfunc
+                    type: array
+                    items:
+                      description: the param list
+                      required:
+                        - paramname
+                        - paramtype
+                        - index
+                      properties:
+                        paramname:
+                          description: the param name
+                          type: string
+                        paramtype:
+                          description: the param value type
+                          type: string
+                        index:
+                          description: the index of the param
+                          type: string
+                      type: object
+                type: object
+              type: array
+            abilityinstancelist:
+              description: ability instance list
+              items:
+                description: a device description
+                properties:
+                  devicename:
+                    description: device name
+                    type: string
+                  deviceid:
+                    description: device uuid
+                    type: string
+                  deviceip:
+                    description: device ip
+                    type: string
+                  port:
+                    description: device port
+                    type: string
+                  status:
+                    type: boolean
+                type: object
+              type: array
+  scope: Namespaced
+  names:
+    kind: Ability
+    singular: ability
+    plural: abilities

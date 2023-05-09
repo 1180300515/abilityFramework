@@ -19,27 +19,32 @@ namespace plugs
         virtual std::string getDescription() const = 0;
         virtual void execute(SubjectManager* subjectManager) = 0;
         virtual std::vector<std::string> targetSubjects() const = 0;
-        bool registerObserver(SubjectManager* subjectManager){
-            std::cout << "Registering Plugin: " << getName() << std::endl;
-            for(auto subjectName : targetSubjects()){
-                Subject* subject = subjectManager->getSubject(subjectName);
-                if(subject){
-                    subject->registerObserver(observer);
-                    subject->getObserverNums();
-                }
-            }
-            std::cout << "Plugin: " << getName() << " is registered" << std::endl;
-            return true;
-        }
-        void transportMessage2Subject(SubjectManager* subjectManager, std::string subjectName, std::string message){
-            auto* subject = subjectManager->getSubject(subjectName);
-            std::cout << "Sending message from " << getName() << " to " << subjectName << std::endl; 
-            if(subject){
-                std::cout << "Subject not null" << std::endl;
-                subject->getObserverNums();
-                subject->transportMessage(observer ,message);
-            }
-        }
+        virtual bool registerObserver(SubjectManager* subjectManager) =0;
+        // {
+        //     std::cout << "Registering Plugin: " << getName() << std::endl;
+        //     for(auto subjectName : targetSubjects()){
+        //         Subject* subject = subjectManager->getSubject(subjectName);
+        //         std::cout << subjectName << " Subject address :" << subject << std::endl;
+        //         std::cout << subjectName << " Observer address :" << observer << std::endl;
+        //         if(subject){
+        //             subject->registerObserver(observer);
+        //             subject->getObserverNums();
+        //         }
+        //     }
+        //     std::cout << "Plugin: " << getName() << " is registered" << std::endl;
+        //     return true;
+        // }
+        virtual void transportMessage2Subject(SubjectManager* subjectManager, std::string subjectName, std::string message) = 0;
+        // {
+        //     auto* subject = subjectManager->getSubject(subjectName);
+        //     std::cout << "Subject address is :" << subject << std::endl;
+        //     std::cout << "Sending message from " << getName() << " to " << subjectName << std::endl; 
+        //     if(subject){
+        //         std::cout << "Subject not null" << std::endl;
+        //         subject->getObserverNums();
+        //         subject->transportMessage(observer ,message);
+        //     }
+        // }
 
     };
 

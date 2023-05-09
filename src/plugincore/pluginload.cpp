@@ -14,6 +14,7 @@ namespace plugs
 
     void PluginLoader::listPlugins()
     {
+        std::cout << L_BLACK << std::endl;
         for (auto plugin : plugin_list)
         {
             std::cout << "Plugin: " << plugin.name << std::endl;
@@ -22,6 +23,7 @@ namespace plugs
             std::cout << "\tExists: " << (plugin.exists ? "√" : "×") << std::endl;
             std::cout << "\tActivated: " << (plugin.activated ? "√" : "×") << std::endl;
         }
+        std::cout << NONE << std::endl;
     }
 
     void PluginLoader::loadConfigs(std::string path)
@@ -85,7 +87,7 @@ namespace plugs
                 std::unique_ptr<PluginInterface> plugin_interface(createPlugin());
                 // plugin_interface->execute();
                 plugin.activated = true;
-                std::cout << "Plugin " << plugin.name << ":" << plugin.activated << std::endl;
+                // std::cout << "Plugin " << plugin.name << ":" << plugin.activated << std::endl;
                 addPlugin(plugin.name, std::move(plugin_interface));
                 //destroyPlugin(plugin.get());
             }
@@ -110,13 +112,13 @@ namespace plugs
 
     void PluginLoader::executePlugin(const std::string& name, SubjectManager* subjectManager)
     {
-        std::cout << "Execute plugin: " << name << std::endl;
+        // std::cout << "Execute plugin: " << name << std::endl;
         for (auto& plugin : pluginsload)
         {
-            std::cout << "Plugin name: " << plugin.first << std::endl;
+            // std::cout << "Plugin name: " << plugin.first << std::endl;
             if (plugin.first == name)
             {
-                std::cout << "Find plugin: " << name << std::endl;
+                // std::cout << "Find plugin: " << name << std::endl;
                 plugin.second->execute(subjectManager);
             }
         }

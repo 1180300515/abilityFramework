@@ -1,0 +1,49 @@
+apiVersion: stable.example.com/v1
+kind: LoudspeakerDevice
+metadata:
+  name: "loudspeaker1"
+spec:
+  kind: loudspeaker
+  version: "1.0"
+  hostname: ""
+  capability1:
+    - name: loudspeaker
+      api:
+        - Getloudspeaker
+  capability2:
+    - name: XiaomiLoudspeaker
+      api:
+        - Getxiaomiloudspeaker
+  properties:
+    sampleRates: "16000"
+    channelNumber: 8
+    bitWidth: 16
+    interface: standardinterface
+status:
+  occupancy: false
+api:
+  function:
+    - name: Getloudspeaker
+      param:
+        - name: param1
+          type: string
+          index: "1"
+        - name: param2
+          type: string
+          index: "2"
+      returnparam:
+        - name: param3
+          type: string
+          index: "1"
+    - name: Getxiaomiloudspeaker
+      param:
+        - name: param1
+          type: string
+          index: "1"
+        - name: param2
+          type: string
+          index: "2"
+      returnparam:
+        - name: param3
+          type: string
+          index: "1"
