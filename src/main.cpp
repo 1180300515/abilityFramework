@@ -5,6 +5,8 @@
 #include "plugincore/event_interface.h"
 #include "eventhandler/eventhandler.h"
 
+#include "discoverymanager/localhw_interface.h"
+
 using namespace plugs;
 
 // std::string getOsName();
@@ -42,6 +44,8 @@ int main()
     AMplugin->executePlugin("connection_mgr", subjectManager);
     AMplugin->executePlugin("ability_mgr", subjectManager);
 
+
+    std::cout << LocalhwPrint() << std::endl;
     
 
     return 0;

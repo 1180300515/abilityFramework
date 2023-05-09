@@ -216,6 +216,126 @@ src/connmanager/connmanager.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/connection_mgr.dir/build.make CMakeFiles/connection_mgr.dir/src/connmanager/connmanager.cpp.s
 .PHONY : src/connmanager/connmanager.cpp.s
 
+src/discoverymanager/audiodevs.o: src/discoverymanager/audiodevs.cpp.o
+.PHONY : src/discoverymanager/audiodevs.o
+
+# target to build an object file
+src/discoverymanager/audiodevs.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/audiodevs.cpp.o
+.PHONY : src/discoverymanager/audiodevs.cpp.o
+
+src/discoverymanager/audiodevs.i: src/discoverymanager/audiodevs.cpp.i
+.PHONY : src/discoverymanager/audiodevs.i
+
+# target to preprocess a source file
+src/discoverymanager/audiodevs.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/audiodevs.cpp.i
+.PHONY : src/discoverymanager/audiodevs.cpp.i
+
+src/discoverymanager/audiodevs.s: src/discoverymanager/audiodevs.cpp.s
+.PHONY : src/discoverymanager/audiodevs.s
+
+# target to generate assembly for a file
+src/discoverymanager/audiodevs.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/audiodevs.cpp.s
+.PHONY : src/discoverymanager/audiodevs.cpp.s
+
+src/discoverymanager/camdevs.o: src/discoverymanager/camdevs.cpp.o
+.PHONY : src/discoverymanager/camdevs.o
+
+# target to build an object file
+src/discoverymanager/camdevs.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/camdevs.cpp.o
+.PHONY : src/discoverymanager/camdevs.cpp.o
+
+src/discoverymanager/camdevs.i: src/discoverymanager/camdevs.cpp.i
+.PHONY : src/discoverymanager/camdevs.i
+
+# target to preprocess a source file
+src/discoverymanager/camdevs.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/camdevs.cpp.i
+.PHONY : src/discoverymanager/camdevs.cpp.i
+
+src/discoverymanager/camdevs.s: src/discoverymanager/camdevs.cpp.s
+.PHONY : src/discoverymanager/camdevs.s
+
+# target to generate assembly for a file
+src/discoverymanager/camdevs.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/camdevs.cpp.s
+.PHONY : src/discoverymanager/camdevs.cpp.s
+
+src/discoverymanager/discoverymanager.o: src/discoverymanager/discoverymanager.cpp.o
+.PHONY : src/discoverymanager/discoverymanager.o
+
+# target to build an object file
+src/discoverymanager/discoverymanager.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/discoverymanager.cpp.o
+.PHONY : src/discoverymanager/discoverymanager.cpp.o
+
+src/discoverymanager/discoverymanager.i: src/discoverymanager/discoverymanager.cpp.i
+.PHONY : src/discoverymanager/discoverymanager.i
+
+# target to preprocess a source file
+src/discoverymanager/discoverymanager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/discoverymanager.cpp.i
+.PHONY : src/discoverymanager/discoverymanager.cpp.i
+
+src/discoverymanager/discoverymanager.s: src/discoverymanager/discoverymanager.cpp.s
+.PHONY : src/discoverymanager/discoverymanager.s
+
+# target to generate assembly for a file
+src/discoverymanager/discoverymanager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/discoverymanager.cpp.s
+.PHONY : src/discoverymanager/discoverymanager.cpp.s
+
+src/discoverymanager/dispdevs.o: src/discoverymanager/dispdevs.cpp.o
+.PHONY : src/discoverymanager/dispdevs.o
+
+# target to build an object file
+src/discoverymanager/dispdevs.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/dispdevs.cpp.o
+.PHONY : src/discoverymanager/dispdevs.cpp.o
+
+src/discoverymanager/dispdevs.i: src/discoverymanager/dispdevs.cpp.i
+.PHONY : src/discoverymanager/dispdevs.i
+
+# target to preprocess a source file
+src/discoverymanager/dispdevs.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/dispdevs.cpp.i
+.PHONY : src/discoverymanager/dispdevs.cpp.i
+
+src/discoverymanager/dispdevs.s: src/discoverymanager/dispdevs.cpp.s
+.PHONY : src/discoverymanager/dispdevs.s
+
+# target to generate assembly for a file
+src/discoverymanager/dispdevs.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/dispdevs.cpp.s
+.PHONY : src/discoverymanager/dispdevs.cpp.s
+
+src/discoverymanager/localhw_discovery.o: src/discoverymanager/localhw_discovery.cpp.o
+.PHONY : src/discoverymanager/localhw_discovery.o
+
+# target to build an object file
+src/discoverymanager/localhw_discovery.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/localhw_discovery.cpp.o
+.PHONY : src/discoverymanager/localhw_discovery.cpp.o
+
+src/discoverymanager/localhw_discovery.i: src/discoverymanager/localhw_discovery.cpp.i
+.PHONY : src/discoverymanager/localhw_discovery.i
+
+# target to preprocess a source file
+src/discoverymanager/localhw_discovery.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/localhw_discovery.cpp.i
+.PHONY : src/discoverymanager/localhw_discovery.cpp.i
+
+src/discoverymanager/localhw_discovery.s: src/discoverymanager/localhw_discovery.cpp.s
+.PHONY : src/discoverymanager/localhw_discovery.s
+
+# target to generate assembly for a file
+src/discoverymanager/localhw_discovery.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbilityFramework.dir/build.make CMakeFiles/AbilityFramework.dir/src/discoverymanager/localhw_discovery.cpp.s
+.PHONY : src/discoverymanager/localhw_discovery.cpp.s
+
 src/eventhandler/eventhandler.o: src/eventhandler/eventhandler.cpp.o
 .PHONY : src/eventhandler/eventhandler.o
 
@@ -309,6 +429,21 @@ help:
 	@echo "... src/connmanager/connmanager.o"
 	@echo "... src/connmanager/connmanager.i"
 	@echo "... src/connmanager/connmanager.s"
+	@echo "... src/discoverymanager/audiodevs.o"
+	@echo "... src/discoverymanager/audiodevs.i"
+	@echo "... src/discoverymanager/audiodevs.s"
+	@echo "... src/discoverymanager/camdevs.o"
+	@echo "... src/discoverymanager/camdevs.i"
+	@echo "... src/discoverymanager/camdevs.s"
+	@echo "... src/discoverymanager/discoverymanager.o"
+	@echo "... src/discoverymanager/discoverymanager.i"
+	@echo "... src/discoverymanager/discoverymanager.s"
+	@echo "... src/discoverymanager/dispdevs.o"
+	@echo "... src/discoverymanager/dispdevs.i"
+	@echo "... src/discoverymanager/dispdevs.s"
+	@echo "... src/discoverymanager/localhw_discovery.o"
+	@echo "... src/discoverymanager/localhw_discovery.i"
+	@echo "... src/discoverymanager/localhw_discovery.s"
 	@echo "... src/eventhandler/eventhandler.o"
 	@echo "... src/eventhandler/eventhandler.i"
 	@echo "... src/eventhandler/eventhandler.s"

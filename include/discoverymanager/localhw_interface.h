@@ -14,6 +14,7 @@ public:
 };
 
 DeviceProfile getLocalHWInfo();
+int LocalhwPrint();
 
 
 #endif // _LOCALHW_INTERFACE_H_

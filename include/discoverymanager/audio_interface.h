@@ -6,10 +6,6 @@
 #include <cstring>
 #include <pulse/pulseaudio.h>
 
-std::vector<AudioDevice> inputDevices;
-std::vector<AudioDevice> outputDevices;
-
-
 class AudioDevice
 {
 public:
@@ -24,6 +20,8 @@ public:
         : name(name), description(description), volume(volume), mute(mute), sampleRate(sampleRate), channels(channels) {}
 };
 
+std::vector<AudioDevice> inputDevices;
+std::vector<AudioDevice> outputDevices;
 
 static void sink_info_callback(pa_context *c, const pa_sink_info *info, int eol, void *userdata);
 static void source_info_callback(pa_context *c, const pa_source_info *info, int eol, void *userdata);
