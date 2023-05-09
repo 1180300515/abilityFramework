@@ -11,7 +11,7 @@ struct Metadata
     std::string name;
     std::string namespace_name;
 };
-struct Status
+struct DStatus
 {
     bool occupancy;
 };

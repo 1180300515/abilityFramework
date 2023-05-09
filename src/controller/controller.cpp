@@ -502,6 +502,14 @@ void Preprocessing()
     bool logintofile = config["switch"]["logintofile"].as<bool>();
     std::string httpserver = config["value"]["httpserveraddr"].as<std::string>();
     std::string edgeserver = config["value"]["edgeserveraddr"].as<std::string>();
+    if (httpserver != "")
+    {
+        http_server_address = httpserver;
+    }
+    if (edgeserver != "")
+    {
+        edge_server_address = edgeserver;
+    }
 
     // get the local hostname
     char name[256];

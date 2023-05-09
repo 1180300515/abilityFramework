@@ -14,7 +14,7 @@ public:
     std::string apiVersion;
     std::string kind;
     Metadata metadata;
-    Status status;
+    DStatus status;
     Api api;
     std::mutex resourcelock_ ;
     std::vector<DeviceDescribe> devicelist;

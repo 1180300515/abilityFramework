@@ -2,7 +2,7 @@ switch:
   loadcrd: true
   loadinstance: true
   loadability: true
-  logintofile: true
+  logintofile: false
 value:
   httpserveraddr: "http://0.0.0.0:8000"
-  edgeserveraddr: "127.0.0.1:8001"
+  edgeserveraddr: "10.139.7.1:12300"
