@@ -1,5 +1,8 @@
 #include "discoverymanager/audio_interface.h"
 
+std::vector<AudioDevice> inputDevices;
+std::vector<AudioDevice> outputDevices;
+
 static void sink_info_callback(pa_context *c, const pa_sink_info *info, int eol, void *userdata)
 {
     if (eol > 0)
