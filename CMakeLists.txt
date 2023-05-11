@@ -67,5 +67,6 @@ add_executable(${PROJECT_NAME} src/main.cpp
     src/discoverymanager/audiodevs.cpp
     src/discoverymanager/camdevs.cpp
     src/discoverymanager/dispdevs.cpp
-    src/discoverymanager/localhw_discovery.cpp)
+    src/discoverymanager/localhw_discovery.cpp
+    src/discoverymanager/discoverymanager.cpp)
 target_link_libraries(AbilityFramework yaml-cpp pulse X11 Xrandr v4l2)

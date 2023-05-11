@@ -1,10 +1,12 @@
 #include <iostream>
+#include <thread>
 #include "plugincore/plugin_interface.h"
 #include "plugincore/obs_interface.h"
 #include "plugincore/subject_mgr.h"
 #include "plugincore/event_interface.h"
 #include "eventhandler/eventhandler.h"
 
+#include "discoverymanager/discmgr_interface.h"
 #include "discoverymanager/localhw_interface.h"
 
 using namespace plugs;
@@ -46,6 +48,13 @@ int main()
 
 
     std::cout << LocalhwPrint() << std::endl;
+
+    std::thread sender_thread(udp_broadcast_sender);
+    std::thread receiver_thread(udp_broadcast_receiver);
+
+    sender_thread.join();
+    receiver_thread.join();
+
     
 
     return 0;

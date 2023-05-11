@@ -5,3 +5,8 @@ build/
 CMakeCache.txt
 Makefile
 cmake_install.cmake
+lib/modules/libModule_A.so
+lib/modules/libconnection_mgr.so
+.gitignore
+.gitignore
+lib/modules/libability_mgr.so
