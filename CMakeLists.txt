@@ -5,6 +5,7 @@ set(CMAKE_CXX_COMPILER "/usr/bin/clang++-14")
 set(CMAKE_CXX_FLAGS "-std=c++17 -O3")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+<<<<<<< HEAD
 # set(YAML_INCLUDE_DIR  usr/include/yaml-cpp)
 # set(YAML_LIB_DIR usr/lib/)
 
@@ -15,6 +16,29 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # set(JSON_CPP_LIB_DIR usr/lib/)
 
 # set(RAPIDJSON_INCLUDE_DIR /usr/include/rapidjson)
+=======
+# Macos specific
+# set(YAML_DIR /opt/homebrew/Cellar/yaml-cpp/0.7.0)
+# set(YAML_INCLUDE_DIR  ${YAML_DIR}/include/yaml-cpp)
+# set(YAML_LIB_DIR ${YAML_DIR}/lib)
+
+# Linux specific
+set(YAML_INCLUDE_DIR /usr/include/yaml-cpp)
+set(YAML_LIB_DIR /usr/lib/)
+
+set(PULSE_INCLUDE_DIR /usr/include/pulse)
+set(PULSE_LIB_DIR /usr/lib/pulseaudio)
+
+set(X11_INCLUDE_DIR /usr/include/X11)
+set(X11_LIB_DIR /usr/lib/)
+
+set(XRANDR_INCLUDE_DIR /usr/include/X11/extensions)
+set(XRANDR_LIB_DIR /usr/lib/)
+
+set(V4L2_INCLUDE_DIR /usr/include/linux)
+set(V4L2_LIB_DIR /usr/lib/)
+
+>>>>>>> linux1
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/modules)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

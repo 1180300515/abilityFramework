@@ -20,8 +20,6 @@ public:
         : name(name), description(description), volume(volume), mute(mute), sampleRate(sampleRate), channels(channels) {}
 };
 
-
-
 static void sink_info_callback(pa_context *c, const pa_sink_info *info, int eol, void *userdata);
 static void source_info_callback(pa_context *c, const pa_source_info *info, int eol, void *userdata);
 static void context_state_callback(pa_context *c, void *userdata);
