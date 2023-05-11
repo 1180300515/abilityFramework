@@ -40,6 +40,8 @@ private:
 
 private:
     dbManager();
+    bool checkCameraExist();
+    bool checkLoudspeakerExist();
 
 public:
     // singleton
@@ -52,7 +54,7 @@ public:
     dbManager(const dbManager &) = delete;
     dbManager &operator=(const dbManager) = delete;
     /**
-     * 从文件读取数据，存储crd到数据库
+     * read file into the crd table.
      *
      * @param filepath: the file path
      *
