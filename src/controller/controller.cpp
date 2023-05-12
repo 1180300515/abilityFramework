@@ -36,6 +36,10 @@ void Controller::LoadResource()
     {
         LOG(ERROR) << "get all sensordevice error ";
     }
+    if (!dbManager::getInstance().DBGetDeviceInstances(mic_instances))
+    {
+        LOG(ERROR) << "get all micphonedevice error ";
+    }
 }
 
 void Controller::SetEdgeAddressRecord(std::map<std::string, std::string> record)
@@ -51,6 +55,7 @@ std::string Controller::isLocalResource(std::string key)
     std::lock_guard<std::mutex> locker1(camera_lock_);
     std::lock_guard<std::mutex> locker2(loudspeaker_lock_);
     std::lock_guard<std::mutex> locker3(sensor_lock_);
+    std::lock_guard<std::mutex> locker4(mic_lock_);
     if (camera_instances.find(key) != camera_instances.end())
     {
         return CameraDeviceResourcetype;
@@ -62,6 +67,10 @@ std::string Controller::isLocalResource(std::string key)
     if (sensor_instances.find(key) != sensor_instances.end())
     {
         return SensorDeviceResourcetype;
+    }
+    if (mic_instances.find(key) != mic_instances.end())
+    {
+        return MicrophoneDeviceResourcetype;
     }
     return "";
 }
@@ -340,71 +349,12 @@ void Controller::HandleResourceSyncEdge(KeyAndDataPackages data)
     }
 }
 
-// void Controller::HandleBroadcast(KeyAndDataPackages data)
-// {
-//     LOG(INFO) << "The notifyhandle function is called back";
-//     for (int i = 0; i < data.data.size(); i++)
-//     {
-//         if (data.data[i].eventType == EdgeDeleteEventType)
-//         {
-//             deleteResource(data.data[i].key);
-//         }
-//         else if (data.data[i].eventType == EdgeUpdateEventType)
-//         {
-//             std::string type = isLocalResource(data.data[i].key);
-//             if (type == CameraDeviceResourcetype)
-//             {
-//                 CameraInstance instance;
-//                 UnMarshal(data.data[i].data, instance);
-//                 updateResource(instance);
-//             }
-//             else if (type == LoudspeakerDeviceResourcetype)
-//             {
-//                 LoudspeakerInstance instance;
-//                 UnMarshal(data.data[i].data, instance);
-//                 updateResource(instance);
-//             }
-//             else if (type == SensorDeviceResourcetype)
-//             {
-//                 SensorInstance instance;
-//                 UnMarshal(data.data[i].data, instance);
-//                 updateResource(instance);
-//             }
-//         }
-//         else if (data.data[i].eventType == EdgeAddEventType)
-//         {
-//             std::string type = data.data[i].resourceType;
-//             if (type == CameraDeviceResourcetype)
-//             {
-//                 CameraInstance instance;
-//                 UnMarshal(data.data[i].data, instance);
-//                 addResource(instance);
-//             }
-//             else if (type == LoudspeakerDeviceResourcetype)
-//             {
-//                 LoudspeakerInstance instance;
-//                 UnMarshal(data.data[i].data, instance);
-//                 addResource(instance);
-//             }
-//             else if (type == SensorDeviceResourcetype)
-//             {
-//                 SensorInstance instance;
-//                 UnMarshal(data.data[i].data, instance);
-//                 addResource(instance);
-//             }
-//         }
-//         else
-//         {
-//             LOG(ERROR) << data.data[i].eventType << " is illegal";
-//         }
-//     }
-// }
-
 void Controller::RefreshKVRecord()
 {
     std::lock_guard<std::mutex> locker1(camera_lock_);
     std::lock_guard<std::mutex> locker2(loudspeaker_lock_);
     std::lock_guard<std::mutex> locker3(sensor_lock_);
+    std::lock_guard<std::mutex> locker4(mic_lock_);
     this->versionRecord.clear();
     for (auto &iter : camera_instances)
     {
@@ -418,6 +368,34 @@ void Controller::RefreshKVRecord()
     {
         this->versionRecord[iter.first] = iter.second->spec.version;
     }
+    for (auto &iter : mic_instances)
+    {
+        this->versionRecord[iter.first] = iter.second->spec.version;
+    }
+}
+
+void Controller::PrintResource()
+{
+    std::lock_guard<std::mutex> locker1(camera_lock_);
+    std::lock_guard<std::mutex> locker2(loudspeaker_lock_);
+    std::lock_guard<std::mutex> locker3(sensor_lock_);
+    std::lock_guard<std::mutex> locker4(mic_lock_);
+    for (auto &iter : camera_instances)
+    {
+        std::cout << iter.second->Marshal() << std::endl;
+    }
+    for (auto &iter : loudspeaker_instances)
+    {
+        std::cout << iter.second->Marshal() << std::endl;
+    }
+    for (auto &iter : loudspeaker_instances)
+    {
+        std::cout << iter.second->Marshal() << std::endl;
+    }
+    for (auto &iter : mic_instances)
+    {
+        std::cout << iter.second->Marshal() << std::endl;
+    }
 }
 
 std::string Controller::GetNonLocalFormat()
@@ -428,6 +406,7 @@ std::string Controller::GetNonLocalFormat()
     std::lock_guard<std::mutex> locker1(camera_lock_);
     std::lock_guard<std::mutex> locker2(loudspeaker_lock_);
     std::lock_guard<std::mutex> locker3(sensor_lock_);
+    std::lock_guard<std::mutex> locker4(mic_lock_);
     for (auto &iter : camera_instances)
     {
         KeyDatapack pack;
@@ -459,6 +438,21 @@ std::string Controller::GetNonLocalFormat()
         data.data.emplace_back(pack);
     }
     for (auto &iter : loudspeaker_instances)
+    {
+        KeyDatapack pack;
+        pack.key = iter.first;
+        pack.eventType = EdgeNonLocalEventType;
+        auto res = std::make_shared<NonLocalResource>();
+        int index = iter.first.find("/");
+        res->name = iter.first.substr(index + 1);
+        res->namespace_name = iter.first.substr(0, index);
+        res->kind = iter.second->spec.kind;
+        res->hostname = iter.second->spec.hostname;
+        res->devicelist = iter.second->devicelist;
+        pack.data = Marshal(res);
+        data.data.emplace_back(pack);
+    }
+    for (auto &iter : mic_instances)
     {
         KeyDatapack pack;
         pack.key = iter.first;
@@ -479,7 +473,7 @@ std::string Controller::GetNonLocalFormat()
 void Preprocessing()
 {
     // read config yaml file
-    LOG(INFO) << "load config from file";
+    std::cout << "load config from file";
     std::string  config_file_path = "../config/controller_config.yaml";
     YAML::Node config;
     try
@@ -516,13 +510,6 @@ void Preprocessing()
     gethostname(name, sizeof(name));
     device_hostname = name;
 
-    // config the log
-    if (logintofile)
-    {
-        FLAGS_log_dir = LOG_FILE_PATH;
-    }
-    FLAGS_alsologtostderr = 1;
-    google::InitGoogleLogging("controller");
 
     // load resource into database
     dbManager &manager = dbManager::getInstance();

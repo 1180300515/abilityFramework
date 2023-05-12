@@ -11,7 +11,7 @@
 #include <linux/videodev2.h>
 
 // 定义一个摄像头设备的类
-class CameraDevice
+class CameraHardware
 {
 public:
     std::string device_path;
@@ -21,7 +21,7 @@ public:
     std::vector<std::string> formats;
     //...更多属性和方法...
 
-    CameraDevice &operator=(const CameraDevice &other)
+    CameraHardware &operator=(const CameraHardware &other)
     {
         if (this != &other)
         {
@@ -36,6 +36,6 @@ public:
     }
 };
 
-std::vector<CameraDevice> getCameraInfo();
+std::vector<CameraHardware> getCameraInfo();
 
 #endif // _CAM_INTERFACE_H_

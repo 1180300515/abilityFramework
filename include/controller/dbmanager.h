@@ -5,22 +5,21 @@
 #include <string>
 #include <memory>
 
+#include "jsoncpp/json/json.h"
+
 #include "controller/common/ability_struct.h"
 #include "controller/common/cameradevice_instance.h"
 #include "controller/common/sensordevice_instance.h"
 #include "controller/common/louspeakerdevice_instance.h"
+#include "controller/common/microphonedevice_instance.h"
 #include "controller/common/database_store_struct.h"
+#include "discoverymanager/localhw_interface.h"
 
 class dbManager
 {
 private:
-    std::string crd_table_name = "CRD";
-    std::string instance_table_name = "INSTANCE";
-    std::string ability_table_name = "ABILITY";
-    std::string level1_table_name = "LEVEL1";
-    std::string level2_table_name = "LEVEL2";
-    std::string level3_table_name = "LEVEL3";
-
+    DeviceProfile profile;
+    
     // store the sql research result
     static std::vector<CrdDBStruct> crdstructs;
     static std::vector<InstanceDBStruct> instancestructs;
@@ -34,14 +33,21 @@ private:
     static int instance_callback(void *unused, int columenCount, char **columnValue, char **columnName);
     static int ability_callback(void *unused, int columenCount, char **columnValue, char **columnName);
     static int cloud_address_callback(void *unused, int columenCount, char **columnValue, char **columnName);
-    // static int level1_callback(void *unused,int columenCount,char **columnValue,char **columnName);
-    // static int level2_callback(void *unused,int columenCount,char **columnValue,char **columnName);
-    // static int level3_callback(void *unused,int columenCount,char **columnValue,char **columnName);
 
 private:
     dbManager();
-    bool checkCameraExist();
-    bool checkLoudspeakerExist();
+    /**
+     * add the camera info into the instance
+    */
+    void insertCameraInfo(Json::Value &jnode);
+    /**
+     * add the mic info into the instance
+    */
+    void insertMicInfo(Json::Value &jnode);
+    /**
+     * add the loudspeaker info into the instance
+    */
+    void insertloudspeakerInfo(Json::Value &jnode);
 
 public:
     // singleton
@@ -63,7 +69,7 @@ public:
     bool RegisterCrd(const std::string &filepath);
 
     /**
-     * 从文件读取数据，存储ability进入数据库
+     * read file into the ability table
      *
      * @param filepath: the file path
      *
@@ -71,40 +77,41 @@ public:
      */
     bool AddAbilityInstance(const std::string &filepath);
     /**
-     * 从文件读取数据，存储device instance进入数据库
+     * read file into the instance table
      *
      * @param filepath: the file path
      * @return success or not
      */
     bool AddDeviceInstance(const std::string &filepath);
     /**
-     * 读取instance到结构体中
+     * read instance into the memory
      */
     bool DBGetDeviceInstances(std::map<std::string, std::shared_ptr<CameraInstance>> &instance);
     bool DBGetDeviceInstances(std::map<std::string, std::shared_ptr<LoudspeakerInstance>> &instance);
     bool DBGetDeviceInstances(std::map<std::string, std::shared_ptr<SensorInstance>> &instance);   
+    bool DBGetDeviceInstances(std::map<std::string, std::shared_ptr<MicrophoneInstance>> &instance);   
     /**
-     * 存储资源到数据库中
+     * store the instance into db
     */
     bool DBStoreDeviceInstances(std::string data);
     /**
-     * 数据库更新device instance
+     * update the instance 
     */
     bool DBUpdateDeviceInstance(std::string &data);
     /**
-     * 数据库删除device instance
+     * delete the instance
     */
     bool DBDelteDeviceInstance(std::string &key);
     /**
-     * 存储云端地址进入数据库
+     * store the cloud address into db
     */
     bool DBStoreCloudAddress();
     /**
-     * 从数据库中读取云端地址
+     * read cloud address from db
     */
     bool DBGetCloudAddress();
     /**
-     * 清除数据库中的对应数据
+     * clean db
     */
     bool DBCleanDeviceInstances();
     bool DBCleanAbility();

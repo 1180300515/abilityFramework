@@ -1,9 +1,9 @@
 #include "discoverymanager/cam_interface.h"
 
-std::vector<CameraDevice> getCameraInfo()
+std::vector<CameraHardware> getCameraInfo()
 {
     glob_t glob_result;
-    std::vector<CameraDevice> camera_devices;
+    std::vector<CameraHardware> camera_devices;
 
     // 找到所有的V4L设备
     glob("/dev/video*", GLOB_TILDE, nullptr, &glob_result);
@@ -40,7 +40,7 @@ std::vector<CameraDevice> getCameraInfo()
         }
 
         // 创建一个CameraDevice对象，并添加到列表中
-        CameraDevice device;
+        CameraHardware device;
         device.device_path = path;
         device.driver = reinterpret_cast<const char *>(cap.driver);
         device.card = reinterpret_cast<const char *>(cap.card);
@@ -72,21 +72,21 @@ std::vector<CameraDevice> getCameraInfo()
 
     globfree(&glob_result);
 
-    // 打印摄像头设备列表
-    for (const auto &device : camera_devices)
-    {
-        std::cout << "Device path: " << device.device_path << std::endl
-                  << "Driver: " << device.driver << std::endl
-                  << "Card: " << device.card << std::endl
-                  << "Bus info: " << device.bus_info << std::endl
-                  << "Supported formats: ";
-        for (const auto &format : device.formats)
-        {
-            std::cout << format << " ";
-        }
-        std::cout << std::endl
-                  << std::endl;
-    }
+    // // 打印摄像头设备列表
+    // for (const auto &device : camera_devices)
+    // {
+    //     std::cout << "Device path: " << device.device_path << std::endl
+    //               << "Driver: " << device.driver << std::endl
+    //               << "Card: " << device.card << std::endl
+    //               << "Bus info: " << device.bus_info << std::endl
+    //               << "Supported formats: ";
+    //     for (const auto &format : device.formats)
+    //     {
+    //         std::cout << format << " ";
+    //     }
+    //     std::cout << std::endl
+    //               << std::endl;
+    // }
 
     return camera_devices;
 }

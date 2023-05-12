@@ -26,6 +26,7 @@ extern std::string device_hostname;
 #define CameraDeviceResourcetype "CameraDevice"
 #define SensorDeviceResourcetype "SensorDevice"
 #define LoudspeakerDeviceResourcetype "LoudspeakerDevice"
+#define MicrophoneDeviceResourcetype "MicrophoneDevice"
 // event type
 #define EdgeUpdateEventType "edgeupdate"
 #define EdgeDeleteEventType "edgedelete"

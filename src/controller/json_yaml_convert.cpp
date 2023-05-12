@@ -4,7 +4,7 @@
 
 #include "controller/json_yaml_convert.h"
 
-bool YamlToJson(const YAML::Node &ynode, Json::Value &jnode)
+bool YamlToJson(const YAML::Node &ynode, Json::Value &jnode, std::string name)
 {
     try
     {
@@ -31,11 +31,10 @@ bool YamlToJson(const YAML::Node &ynode, Json::Value &jnode)
         }
         else if (ynode.IsMap())
         {
-            for (auto it = ynode.begin();
-                 it != ynode.end(); ++it)
+            for (auto it = ynode.begin(); it != ynode.end(); ++it)
             {
                 Json::Value v;
-                if (YamlToJson(it->second, v))
+                if (YamlToJson(it->second, v, it->first.Scalar()))
                 {
                     jnode[it->first.Scalar()] = v;
                 }
@@ -54,18 +53,24 @@ bool YamlToJson(const YAML::Node &ynode, Json::Value &jnode)
     return true;
 }
 
-bool JsonToYaml(const Json::Value &jnode, YAML::Node &ynode)
+bool YamlToJsonForInstance(const YAML::Node &ynode, Json::Value &jnode, std::string name)
 {
     try
     {
-        if (jnode.isArray())
+        if (ynode.IsScalar())
         {
-            for (int i = 0; i < jnode.size(); ++i)
+            Json::Value v(ynode.Scalar());
+            jnode.swapPayload(v);
+            return true;
+        }
+        if (ynode.IsSequence())
+        {
+            for (size_t i = 0; i < ynode.size(); ++i)
             {
-                YAML::Node n;
-                if (JsonToYaml(jnode[i], n))
+                Json::Value v;
+                if (YamlToJsonForInstance(ynode[i], v))
                 {
-                    ynode.push_back(n);
+                    jnode.append(v);
                 }
                 else
                 {
@@ -73,26 +78,53 @@ bool JsonToYaml(const Json::Value &jnode, YAML::Node &ynode)
                 }
             }
         }
-        else if (jnode.isObject())
+        else if (ynode.IsMap())
         {
-            for (auto it = jnode.begin();
-                 it != jnode.end();
-                 ++it)
+            for (auto it = ynode.begin(); it != ynode.end(); ++it)
             {
-                YAML::Node n;
-                if (JsonToYaml(*it, n))
+                for (auto it = ynode.begin(); it != ynode.end(); ++it)
                 {
-                    ynode[it.name()] = n;
+                    if (name == "properties" && it->first.Scalar() == "wideAngle")
+                    {
+                        jnode[it->first.Scalar()] = it->second.as<int>();
+                        continue;
+                    }
+                    else if (name == "properties" && it->first.Scalar() == "telephoto")
+                    {
+                        std::cout << "tag94" << std::endl;
+                        jnode[it->first.Scalar()] = it->second.as<bool>();
+                        continue;
+                    }
+                    else if (name == "properties" && it->first.Scalar() == "channelNumber")
+                    {
+                        jnode[it->first.Scalar()] = it->second.as<int>();
+                        continue;
+                    }
+                    else if (name == "properties" && it->first.Scalar() == "bitWidth")
+                    {
+                        jnode[it->first.Scalar()] = it->second.as<int>();
+                        continue;
+                    }
+                    else if (name == "status" && it->first.Scalar() == "occupancy")
+                    {
+                        jnode[it->first.Scalar()] = it->second.as<bool>();
+                        continue;
+                    }
+                    else
+                    {
+                        Json::Value v;
+                        if (YamlToJsonForInstance(it->second, v, it->first.Scalar()))
+                        {
+                            jnode[it->first.Scalar()] = v;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
                 }
-                else
-                {
-                    return false;
-                }
+                return true;
             }
-        }
-        else
-        {
-            ynode = jnode.asString();
         }
     }
     catch (...)
@@ -102,7 +134,6 @@ bool JsonToYaml(const Json::Value &jnode, YAML::Node &ynode)
     }
     return true;
 }
-
 std::string JsonToString(const Json::Value &jnode)
 {
     Json::FastWriter writer;
@@ -113,21 +144,6 @@ void StringToJson(const std::string jsonformatstring, Json::Value &jnode)
 {
     Json::Reader reader;
     reader.parse(jsonformatstring, jnode);
-}
-
-std::string GetCrdKey(const Json::Value &jnode)
-{
-    return jnode["metadata"]["name"].asString();
-}
-
-std::string GetCrdGroup(const Json::Value &jnode)
-{
-    return jnode["spec"]["group"].asString();
-}
-
-std::string GetCrdKind(const Json::Value &jnode)
-{
-    return jnode["spec"]["names"]["kind"].asString();
 }
 
 std::string GetCrdSchema(const Json::Value &jnode)
@@ -154,34 +170,6 @@ std::string GetCrdSchema(const Json::Value &jnode)
         LOG(ERROR) << "json format is not correct";
         return "";
     }
-}
-
-std::string CrdSchemaRevise(const std::string &schemastring)
-{
-    Json::Value jnode;
-    StringToJson(schemastring, jnode);
-    Json::Value mem = jnode["properties"]["spec"]["properties"]["properties"]["properties"];
-    for (Json::Value::iterator it = mem.begin(); it != mem.end(); ++it)
-    {
-        jnode["properties"]["spec"]["properties"]["properties"]["properties"][it.name().c_str()]["type"] = "string";
-    }
-    jnode["properties"]["status"]["properties"]["occupancy"]["type"] = "string";
-    return JsonToString(jnode);
-}
-
-std::string GetInstanceKey(const Json::Value &jnode)
-{
-    return jnode["metadata"]["name"].asString();
-}
-
-std::string GetInstanceGroupAndVersion(const Json::Value &jnode)
-{
-    return jnode["apiVersion"].asString();
-}
-
-std::string GetInstanceKind(const Json::Value &jnode)
-{
-    return jnode["kind"].asString();
 }
 
 std::string GetInstanceValidatePart(const Json::Value &jnode)
@@ -228,22 +216,11 @@ bool SchemaValidation(const std::string schemajsonstring, const std::string inpu
     }
 }
 
-std::string GetAbilityKey(const Json::Value &jnode)
-{
-    return jnode["abilityname"].asString();
-}
-std::string GetAbilityGroupAndVersion(const Json::Value &jnode)
-{
-    return jnode["apiVersion"].asString();
-}
-std::string GetAbilityKind(const Json::Value &jnode)
-{
-    return jnode["kind"].asString();
-}
 std::string GetAbilityValidatePart(const Json::Value &jnode)
 {
     Json::Value tag = jnode;
     tag.removeMember("apiVersion");
     tag.removeMember("kind");
+    tag.removeMember("metadata");
     return JsonToString(jnode);
 }

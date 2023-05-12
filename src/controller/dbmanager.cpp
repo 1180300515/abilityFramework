@@ -58,15 +58,6 @@ dbManager::dbManager()
                         "KIND  TEXT   NOT NULL,"
                         "VERSION TEXT NOT NULL);";
     cloud_address_table_sql = "CREATE TABLE IF NOT EXISTS CLOUDADDRESS ( ADDRESS TEXT PRIMARY KEY   NOT NULL );";
-    // level1_table_sql = "CREATE TABLE IF NOT EXISTS LEVEL1 ( "
-    //                    "ABILITYNAME TEXT PRIMARY KEY     NOT NULL,"
-    //                    "LIST TEXT   NOT NULL );";
-    // level2_table_sql = "CREATE TABLE IF NOT EXISTS LEVEL2 ( "
-    //                    "ABILITYNAME TEXT PRIMARY KEY     NOT NULL,"
-    //                    "LIST TEXT   NOT NULL );";
-    // level3_table_sql = "CREATE TABLE IF NOT EXISTS LEVEL3 ( "
-    //                    "ABILITYNAME TEXT PRIMARY KEY     NOT NULL,"
-    //                    "LIST TEXT   NOT NULL );";
 
     rc = sqlite3_exec(db, crd_table_sql, crd_callback, 0, &errormes);
     if (rc)
@@ -93,26 +84,44 @@ dbManager::dbManager()
         exit(0);
     }
     LOG(INFO) << "create table CRD,INSTANCE.ABILITY,CLOUDADDRESS success";
-    // rc = sqlite3_exec(db, level1_table_sql, level1_callback, 0, &errormes);
-    // if (rc)
-    // {
-    //     LOG(ERROR) << "create table INFO failed with: " << errormes;
-    //     exit(0);
-    // }
-    // rc = sqlite3_exec(db, level2_table_sql, level2_callback, 0, &errormes);
-    // if (rc)
-    // {
-    //     LOG(ERROR) << "create table INFO failed with: " << errormes;
-    //     exit(0);
-    // }
-    // rc = sqlite3_exec(db, level3_table_sql, level3_callback, 0, &errormes);
-    // if (rc)
-    // {
-    //     LOG(ERROR) << "create table INFO failed with: " << errormes;
-    //     exit(0);
-    // }
+    profile = getLocalHWInfo();
+    LOG(INFO) << "get local hardware success";
 }
 
+void dbManager::insertCameraInfo(Json::Value &jnode)
+{
+    CameraHardware a = profile.cameraDevices.front();
+    profile.cameraDevices.erase(profile.cameraDevices.begin());
+    jnode["spec"]["properties"]["deviceNode"] = a.device_path;
+    jnode["spec"]["properties"]["driverName"] = a.driver;
+    jnode["spec"]["properties"]["cardType"] = a.card;
+    jnode["spec"]["properties"]["busInfo"] = a.bus_info;
+    jnode["spec"]["properties"]["description"] = "ignore";
+    for (int i = 0; i < a.formats.size(); i++)
+    {
+        jnode["spec"]["properties"]["supportFormat"].append(a.formats[i]);
+    }
+}
+void dbManager::insertMicInfo(Json::Value &jnode)
+{
+    AudioDevice a = profile.micDevices.front();
+    profile.micDevices.erase(profile.micDevices.begin());
+    jnode["spec"]["properties"]["hardwareName"] = a.name;
+    jnode["spec"]["properties"]["sampleRates"] = std::to_string(a.sampleRate);
+    jnode["spec"]["properties"]["volume"] = (int)a.volume;
+    jnode["spec"]["properties"]["mute"] = a.mute;
+    jnode["spec"]["properties"]["description"] = a.description;
+}
+void dbManager::insertloudspeakerInfo(Json::Value &jnode)
+{
+    AudioDevice a = profile.speakerDevices.front();
+    profile.speakerDevices.erase(profile.speakerDevices.begin());
+    jnode["spec"]["properties"]["hardwareName"] = a.name;
+    jnode["spec"]["properties"]["sampleRates"] = std::to_string(a.sampleRate);
+    jnode["spec"]["properties"]["volume"] = (int)a.volume;
+    jnode["spec"]["properties"]["mute"] = a.mute;
+    jnode["spec"]["properties"]["description"] = a.description;
+}
 // static member init
 std::vector<CrdDBStruct> dbManager::crdstructs;
 std::vector<InstanceDBStruct> dbManager::instancestructs;
@@ -141,10 +150,11 @@ bool dbManager::RegisterCrd(const std::string &filepath)
         LOG(ERROR) << "convert the yaml file in: " << filepath << "error";
         return false;
     }
-    std::string crd_key_name = GetCrdKey(crd_json);
+    // get related value
+    std::string crd_key_name = crd_json["metadata"]["name"].asString();
     std::string crd_json_string = JsonToString(crd_json);
-    std::string crd_group_string = GetCrdGroup(crd_json);
-    std::string crd_kind_string = GetCrdKind(crd_json);
+    std::string crd_group_string = crd_json["spec"]["group"].asString();
+    std::string crd_kind_string = crd_json["spec"]["names"]["kind"].asString();
     std::string crd_schema_string = GetCrdSchema(crd_json);
 
     std::string sql = "INSERT OR IGNORE INTO CRD (KEY,VALUE,APIGROUP,KIND,SCHEMA) VALUES (\'";
@@ -157,9 +167,7 @@ bool dbManager::RegisterCrd(const std::string &filepath)
         LOG(ERROR) << "sql excute error: " << erroms;
         return false;
     }
-
     LOG(INFO) << "register success with crd name: " << crd_key_name << " in file: " << filepath;
-
     return true;
 }
 
@@ -188,10 +196,11 @@ bool dbManager::AddAbilityInstance(const std::string &filepath)
     }
 
     // check the crd is exist or not in the crd table
-    std::string apiVersion_string = GetAbilityGroupAndVersion(instance_json);
+    std::string apiVersion_string = instance_json["apiVersion"].asString();
     int flag = apiVersion_string.find("/");
     std::string instance_group = apiVersion_string.substr(0, flag);
-    std::string instance_kind = GetAbilityKind(instance_json);
+    std::string instance_kind = instance_json["kind"].asString();
+
     crdstructs.clear();
     std::string search_sql = "SELECt * FROM CRD WHERE APIGROUP = \'" + instance_group + "\' AND KIND = \'" + instance_kind + "\' ;";
     int rc;
@@ -209,7 +218,7 @@ bool dbManager::AddAbilityInstance(const std::string &filepath)
     }
     LOG(INFO) << "find matched crd with group: " << instance_group << ", kind: " << instance_kind;
 
-    // base the crd schema part, validate the instance
+    // json schema
     std::string crd_schema = crdstructs.begin()->schema;
     std::string instance_validate = GetAbilityValidatePart(instance_json);
     if (SchemaValidation(crd_schema, instance_validate))
@@ -222,9 +231,9 @@ bool dbManager::AddAbilityInstance(const std::string &filepath)
         return false;
     }
     // add instance into the ability table
-    std::string instance_key = GetAbilityKey(instance_json);
+    std::string instance_key = instance_json["abilityname"].asString();
     std::string instance_value = JsonToString(instance_json);
-    std::string instance_version = apiVersion_string.substr(flag + 1, apiVersion_string.size() - flag + 1);
+    std::string instance_version = apiVersion_string.substr(flag);
 
     std::string insert_sql = "INSERT OR IGNORE INTO ABILITY (NAME,VALUE,APIGROUP,KIND,VERSION) VALUES (\'";
     insert_sql += instance_key + "\',\'" + instance_value + "\',\'" + instance_group + "\',\'" + instance_kind + "\',\'" + instance_version + "\' );";
@@ -237,7 +246,6 @@ bool dbManager::AddAbilityInstance(const std::string &filepath)
         return false;
     }
     LOG(INFO) << "add instance in file: " << filepath << " success";
-
     return true;
 }
 
@@ -259,17 +267,16 @@ bool dbManager::AddDeviceInstance(const std::string &filepath)
         LOG(ERROR) << "file can't be load";
         return false;
     }
-    if (!YamlToJson(instance_yaml, instance_json))
+    if (!YamlToJsonForInstance(instance_yaml, instance_json))
     {
         LOG(ERROR) << "convert the yaml file in: " << filepath << " to json format fail";
         return false;
     }
-
     // check the crd is exist or not in the crd table
-    std::string apiVersion_string = GetInstanceGroupAndVersion(instance_json);
+    std::string apiVersion_string = instance_json["apiVersion"].asString();
     int flag = apiVersion_string.find("/");
     std::string instance_group = apiVersion_string.substr(0, flag);
-    std::string instance_kind = GetInstanceKind(instance_json);
+    std::string instance_kind = instance_json["kind"].asString();
     crdstructs.clear();
     std::string search_sql = "SELECT * FROM CRD WHERE APIGROUP = \'" + instance_group + "\' AND KIND = \'" + instance_kind + "\' ;";
     int rc;
@@ -287,9 +294,9 @@ bool dbManager::AddDeviceInstance(const std::string &filepath)
     }
     LOG(INFO) << "find matched crd with group: " << instance_group << ", kind: " << instance_kind;
 
-    // base the crd schema part, validate the instance
-    std::string crd_schema = CrdSchemaRevise(crdstructs.begin()->schema);
-    // LOG(INFO) << "the revise schema is: " << crd_schema;
+    // json schema
+    // std::string crd_schema = CrdSchemaRevise(crdstructs.begin()->schema);
+    std::string crd_schema = crdstructs.begin()->schema;
     std::string instance_validate = GetInstanceValidatePart(instance_json);
     if (SchemaValidation(crd_schema, instance_validate))
     {
@@ -301,7 +308,7 @@ bool dbManager::AddDeviceInstance(const std::string &filepath)
         return false;
     }
     // add instance into the instance table
-    std::string instance_key = GetInstanceKey(instance_json);
+    std::string instance_key = instance_json["metadata"]["name"].asString();
     std::string instance_namespace = "default";
     if (instance_json["metadata"].isMember("namespace"))
     {
@@ -311,14 +318,27 @@ bool dbManager::AddDeviceInstance(const std::string &filepath)
     {
         if (instance_json["spec"]["hostname"] != device_hostname && instance_json["spec"]["hostname"] != "")
         {
-            LOG(ERROR) << "the " << instance_json["spec"]["hostname"] << " is not the local hostname" ; 
+            LOG(ERROR) << "the " << instance_json["spec"]["hostname"] << " is not the local hostname";
             return false;
         }
         else
         {
             instance_json["spec"]["hostname"] = device_hostname;
-        }   
+        }
     }
+    if (instance_kind == CameraDeviceResourcetype)
+    {
+        insertCameraInfo(instance_json);
+    }
+    else if (instance_kind == MicrophoneDeviceResourcetype)
+    {
+        insertMicInfo(instance_json);
+    }
+    else if (instance_kind == LoudspeakerDeviceResourcetype)
+    {
+        insertloudspeakerInfo(instance_json);
+    }
+
     std::string instance_value = JsonToString(instance_json);
     std::string instance_version = apiVersion_string.substr(flag + 1, apiVersion_string.size() - flag + 1);
 
@@ -396,6 +416,28 @@ bool dbManager::DBGetDeviceInstances(std::map<std::string, std::shared_ptr<Senso
     for (int i = 0; i < instancestructs.size(); i++)
     {
         auto ins = std::make_shared<SensorInstance>();
+        ins->UnMarshal(instancestructs[i].value);
+        std::string key = instancestructs[i].namespace_name + "/" + instancestructs[i].name;
+        instance[key] = ins;
+    }
+    return true;
+}
+
+bool dbManager::DBGetDeviceInstances(std::map<std::string, std::shared_ptr<MicrophoneInstance>> &instance)
+{
+    instancestructs.clear();
+    std::string search_sql = "SELECT * FROM INSTANCE WHERE KIND = \'MicrophoneDevice\' ;";
+    int rc;
+    char *erroms = 0;
+    rc = sqlite3_exec(db, search_sql.c_str(), instance_callback, 0, &erroms);
+    if (rc)
+    {
+        LOG(ERROR) << "sql excute error: " << erroms;
+        return false;
+    }
+    for (int i = 0; i < instancestructs.size(); i++)
+    {
+        auto ins = std::make_shared<MicrophoneInstance>();
         ins->UnMarshal(instancestructs[i].value);
         std::string key = instancestructs[i].namespace_name + "/" + instancestructs[i].name;
         instance[key] = ins;
@@ -671,9 +713,6 @@ int dbManager::cloud_address_callback(void *unused, int columenCount, char **col
     return SQLITE_OK;
 }
 
-
-
-
 // bool dbManager::UnRegisterCrd(const std::string &filepath)
 // {
 //     YAML::Node crd_yaml;
@@ -712,7 +751,6 @@ int dbManager::cloud_address_callback(void *unused, int columenCount, char **col
 
 //     return true;
 // }
-
 
 // bool dbManager::DeleteAbilityInstance(const std::string &filepath)
 // {
@@ -860,7 +898,6 @@ int dbManager::cloud_address_callback(void *unused, int columenCount, char **col
 //     LOG(INFO) << "update ability success with key: " << instance_key;
 //     return true;
 // }
-
 
 // bool dbManager::DeleteDeviceInstance(const std::string &filepath)
 // {

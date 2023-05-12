@@ -190,20 +190,20 @@ void ConnectionManager::EdgeSyncThread()
 
 void ConnectionManager::Run()
 {
-    // start http server
-    std::thread th1(&ConnectionManager::HttpServerThread, this);
-    LOG(INFO) << "start http server success";
+    // // start http server
+    // std::thread th1(&ConnectionManager::HttpServerThread, this);
+    // LOG(INFO) << "start http server success";
     // start edge server
     std::thread th2(&ConnectionManager::EdgeSyncServerThread, this);
     LOG(INFO) << "start edge sync server success";
     sleep(1);
-    // start cloud sync
-    std::thread th3(&ConnectionManager::CloudSyncThread, this);
+    // // start cloud sync
+    // std::thread th3(&ConnectionManager::CloudSyncThread, this);
     // start edge sync
     std::thread th4(&ConnectionManager::EdgeSyncThread, this);
 
-    th1.join();
+    // th1.join();
     th2.join();
-    th3.join();
+    // th3.join();
     th4.join();
 }

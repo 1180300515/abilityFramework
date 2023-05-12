@@ -1,8 +1,8 @@
 #include "jsoncpp/json/json.h"
 
-#include "controller/common/louspeakerdevice_instance.h"
+#include "controller/common/microphonedevice_instance.h"
 
-std::string LoudspeakerInstance::Marshal()
+std::string MicrophoneInstance::Marshal()
 {
     std::lock_guard<std::mutex> locker(resourcelock_);
     Json::Value jnode;
@@ -18,9 +18,6 @@ std::string LoudspeakerInstance::Marshal()
     jnode["spec"]["properties"]["sampleRates"] = spec.properties.sampleRates;
     jnode["spec"]["properties"]["channelNumber"] = spec.properties.channelNumber;
     jnode["spec"]["properties"]["bitWidth"] = spec.properties.bitWidth;
-    jnode["spec"]["properties"]["hardwareName"] = spec.properties.hardwareName;
-    jnode["spec"]["properties"]["volume"] = spec.properties.volume;
-    jnode["spec"]["properties"]["mute"] = spec.properties.mute;
     jnode["spec"]["properties"]["description"] = spec.properties.description;
     jnode["spec"]["properties"]["interface"] = spec.properties.interface;
     for (int i = 0; i < spec.capability1.size(); i++)
@@ -81,7 +78,7 @@ std::string LoudspeakerInstance::Marshal()
     return writer.write(jnode);
 }
 
-bool LoudspeakerInstance::UnMarshal(std::string source)
+bool MicrophoneInstance::UnMarshal(std::string source)
 {
     std::lock_guard<std::mutex> locker(resourcelock_);
     Instance::UnMarshal(source);
@@ -128,14 +125,14 @@ bool LoudspeakerInstance::UnMarshal(std::string source)
     return true;
 }
 
-bool LoudspeakerInstance::updateInstance(std::string data)
+bool MicrophoneInstance::updateInstance(std::string data)
 {
     std::lock_guard<std::mutex> locker(resourcelock_);
     UnMarshal(data);
     return true;
 }
 
-std::string LoudspeakerInstance::getInstanceVersion()
+std::string MicrophoneInstance::getInstanceVersion()
 {
     return spec.version;
 }

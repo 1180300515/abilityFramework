@@ -19,13 +19,12 @@ spec:
         - Setxiaomicamera1
  
   properties:
-    vendor: "s"
+    vendor: "acer"
     resolution: "720"
     location: home
     wideAngle: 90
     focusMethod: FF
     telephoto: false
-    description: ""
     interface: standardinterface
 status:
   occupancy: false

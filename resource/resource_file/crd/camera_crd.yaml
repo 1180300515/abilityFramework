@@ -15,7 +15,6 @@ spec:
           required:
             - spec
             - status
-            - api
           properties:
             spec:
               type: object
@@ -61,11 +60,10 @@ spec:
                 properties:
                   type: object
                   required:
-                    - vendor
-                    - resolution
                     - location
                     - wideAngle
                     - focusMethod
+                    - resolution
                     - telephoto
                     - interface
                   properties:
@@ -81,6 +79,20 @@ spec:
                       type: string
                     telephoto:
                       type: boolean
+                    deviceNode:
+                      type: string
+                    driverName:
+                      type: string
+                    cardType:
+                      type: string
+                    busInfo:
+                      type: string
+                    description:
+                      type: string
+                    supportFormat:
+                      type: array
+                      items:
+                        type: string
                     interface:
                       type: string
             status:

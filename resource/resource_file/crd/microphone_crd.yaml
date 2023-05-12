@@ -1,7 +1,7 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: loudspeakerdevices.stable.example.com
+  name: microphonedevices.stable.example.com
 spec:
   group: stable.example.com
   versions:
@@ -10,7 +10,7 @@ spec:
       storage: true
       schema:
         openAPIV3Schema:
-          description: define loudspeaker spec
+          description: define microphone spec
           type: object
           required:
             - spec
@@ -61,6 +61,7 @@ spec:
                   type: object
                   required:
                     - channelNumber
+                    - bitWidth
                     - interface
                   properties:
                     sampleRates:
@@ -69,6 +70,8 @@ spec:
                       type: integer
                     bitWidth:
                       type: integer
+                    hardwareName:
+                      type: string
                     volume:
                       type: integer
                     mute:
@@ -145,9 +148,9 @@ spec:
                     type: string
   scope: Namespaced
   names:
-    kind: LoudspeakerDevice
-    singular: loudspeakerdevice
-    plural: loudspeakerdevices
+    kind: MicrophoneDevice
+    singular: microphonedevice
+    plural: microphonedevices
 
 
 

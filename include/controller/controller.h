@@ -24,6 +24,7 @@ public:
     std::map<std::string, std::shared_ptr<CameraInstance>> camera_instances;
     std::map<std::string, std::shared_ptr<LoudspeakerInstance>> loudspeaker_instances;
     std::map<std::string, std::shared_ptr<SensorInstance>> sensor_instances;
+    std::map<std::string, std::shared_ptr<MicrophoneInstance>> mic_instances;
     // store the cloud non-native resource
     std::map<std::string, std::shared_ptr<NonLocalResource>> nonlocal_instances_;
 
@@ -31,6 +32,7 @@ public:
     std::mutex camera_lock_;
     std::mutex loudspeaker_lock_;
     std::mutex sensor_lock_;
+    std::mutex mic_lock_;
 
 public:
     std::shared_ptr<Controller> getptr();
@@ -71,6 +73,10 @@ public:
      * refresh the key and version record
      */
     void RefreshKVRecord();
+    /**
+     * print the all resources
+    */
+    void PrintResource();
 
     std::string GetNonLocalFormat();
 };

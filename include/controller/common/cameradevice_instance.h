@@ -8,11 +8,18 @@
 struct CameraProperties
 {
     std::string vendor;
-    std::string resolution;
     std::string location;
     int wideAngle;
     std::string focusMethod;
     bool telephoto;
+    std::string resolution;
+    // following information can get from the device
+    std::string deviceNode;
+    std::string driverName;
+    std::string cardType;
+    std::string busInfo;
+    std::string description;
+    std::vector<std::string> supportFormat;
     std::string interface;
 };
 struct CameraSpec

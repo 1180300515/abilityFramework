@@ -7,7 +7,7 @@
 
 class DeviceProfile{
 public:
-    std::vector<CameraDevice> cameraDevices;
+    std::vector<CameraHardware> cameraDevices;
     std::vector<DisplayInfo> displayDevices;
     std::vector<AudioDevice> micDevices;
     std::vector<AudioDevice> speakerDevices;

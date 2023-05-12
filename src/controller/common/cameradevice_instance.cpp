@@ -21,6 +21,15 @@ std::string CameraInstance::Marshal()
     jnode["spec"]["properties"]["wideAngle"] = spec.properties.wideAngle;
     jnode["spec"]["properties"]["focusMethod"] = spec.properties.focusMethod;
     jnode["spec"]["properties"]["telephoto"] = spec.properties.telephoto;
+    jnode["spec"]["properties"]["deviceNode"] = spec.properties.deviceNode;
+    jnode["spec"]["properties"]["driverName"] = spec.properties.driverName;
+    jnode["spec"]["properties"]["cardType"] = spec.properties.cardType;
+    jnode["spec"]["properties"]["busInfo"] = spec.properties.busInfo;
+    jnode["spec"]["properties"]["description"] = spec.properties.description;
+    for (int i = 0; i < spec.properties.supportFormat.size(); i++)
+    {
+        jnode["spec"]["properties"]["supportFormat"].append(spec.properties.supportFormat[i]);
+    }
     jnode["spec"]["properties"]["interface"] = spec.properties.interface;
     for (int i = 0; i < spec.capability1.size(); i++)
     {
@@ -122,6 +131,15 @@ bool CameraInstance::UnMarshal(std::string source)
     spec.properties.wideAngle = std::stoi(jnode["spec"]["properties"]["wideAngle"].asString());
     spec.properties.focusMethod = jnode["spec"]["properties"]["focusMethod"].asString();
     spec.properties.telephoto = (jnode["spec"]["properties"]["telephoto"].asString() == "true");
+    spec.properties.deviceNode = jnode["spec"]["properties"]["deviceNode"].asString();
+    spec.properties.driverName = jnode["spec"]["properties"]["driverName"].asString();
+    spec.properties.cardType = jnode["spec"]["properties"]["cardType"].asString();
+    spec.properties.busInfo = jnode["spec"]["properties"]["busInfo"].asString();
+    spec.properties.description = jnode["spec"]["properties"]["description"].asString();
+    for (int i = 0; i < jnode["spec"]["properties"]["supportFormat"].size(); i++)
+    {
+        spec.properties.supportFormat.emplace_back(jnode["spec"]["properties"]["supportFormat"][i].asString());
+    }
     spec.properties.interface = jnode["spec"]["properties"]["interface"].asString();
     return true;
 }
