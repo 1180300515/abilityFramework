@@ -117,20 +117,34 @@ void udp_broadcast_receiver()
       devices[ip].Update(hostname, status, timestamp);
     }
 
-    //Print devices list
-    for(auto devices : devices)
+    // 检查并移除离线的设备
+    auto current_time = std::time(nullptr);
+    for (auto it = devices.begin(); it != devices.end();)
     {
-      std::cout << CYAN 
-        << devices.second.hostname 
-        << " " 
-        << devices.second.ip 
-        << " " 
-        << devices.second.status 
-        << " " 
-        << devices.second.online_duration
-        << " "
-        << devices.second.last_online_time
-        << NONE << std::endl;
+      if (it->second.IsOffline(current_time))
+      {
+        it = devices.erase(it);
+      }
+      else
+      {
+        ++it;
+      }
+    }
+
+    // Print devices list
+    for (auto devices : devices)
+    {
+      std::cout << CYAN
+                << devices.second.hostname
+                << " "
+                << devices.second.ip
+                << " "
+                << devices.second.status
+                << " "
+                << devices.second.online_duration
+                << " "
+                << devices.second.last_online_time
+                << NONE << std::endl;
     }
   }
 

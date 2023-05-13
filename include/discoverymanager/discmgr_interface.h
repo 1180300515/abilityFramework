@@ -6,7 +6,6 @@
 #include <thread>
 #include <fstream>
 
-
 struct Device
 {
   std::string hostname;
@@ -15,7 +14,12 @@ struct Device
   std::time_t online_duration;
   std::string status;
 
-  void Update(const std::string& new_hostname, const std::string& new_status, std::time_t new_timestamp)
+  bool IsOffline(std::time_t current_time) const
+  {
+    return current_time - last_online_time > 30; // 半分钟
+  }
+
+  void Update(const std::string &new_hostname, const std::string &new_status, std::time_t new_timestamp)
   {
     if (hostname != new_hostname)
     {
@@ -35,6 +39,5 @@ struct Device
 
 void udp_broadcast_sender();
 void udp_broadcast_receiver();
-
 
 #endif // _DISCMGR_INTERFACE_H
