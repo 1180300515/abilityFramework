@@ -51,8 +51,8 @@ int main()
     // std::cout << LocalhwPrint() << std::endl;
     Preprocessing();
     std::shared_ptr<Controller> controller = std::make_shared<Controller>();
-    std::thread sender_thread(udp_broadcast_sender);
-    std::thread receiver_thread(udp_broadcast_receiver, std::bind(&Controller::SetEdgeAddressRecord, controller , std::placeholders::_1));
+    std::thread receiver_thread(udp_broadcast_receiver);
+    std::thread sender_thread(udp_broadcast_sender, std::bind(&Controller::SetEdgeAddressRecord, controller , std::placeholders::_1));
     sleep(1);
     std::thread run(&Controller::Run, controller);
     controller->PrintResource();

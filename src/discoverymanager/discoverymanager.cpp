@@ -15,7 +15,7 @@
 
 std::map<std::string, Device> devices;
 
-void udp_broadcast_sender()
+void udp_broadcast_sender(std::function<void(std::map<std::string, std::string>)> callback)
 {
 
   int sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -55,12 +55,23 @@ void udp_broadcast_sender()
     }
 
     sleep(4);
+    std::map<std::string, std::string> record;
+    char name[256];
+    gethostname(name, sizeof(name));
+    for (auto &iter : devices)
+    {
+      if (iter.second.status != statusToString[OVERLOADED] && iter.second.hostname != name)
+      {
+        record[iter.second.hostname] = iter.second.ip + ":8001";
+      }
+    }
+    callback(record);
   }
 
   close(sock);
 }
 
-void udp_broadcast_receiver(std::function<void(std::map<std::string, std::string>)> callback)
+void udp_broadcast_receiver()
 {
   int sock = socket(AF_INET, SOCK_DGRAM, 0);
   if (sock < 0)
@@ -117,18 +128,6 @@ void udp_broadcast_receiver(std::function<void(std::map<std::string, std::string
     {
       devices[ip].Update(hostname, status, timestamp);
     }
-
-    std::map<std::string,std::string> record;
-    char name[256];
-    gethostname(name, sizeof(name));
-    for (auto &iter : devices)
-    {
-        if (iter.second.status != statusToString[OVERLOADED] && iter.second.hostname != name)
-        {
-            record[iter.second.hostname] = iter.second.ip + ":8001";
-        }
-    }
-    callback(record);
 
     // Print devices list
     for (auto devices : devices)
