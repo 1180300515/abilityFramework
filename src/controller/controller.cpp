@@ -10,6 +10,7 @@
 #include "yaml-cpp/yaml.h"
 
 #include "controller/controller.h"
+#include "discoverymanager/discmgr_interface.h"
 
 std::shared_ptr<Controller> Controller::getptr()
 {
@@ -45,7 +46,10 @@ void Controller::LoadResource()
 void Controller::SetEdgeAddressRecord(std::map<std::string, std::string> record)
 {
     // init the connection manager
-    SetConnection();
+    if (connection_ == nullptr)
+    {
+        SetConnection();
+    }
     connection_->SetEdgeAddressRecord(record);
     LOG(INFO) << "set non-native edge information success";
 }
@@ -474,7 +478,7 @@ void Preprocessing()
 {
     // read config yaml file
     std::cout << "load config from file";
-    std::string  config_file_path = "../config/controller_config.yaml";
+    std::string config_file_path = "../config/controller_config.yaml";
     YAML::Node config;
     try
     {
@@ -482,34 +486,37 @@ void Preprocessing()
     }
     catch (YAML::ParserException e)
     {
-        LOG(ERROR) << "config yaml is malformed.";
+        std::cout << "config yaml is malformed." << std::endl;
         exit(0);
     }
     catch (YAML::BadFile e)
     {
-        LOG(ERROR) << "file can't be load";
+        std::cout << "file can't be load" << std::endl;
         exit(0);
     }
     bool loadcrd = config["switch"]["loadcrd"].as<bool>();
     bool loadinstance = config["switch"]["loadinstance"].as<bool>();
     bool loadability = config["switch"]["loadability"].as<bool>();
     bool logintofile = config["switch"]["logintofile"].as<bool>();
+
+    // config the log
+    if (logintofile)
+    {
+        FLAGS_log_dir = LOG_FILE_PATH;
+    }
+    FLAGS_alsologtostderr = 1;
+    google::InitGoogleLogging("abiltyframework-cpp");
+
     std::string httpserver = config["value"]["httpserveraddr"].as<std::string>();
-    std::string edgeserver = config["value"]["edgeserveraddr"].as<std::string>();
     if (httpserver != "")
     {
         http_server_address = httpserver;
-    }
-    if (edgeserver != "")
-    {
-        edge_server_address = edgeserver;
     }
 
     // get the local hostname
     char name[256];
     gethostname(name, sizeof(name));
     device_hostname = name;
-
 
     // load resource into database
     dbManager &manager = dbManager::getInstance();

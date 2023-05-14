@@ -123,9 +123,7 @@ void ConnectionManager::CloudSyncThread()
 
 void ConnectionManager::EdgeSyncServerThread()
 {
-    int index = edge_server_address.find(":");
-    std::string addr = edge_server_address.substr(0, index);
-    std::string port = edge_server_address.substr(index + 1);
+    std::string port = std::to_string(EDGE_SYNC_PORT);
     int sockfd;
     struct sockaddr_in serv_addr;
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
@@ -136,7 +134,7 @@ void ConnectionManager::EdgeSyncServerThread()
     memset(&serv_addr, 0, sizeof(struct sockaddr_in));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(atoi(port.c_str()));
-    serv_addr.sin_addr.s_addr = inet_addr(addr.c_str());
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
     int len = sizeof(serv_addr);
 
     if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr)) < 0)

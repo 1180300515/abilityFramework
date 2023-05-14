@@ -38,7 +38,7 @@ int main()
     //     // std::cout << "Plugin description: " << plugin->getDescription() << std::endl;
     //     plugin->registerObserver(subjectManager);
     // }
-    // // std::cout << "get laninfo observer nums: "; 
+    // // std::cout << "get laninfo observer nums: ";
     // // laninfo->getObserverNums();
     // // std::cout << "get laninfo observer nums: " << laninfo->observers.size() << std::endl;
     // // std::cout << "get laninfo observer address: " << std::endl;
@@ -48,24 +48,16 @@ int main()
     // AMplugin->executePlugin("connection_mgr", subjectManager);
     // AMplugin->executePlugin("ability_mgr", subjectManager);
 
-
     // std::cout << LocalhwPrint() << std::endl;
-
-    // std::thread sender_thread(udp_broadcast_sender);
-    // std::thread receiver_thread(udp_broadcast_receiver);
-
-    // sender_thread.join();
-    // receiver_thread.join();
-    std::map<std::string,std::string> record;
-    record["k8s-worker"] = "10.139.7.90:12300";
     Preprocessing();
     std::shared_ptr<Controller> controller = std::make_shared<Controller>();
-    controller->SetEdgeAddressRecord(record);
-    controller->Run();
+    std::thread sender_thread(udp_broadcast_sender);
+    std::thread receiver_thread(udp_broadcast_receiver, std::bind(&Controller::SetEdgeAddressRecord, controller , std::placeholders::_1));
+    sleep(1);
+    std::thread run(&Controller::Run, controller);
     controller->PrintResource();
-
-    
-
+    sender_thread.join();
+    receiver_thread.join();
+    run.join();
     return 0;
 }
-

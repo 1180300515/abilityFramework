@@ -17,6 +17,7 @@ std::map<std::string, Device> devices;
 
 void udp_broadcast_sender()
 {
+
   int sock = socket(AF_INET, SOCK_DGRAM, 0);
   if (sock < 0)
   {
@@ -59,7 +60,7 @@ void udp_broadcast_sender()
   close(sock);
 }
 
-void udp_broadcast_receiver()
+void udp_broadcast_receiver(std::function<void(std::map<std::string, std::string>)> callback)
 {
   int sock = socket(AF_INET, SOCK_DGRAM, 0);
   if (sock < 0)
@@ -117,20 +118,32 @@ void udp_broadcast_receiver()
       devices[ip].Update(hostname, status, timestamp);
     }
 
-    //Print devices list
-    for(auto devices : devices)
+    std::map<std::string,std::string> record;
+    char name[256];
+    gethostname(name, sizeof(name));
+    for (auto &iter : devices)
     {
-      std::cout << CYAN 
-        << devices.second.hostname 
-        << " " 
-        << devices.second.ip 
-        << " " 
-        << devices.second.status 
-        << " " 
-        << devices.second.online_duration
-        << " "
-        << devices.second.last_online_time
-        << NONE << std::endl;
+        if (iter.second.status != statusToString[OVERLOADED] && iter.second.hostname != name)
+        {
+            record[iter.second.hostname] = iter.second.ip + ":8001";
+        }
+    }
+    callback(record);
+
+    // Print devices list
+    for (auto devices : devices)
+    {
+      std::cout << CYAN
+                << devices.second.hostname
+                << " "
+                << devices.second.ip
+                << " "
+                << devices.second.status
+                << " "
+                << devices.second.online_duration
+                << " "
+                << devices.second.last_online_time
+                << NONE << std::endl;
     }
   }
 

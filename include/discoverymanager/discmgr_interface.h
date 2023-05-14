@@ -5,7 +5,8 @@
 #include <iostream>
 #include <thread>
 #include <fstream>
-
+#include <functional>
+#include <map>
 
 struct Device
 {
@@ -34,7 +35,6 @@ struct Device
 };
 
 void udp_broadcast_sender();
-void udp_broadcast_receiver();
-
+void udp_broadcast_receiver(std::function<void(std::map<std::string, std::string>)> callback);
 
 #endif // _DISCMGR_INTERFACE_H

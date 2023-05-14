@@ -10,8 +10,6 @@
 extern std::string cloud_address;
 // the http sever address
 extern std::string http_server_address;
-// the sync tcp client address
-extern std::string edge_server_address;
 
 extern std::string device_hostname;
 
@@ -41,6 +39,7 @@ extern std::string device_hostname;
 #define CRD_FILE_PATH "../resource/resource_file/crd"
 #define INSTANCE_FILE_PATH "../resource/resource_file/device"
 #define ABILITY_FILE_PATH "../resource/resource_file/ability"
+#define EDGE_SYNC_PORT 8001
 
 
 #endif

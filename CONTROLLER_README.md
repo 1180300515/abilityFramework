@@ -12,6 +12,11 @@ sudo apt install libgoogle-glog-dev
 sudo apt install libjsoncpp-dev
 sudo apt install rapidjson-dev 
 sudo apt install libyaml-cpp-dev
+其他依赖:
+sudo apt install libxrandr-dev
+sudo apt install libv4l-dev
+sudo apt install libx11-dev
+sudo apt install libpulse-dev
 ```
 
 ## 目录结构
@@ -44,6 +49,10 @@ log 储存日志文件
 
 ## 全局配置
 位于`config/controller_config.yaml`文件中。
+
+## 默认配置
+- 默认udp接收端口号: 8001
+- 默认udp广播端口号: 8888
 
 ## 数据包类型
 - **edge和cloud同步的相关数据包**  
