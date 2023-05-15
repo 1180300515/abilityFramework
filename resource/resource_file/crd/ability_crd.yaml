@@ -79,13 +79,6 @@ spec:
                           type: string
                         paramtype:
                           description: the param value type
-                          enum:
-                            - boolean
-                            - bytes
-                            - double
-                            - float
-                            - int
-                            - string
                           type: string
                         index:
                           description: the index of the param

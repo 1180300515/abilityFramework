@@ -1,0 +1,36 @@
+apiVersion: stable.example.com/v1
+kind: SensorDevice
+metadata:
+  name: "FPM-383D-fingerprint-sensor"
+spec:
+  kind: sensor
+  version: "1.0"
+  hostname: ""
+  capability1:
+    - name: ""
+      api:
+        - ""
+  capability2:
+    - name: ""
+      api:
+        - ""
+  properties:
+    location: unknown
+    vendor: unknown
+    interface: ""
+status:
+  occupancy: false
+api:
+  function:
+    - name: "PS_SearchMB"
+      param:
+        - name: "id"
+          type: "uint16_t*"
+          index: "1"
+        - name: "score"
+          type: "uint16_t*"
+          index: "2"
+      returnparam:
+        - name: "result"
+          type: "uint8_t"
+          index: "1"
