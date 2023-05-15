@@ -30,6 +30,7 @@ struct CameraSpec
     std::vector<Acapability> capability1;
     std::vector<Acapability> capability2;
     CameraProperties properties;
+    std::map<std::string,std::string> customprops;
 };
 
 class CameraInstance : public Instance

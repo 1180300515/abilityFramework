@@ -51,6 +51,10 @@ std::string CameraInstance::Marshal()
         }
         jnode["spec"]["capability2"].append(cap);
     }
+    for (auto &iter : spec.customprops)
+    {
+        jnode["spec"]["customprops"][iter.first] = iter.second;
+    }
     // api part
     for (int i = 0; i < api.function.size(); i++)
     {
@@ -141,6 +145,15 @@ bool CameraInstance::UnMarshal(std::string source)
         spec.properties.supportFormat.emplace_back(jnode["spec"]["properties"]["supportFormat"][i].asString());
     }
     spec.properties.interface = jnode["spec"]["properties"]["interface"].asString();
+    if (jnode["spec"].isMember("customprops"))
+    {
+        Json::Value::Members member;
+        member = jnode["spec"]["customprops"].getMemberNames();
+        for (Json::Value::Members::iterator it = member.begin(); it != member.end(); it++)
+        {
+            spec.customprops[*it] = jnode["spec"]["customprops"][*it].asString();
+        }
+    }
     return true;
 }
 

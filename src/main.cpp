@@ -54,10 +54,8 @@ int main()
     std::thread receiver_thread(udp_broadcast_receiver);
     std::thread sender_thread(udp_broadcast_sender, std::bind(&Controller::SetEdgeAddressRecord, controller , std::placeholders::_1));
     sleep(1);
-    std::thread run(&Controller::Run, controller);
-    controller->PrintResource();
+    controller->Run();
     sender_thread.join();
     receiver_thread.join();
-    run.join();
     return 0;
 }

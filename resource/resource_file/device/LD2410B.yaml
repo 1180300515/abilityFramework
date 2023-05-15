@@ -18,6 +18,10 @@ spec:
     location: unknown
     vendor: unknown
     interface: ""
+  customprops:
+    detectionAngle: "±60"
+    OTAsupport: "yes"
+    distanceResolution: "each range gate 0.2m or 0.75m , max 8 range gate"
 status:
   occupancy: false
 api:

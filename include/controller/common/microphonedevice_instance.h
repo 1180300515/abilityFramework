@@ -24,6 +24,7 @@ struct MicrophoneSpec
     std::vector<Acapability> capability1;
     std::vector<Acapability> capability2;
     MicrophoneProperties properties;
+    std::map<std::string,std::string> customprops;
 };
 class MicrophoneInstance : public Instance
 {

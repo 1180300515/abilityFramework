@@ -18,6 +18,11 @@ spec:
     location: unknown
     vendor: unknown
     interface: ""
+  customprops:
+    baudRate: "9600"
+    dataBit: "8"
+    stopBit: "1"
+    parityBit: "null"
 status:
   occupancy: false
 api:

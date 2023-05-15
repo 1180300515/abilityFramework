@@ -19,6 +19,7 @@ struct SensorSpec
     std::vector<Acapability> capability1;
     std::vector<Acapability> capability2;
     Sensorproperties properties;
+    std::map<std::string,std::string> customprops;
 };
 class SensorInstance : public Instance
 {

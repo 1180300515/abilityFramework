@@ -80,6 +80,9 @@ spec:
                       type: string
                     interface:
                       type: string
+                customprops:
+                  type: object
+                  description: custom properties to describe a microphone device
             status:
               type: object
               required:

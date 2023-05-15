@@ -41,6 +41,7 @@ void Controller::LoadResource()
     {
         LOG(ERROR) << "get all micphonedevice error ";
     }
+    LOG(INFO) << "Load resources successfully";
 }
 
 void Controller::SetEdgeAddressRecord(std::map<std::string, std::string> record)
@@ -81,7 +82,9 @@ std::string Controller::isLocalResource(std::string key)
 
 void Controller::Run()
 {
+    SetConnection();
     LoadResource();
+    PrintResource();
     // register callback
     connection_->RegisterCloudCallback(std::bind(&Controller::HandleResourceSync, getptr(), std::placeholders::_1));
     connection_->RegisterEdgeCallback(std::bind(&Controller::HandleResourceSyncEdge, getptr(), std::placeholders::_1));
@@ -392,7 +395,7 @@ void Controller::PrintResource()
     {
         std::cout << iter.second->Marshal() << std::endl;
     }
-    for (auto &iter : loudspeaker_instances)
+    for (auto &iter : sensor_instances)
     {
         std::cout << iter.second->Marshal() << std::endl;
     }

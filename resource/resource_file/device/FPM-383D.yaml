@@ -18,6 +18,10 @@ spec:
     location: unknown
     vendor: unknown
     interface: ""
+  customprops:
+    baudRate: "57600"
+    resolution: "8bit"
+    interfaceDescrip: "UART"
 status:
   occupancy: false
 api:

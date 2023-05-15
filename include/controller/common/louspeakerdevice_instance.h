@@ -26,6 +26,7 @@ struct LoudspeakerSpec
     std::vector<Acapability> capability1;
     std::vector<Acapability> capability2;
     LoudspeakerProperties properties;
+    std::map<std::string,std::string> customprops;
 };
 class LoudspeakerInstance : public Instance
 {

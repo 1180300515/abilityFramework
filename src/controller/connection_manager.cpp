@@ -54,11 +54,13 @@ ConnectionManager::ConnectionManager(std::shared_ptr<Controller> controller)
 void ConnectionManager::RegisterCloudCallback(std::function<void(KeyAndDataPackages)> func)
 {
     cloudCallback_ = func;
+    LOG(INFO) << "register cloud callback success";
 }
 
 void ConnectionManager::RegisterEdgeCallback(std::function<void(KeyAndDataPackages)> func)
 {
     edgeCallback_ = func;
+    LOG(INFO) << "register edge callback success";
 }
 
 bool ConnectionManager::SendMessageToCloud(std::string data)
@@ -200,8 +202,8 @@ void ConnectionManager::Run()
     // start edge sync
     std::thread th4(&ConnectionManager::EdgeSyncThread, this);
 
-    // th1.join();
+    // th1.detach();
     th2.join();
-    // th3.join();
+    // th3.detach();
     th4.join();
 }
