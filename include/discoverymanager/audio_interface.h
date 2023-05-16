@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <unistd.h>
 #include <cstring>
 #include <pulse/pulseaudio.h>
 
