@@ -5,7 +5,7 @@
 #include <string>
 #include <memory>
 
-#include "jsoncpp/json/json.h"
+#include "json/json.h"
 
 #include "controller/common/ability_struct.h"
 #include "controller/common/cameradevice_instance.h"

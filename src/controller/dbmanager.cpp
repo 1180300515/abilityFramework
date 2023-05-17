@@ -3,7 +3,7 @@
 
 #include "glog/logging.h"
 #include "yaml-cpp/yaml.h"
-#include "jsoncpp/json/json.h"
+#include "json/json.h"
 #include "controller/mongoose/mongoose.h"
 
 #include "controller/json_yaml_convert.h"

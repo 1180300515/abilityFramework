@@ -5,7 +5,7 @@
 #include <string>
 
 #include "yaml-cpp/yaml.h"
-#include "jsoncpp/json/json.h"
+#include "json/json.h"
 
 /**
  * convert yaml to json

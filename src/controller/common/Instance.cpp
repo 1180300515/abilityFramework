@@ -1,5 +1,5 @@
 #include <controller/common/Instance.h>
-#include "jsoncpp/json/json.h"
+#include "json/json.h"
 
 bool Instance::UnMarshal(std::string source)
 {

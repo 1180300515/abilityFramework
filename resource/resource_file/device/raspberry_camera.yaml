@@ -1,0 +1,82 @@
+apiVersion: stable.example.com/v1
+kind: CameraDevice
+metadata:
+  name: "RaspberryCamera"
+spec:
+  version: "1.0"
+  hostname: ""
+  kind: camera
+  capability1:
+    - name: ""
+      api:
+        - ""
+  capability2:
+    - name: ""
+      api:
+        - ""
+  properties:
+    vendor: "unknown"
+    resolution: "720"
+    location: home
+    wideAngle: 90
+    focusMethod: FF
+    telephoto: false
+    interface: standardinterface
+status:
+  occupancy: false
+api:
+  function:
+    - name: getCameraInfo
+      param:
+        - name: input
+          type: CameraInfoRequest
+          index: "1"
+      returnparam:
+        - name: return
+          type: CameraInfoResult
+          index: "1"
+    - name: open
+      param:
+        - name: input
+          type: CameraSession
+          index: "1"
+      returnparam:
+        - name: return
+          type: CameraResult
+          index: "1"
+    - name: close
+      param:
+        - name: input
+          type: DeviceId
+          index: "1"
+      returnparam:
+        - name: return
+          type: CameraResult
+          index: "1"
+    - name: capture
+      param:
+        - name: input
+          type: CaptureRequest
+          index: "1"
+      returnparam:
+        - name: return
+          type: "stream CaptureResult"
+          index: "1"
+    - name: configure
+      param:
+        - name: input
+          type: CameraSession
+          index: "1"
+      returnparam:
+        - name: return
+          type: CameraResult
+          index: "1"
+    - name: startRtsp
+      param:
+        - name: input
+          type: CaptureRequest
+          index: "1"
+      returnparam:
+        - name: return
+          type: RtspUrl
+          index: "1"
