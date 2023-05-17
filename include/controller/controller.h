@@ -25,6 +25,7 @@ public:
     std::map<std::string, std::shared_ptr<LoudspeakerInstance>> loudspeaker_instances;
     std::map<std::string, std::shared_ptr<SensorInstance>> sensor_instances;
     std::map<std::string, std::shared_ptr<MicrophoneInstance>> mic_instances;
+    std::map<std::string, std::shared_ptr<Ability>> ability_instances;
     // store the cloud non-native resource
     std::map<std::string, std::shared_ptr<NonLocalResource>> nonlocal_instances_;
 

@@ -36,10 +36,18 @@ spec:
             followed:
               description: the name to follow
               type: string
-            required:
-              type: array
-              items:
-                type: string
+            depends:
+              type: object
+              description: declare the ability and device that the current ability depends on
+              properties:
+                abilities:
+                  type: array
+                  items:
+                    type: string
+                devices:
+                  type: array
+                  items:
+                    type: string
             spec:
               description: the spec part
               type: object

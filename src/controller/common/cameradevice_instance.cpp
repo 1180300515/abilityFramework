@@ -103,6 +103,24 @@ bool CameraInstance::UnMarshal(std::string source)
     spec.kind = jnode["spec"]["kind"].asString();
     spec.version = jnode["spec"]["version"].asString();
     spec.hostname = jnode["spec"]["hostname"].asString();
+
+    if (spec.capability1.size() != 0)
+    {
+        spec.capability1.clear();
+    }
+    if (spec.capability2.size() != 0)
+    {
+        spec.capability2.clear();
+    }
+    if (spec.properties.supportFormat.size() != 0)
+    {
+        spec.properties.supportFormat.clear();
+    }
+    if (spec.customprops.size() != 0)
+    {
+        spec.customprops.clear();
+    }
+
     if (jnode["spec"].isMember("capability1"))
     {
         for (int i = 0; i < jnode["spec"]["capability1"].size(); i++)
@@ -159,9 +177,7 @@ bool CameraInstance::UnMarshal(std::string source)
 
 bool CameraInstance::updateInstance(std::string data)
 {
-    std::lock_guard<std::mutex> locker(resourcelock_);
-    UnMarshal(data);
-    return true;
+    return UnMarshal(data);
 }
 
 std::string CameraInstance::getInstanceVersion()

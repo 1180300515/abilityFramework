@@ -7,6 +7,11 @@ level: "1"
 abilityname: camera
 description: this is a camera
 followed: default
+depends:
+  abilities:
+    - ands
+  devices:
+    - dsakjd
 spec:
   vendor: oppo
   resolution: 720
@@ -27,8 +32,8 @@ ApiList:
         index: "2"
     returnparam:
       - paramname: param3
-        paramtype: string 
-        index: "1"  
+        paramtype: string
+        index: "1"
   - ApiType: RPC
     ApiName: SetCameraResolution
     inputparam:
@@ -36,9 +41,9 @@ ApiList:
         paramtype: string
         index: "1"
       - paramname: param2
-        paramtype: string  
+        paramtype: string
         index: "2"
     returnparam:
       - paramname: param3
-        paramtype: string 
+        paramtype: string
         index: "1"

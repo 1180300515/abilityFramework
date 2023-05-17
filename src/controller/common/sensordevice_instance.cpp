@@ -18,6 +18,20 @@ std::string SensorInstance::Marshal()
     jnode["spec"]["properties"]["vendor"] = spec.properties.vendor;
     jnode["spec"]["properties"]["location"] = spec.properties.location;
     jnode["spec"]["properties"]["interface"] = spec.properties.interface;
+
+    if (spec.capability1.size() != 0)
+    {
+        spec.capability1.clear();
+    }
+    if (spec.capability2.size() != 0)
+    {
+        spec.capability2.clear();
+    }
+    if (spec.customprops.size() != 0)
+    {
+        spec.customprops.clear();
+    }
+
     for (int i = 0; i < spec.capability1.size(); i++)
     {
         Json::Value cap;
@@ -133,9 +147,7 @@ bool SensorInstance::UnMarshal(std::string source)
 
 bool SensorInstance::updateInstance(std::string data)
 {
-    std::lock_guard<std::mutex> locker(resourcelock_);
-    UnMarshal(data);
-    return true;
+    return UnMarshal(data);
 }
 
 std::string SensorInstance::getInstanceVersion()

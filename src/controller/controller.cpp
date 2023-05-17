@@ -41,6 +41,10 @@ void Controller::LoadResource()
     {
         LOG(ERROR) << "get all micphonedevice error ";
     }
+    if (!dbManager::getInstance().DBGetAbilityInstances(ability_instances))
+    {
+        LOG(ERROR) << "get all ability error ";
+    }
     LOG(INFO) << "Load resources successfully";
 }
 
@@ -400,6 +404,10 @@ void Controller::PrintResource()
         std::cout << iter.second->Marshal() << std::endl;
     }
     for (auto &iter : mic_instances)
+    {
+        std::cout << iter.second->Marshal() << std::endl;
+    }
+    for (auto &iter : ability_instances)
     {
         std::cout << iter.second->Marshal() << std::endl;
     }

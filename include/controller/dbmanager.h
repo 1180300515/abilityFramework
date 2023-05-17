@@ -89,7 +89,8 @@ public:
     bool DBGetDeviceInstances(std::map<std::string, std::shared_ptr<CameraInstance>> &instance);
     bool DBGetDeviceInstances(std::map<std::string, std::shared_ptr<LoudspeakerInstance>> &instance);
     bool DBGetDeviceInstances(std::map<std::string, std::shared_ptr<SensorInstance>> &instance);   
-    bool DBGetDeviceInstances(std::map<std::string, std::shared_ptr<MicrophoneInstance>> &instance);   
+    bool DBGetDeviceInstances(std::map<std::string, std::shared_ptr<MicrophoneInstance>> &instance); 
+    bool DBGetAbilityInstances(std::map<std::string, std::shared_ptr<Ability>> &instance);
     /**
      * store the instance into db
     */

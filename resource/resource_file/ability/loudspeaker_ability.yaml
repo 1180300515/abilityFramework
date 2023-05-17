@@ -7,8 +7,9 @@ level: "1"
 abilityname: loudspeaker
 description: this is a loudspeaker
 followed: default
-required:
-  - temperature
+depends:
+  abilities:
+    - dhaks
 spec:
   sampleRates: "16000"
   channelNumber: 8

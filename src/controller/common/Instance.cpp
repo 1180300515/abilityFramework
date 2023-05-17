@@ -9,6 +9,16 @@ bool Instance::UnMarshal(std::string source)
     apiVersion = jnode["apiVersion"].asString();
     kind = jnode["kind"].asString();
     metadata.name = jnode["metadata"]["name"].asString();
+
+    if (api.function.size() != 0)
+    {
+        api.function.clear();
+    }
+    if (devicelist.size() != 0)
+    {
+        devicelist.clear();
+    }
+
     if (jnode["metadata"].isMember("namespace"))
     {
         metadata.namespace_name = jnode["metadata"]["namespace"].asString();
@@ -18,6 +28,7 @@ bool Instance::UnMarshal(std::string source)
         metadata.namespace_name = "default";
     }
     status.occupancy = (jnode["status"]["occupancy"].asString() == "true");
+
     for (int i = 0; i < jnode["api"]["function"].size(); i++)
     {
         Afunction func;
@@ -39,6 +50,18 @@ bool Instance::UnMarshal(std::string source)
             func.returnparam.push_back(aparam);
         }
         api.function.push_back(func);
+    }
+
+    Json::Value::Members dl = jnode["devicelist"].getMemberNames();
+    for (auto iter = dl.begin(); iter != dl.end(); iter++)
+    {
+        DeviceDescribe de;
+        de.devicename = jnode["devicelist"][*iter]["devicename"].asString();
+        de.deviceid = jnode["devicelist"][*iter]["deviceid"].asString();
+        de.deviceip = jnode["devicelist"][*iter]["deviceip"].asString();
+        de.deviceport = jnode["devicelist"][*iter]["deviceport"].asString();
+        de.status = jnode["devicelist"][*iter]["status"].asString();
+        devicelist.emplace_back(de);
     }
     return true;
 }

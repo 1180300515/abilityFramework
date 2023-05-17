@@ -7,8 +7,6 @@ level: "1"
 abilityname: sensor
 description: this is a sensor
 followed: default
-required:
-  - temperature
 spec:
   location: home
   vendor: oppo

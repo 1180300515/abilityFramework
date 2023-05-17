@@ -30,7 +30,7 @@ resource
     ├── ability 能力资源文件
     ├── crd crd资源文件
     ├── device 设备资源文件
-    └── nonlocal 测试用例
+    └── example_for_test 测试用例
 src 源文件
 └── controller
     ├── common
@@ -51,6 +51,7 @@ log 储存日志文件
 位于`config/controller_config.yaml`文件中。
 
 ## 默认配置
+位于`include/controller/global_var.h`头文件中
 - 默认udp接收端口号: 8001
 - 默认udp广播端口号: 8888
 

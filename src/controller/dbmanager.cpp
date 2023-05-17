@@ -234,9 +234,14 @@ bool dbManager::AddAbilityInstance(const std::string &filepath)
     std::string instance_key = instance_json["abilityname"].asString();
     std::string instance_value = JsonToString(instance_json);
     std::string instance_version = apiVersion_string.substr(flag);
+    std::string instance_namespace = "default";
+    if (instance_json["metadata"].isMember("namespace"))
+    {
+        std::string instance_namespace = instance_json["metadata"]["namespace"].asString();
+    }
 
-    std::string insert_sql = "INSERT OR IGNORE INTO ABILITY (NAME,VALUE,APIGROUP,KIND,VERSION) VALUES (\'";
-    insert_sql += instance_key + "\',\'" + instance_value + "\',\'" + instance_group + "\',\'" + instance_kind + "\',\'" + instance_version + "\' );";
+    std::string insert_sql = "INSERT OR IGNORE INTO ABILITY (NAME,NAMESPACE,VALUE,APIGROUP,KIND,VERSION) VALUES (\'";
+    insert_sql += instance_key + "\',\'" + instance_namespace + "\',\'" + instance_value + "\',\'" + instance_group + "\',\'" + instance_kind + "\',\'" + instance_version + "\' );";
     int rc2;
     char *erroms2 = 0;
     rc2 = sqlite3_exec(db, insert_sql.c_str(), ability_callback, 0, &erroms2);
@@ -440,6 +445,28 @@ bool dbManager::DBGetDeviceInstances(std::map<std::string, std::shared_ptr<Micro
         auto ins = std::make_shared<MicrophoneInstance>();
         ins->UnMarshal(instancestructs[i].value);
         std::string key = instancestructs[i].namespace_name + "/" + instancestructs[i].name;
+        instance[key] = ins;
+    }
+    return true;
+}
+
+bool dbManager::DBGetAbilityInstances(std::map<std::string, std::shared_ptr<Ability>> &instance)
+{
+    abilitystructs.clear();
+    std::string search_sql = "SELECT * FROM ABILITY ;";
+    int rc;
+    char *erroms = 0;
+    rc = sqlite3_exec(db, search_sql.c_str(), ability_callback, 0, &erroms);
+    if (rc)
+    {
+        LOG(ERROR) << "sql excute error: " << erroms;
+        return false;
+    }
+    for (int i = 0; i < abilitystructs.size(); i++)
+    {
+        auto ins = std::make_shared<Ability>();
+        ins->UnMarshal(abilitystructs[i].value);
+        std::string key = abilitystructs[i].namespace_name + "/" + abilitystructs[i].name;
         instance[key] = ins;
     }
     return true;

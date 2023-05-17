@@ -20,6 +20,20 @@ std::string MicrophoneInstance::Marshal()
     jnode["spec"]["properties"]["bitWidth"] = spec.properties.bitWidth;
     jnode["spec"]["properties"]["description"] = spec.properties.description;
     jnode["spec"]["properties"]["interface"] = spec.properties.interface;
+
+    if (spec.capability1.size() != 0)
+    {
+        spec.capability1.clear();
+    }
+    if (spec.capability2.size() != 0)
+    {
+        spec.capability2.clear();
+    }
+    if (spec.customprops.size() != 0)
+    {
+        spec.customprops.clear();
+    }
+
     for (int i = 0; i < spec.capability1.size(); i++)
     {
         Json::Value cap;
@@ -140,9 +154,7 @@ bool MicrophoneInstance::UnMarshal(std::string source)
 
 bool MicrophoneInstance::updateInstance(std::string data)
 {
-    std::lock_guard<std::mutex> locker(resourcelock_);
-    UnMarshal(data);
-    return true;
+    return UnMarshal(data);
 }
 
 std::string MicrophoneInstance::getInstanceVersion()

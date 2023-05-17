@@ -1,8 +1,10 @@
 #ifndef ABILITY_STRUCT_H
 #define ABILITY_STRUCT_H
 
-#include "controller/common/common_struct.h"
 #include <map>
+#include <mutex>
+
+#include "controller/common/common_struct.h"
 
 // ability struct defination
 struct Aabilityparam
@@ -26,8 +28,14 @@ struct Aabilityinstance
     std::string port;
     std::string status;
 };
-struct Ability
+struct Abilitydepends
 {
+    std::vector<std::string> abilities;
+    std::vector<std::string> devices;
+};
+class Ability
+{
+public:
     std::string apiVersion;
     std::string kind;
     Metadata metadata;
@@ -35,13 +43,17 @@ struct Ability
     std::string abilityname;
     std::string description;
     std::string followed;
-    std::vector<std::string> required;
+    Abilitydepends depends;
     std::map<std::string, std::string> spec;
     std::vector<Aapi> ApiList;
     std::vector<Aabilityinstance> abilityinstancelist;
+
+    std::mutex abilitylock_;
+
+    bool UnMarshal(const std::string source);
+    std::string Marshal();
+    bool updateAbility(std::string data);
+
 };
 
-
-bool UnMarshal(const std::string source, Ability &des);
-std::string Marshal(Ability &source);
 #endif

@@ -16,9 +16,10 @@ public:
     Metadata metadata;
     DStatus status;
     Api api;
-    std::mutex resourcelock_ ;
     std::vector<DeviceDescribe> devicelist;
 
+    std::mutex resourcelock_ ;
+    
     virtual std::string Marshal() = 0;
     virtual bool UnMarshal(std::string source);
     virtual bool updateInstance(std::string data) = 0;

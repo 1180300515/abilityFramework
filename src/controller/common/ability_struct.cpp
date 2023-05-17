@@ -2,27 +2,64 @@
 
 #include "controller/common/ability_struct.h"
 
-bool UnMarshal(const std::string source, Ability &des)
+bool Ability::UnMarshal(const std::string source)
 {
+    std::lock_guard<std::mutex> locker(abilitylock_);
     Json::Value jnode;
     Json::Reader reader;
     reader.parse(source, jnode);
-    des.apiVersion = jnode["apiVersion"].asString();
-    des.kind = jnode["kind"].asString();
-    des.level = jnode["level"].asString();
-    des.abilityname = jnode["abilityname"].asString();
-    des.description = jnode["description"].asString();
-    des.followed = jnode["followed"].asString();
-    for (int i = 0; i < jnode["required"].size(); i++)
+    apiVersion = jnode["apiVersion"].asString();
+    kind = jnode["kind"].asString();
+    level = jnode["level"].asString();
+    abilityname = jnode["abilityname"].asString();
+    description = jnode["description"].asString();
+    followed = jnode["followed"].asString();
+
+    if (depends.abilities.size() != 0)
     {
-        des.required.push_back(jnode["required"][i].asString());
+        depends.abilities.clear();
+    }
+    if (depends.devices.size() != 0)
+    {
+        depends.devices.clear();
+    }
+    if (spec.size() != 0)
+    {
+        spec.clear();
+    }
+    if (ApiList.size() != 0)
+    {
+        ApiList.clear();
+    }
+    if (abilityinstancelist.size() != 0)
+    {
+        abilityinstancelist.clear();
+    }
+
+    if (jnode.isMember("depends"))
+    {
+        if (jnode["depends"].isMember("abilities"))
+        {
+            for (int i = 0; i < jnode["depends"]["abilities"].size(); i++)
+            {
+                depends.abilities.emplace_back(jnode["depends"]["abilities"][i].asString());
+            }
+        }
+        if (jnode["depends"].isMember("devices"))
+        {
+            for (int i = 0; i < jnode["depends"]["devices"].size(); i++)
+            {
+                depends.devices.emplace_back(jnode["depends"]["devices"][i].asString());
+            }
+        }
     }
     Json::Value::Members member;
     member = jnode["spec"].getMemberNames();
     for (Json::Value::Members::iterator it = member.begin(); it != member.end(); it++)
     {
-        des.spec[*it] = jnode["spec"][*it].asString();
+        spec[*it] = jnode["spec"][*it].asString();
     }
+
     for (int i = 0; i < jnode["ApiList"].size(); i++)
     {
         Aapi api;
@@ -34,7 +71,7 @@ bool UnMarshal(const std::string source, Ability &des)
             param.paramname = jnode["ApiList"][i]["inputparam"][j]["paramname"].asString();
             param.paramtype = jnode["ApiList"][i]["inputparam"][j]["paramtype"].asString();
             param.index = jnode["ApiList"][i]["inputparam"][j]["index"].asString();
-            api.inputparam.push_back(param);
+            api.inputparam.emplace_back(param);
         }
         for (int x = 0; x < jnode["ApiList"][i]["inputparam"].size(); x++)
         {
@@ -42,70 +79,95 @@ bool UnMarshal(const std::string source, Ability &des)
             param.paramname = jnode["ApiList"][i]["inputparam"][x]["paramname"].asString();
             param.paramtype = jnode["ApiList"][i]["inputparam"][x]["paramtype"].asString();
             param.index = jnode["ApiList"][i]["inputparam"][x]["index"].asString();
-            api.returnparam.push_back(param);
+            api.returnparam.emplace_back(param);
         }
-        des.ApiList.push_back(api);
+        ApiList.emplace_back(api);
+    }
+
+    for (int i = 0; i < jnode["abilityinstancelist"].size(); i++)
+    {
+        Aabilityinstance instance;
+        instance.devicename = jnode["abilityinstancelist"][i]["devicename"].asString();
+        instance.deviceid = jnode["abilityinstancelist"][i]["deviceid"].asString();
+        instance.deviceip = jnode["abilityinstancelist"][i]["deviceip"].asString();
+        instance.port = jnode["abilityinstancelist"][i]["port"].asString();
+        instance.status = jnode["abilityinstancelist"][i]["status"].asString();
+        abilityinstancelist.emplace_back(instance);
     }
     return true;
 }
 
-std::string Marshal(Ability &source)
+std::string Ability::Marshal()
 {
+    std::lock_guard<std::mutex> locker(abilitylock_);
     Json::Value jnode;
-    jnode["apiVersion"] = source.apiVersion;
-    jnode["kind"] = source.kind;
-    jnode["metadata"]["name"] = source.metadata.name;
-    jnode["metadata"]["namespace"] = source.metadata.namespace_name;
-    jnode["level"] = source.level;
-    jnode["abilityname"] = source.abilityname;
-    jnode["description"] = source.description;
-    jnode["followed"] = source.followed;
-    for (int i = 0; i < source.required.size(); i++)
+    jnode["apiVersion"] = apiVersion;
+    jnode["kind"] = kind;
+    jnode["metadata"]["name"] = metadata.name;
+    jnode["metadata"]["namespace"] = metadata.namespace_name;
+    jnode["level"] = level;
+    jnode["abilityname"] = abilityname;
+    jnode["description"] = description;
+    jnode["followed"] = followed;
+    if (depends.abilities.size() != 0)
     {
-        jnode["required"].append(source.required[i]);
+        for (auto &iter : depends.abilities)
+        {
+            jnode["depends"]["abilities"].append(iter);
+        }
     }
-    std::map<std::string, std::string>::iterator iter;
-    iter = source.spec.begin();
-    while (iter != source.spec.end())
+    if (depends.devices.size() != 0)
     {
-        jnode["spec"][iter->first] = iter->second;
-        iter++;
+        for (auto &iter : depends.devices)
+        {
+            jnode["depends"]["devices"].append(iter);
+        }
+    }
+    for (auto &iter : spec)
+    {
+        jnode["spec"][iter.first] = iter.second;
     }
     // api part
-    for (int i = 0; i < source.ApiList.size(); i++)
+    for (int i = 0; i < ApiList.size(); i++)
     {
         Json::Value cap;
-        cap["ApiName"] = source.ApiList[i].ApiName;
-        cap["ApiType"] = source.ApiList[i].ApiType;
-        for (int j = 0; j < source.ApiList[i].inputparam.size(); j++)
+        cap["ApiName"] = ApiList[i].ApiName;
+        cap["ApiType"] = ApiList[i].ApiType;
+        for (int j = 0; j < ApiList[i].inputparam.size(); j++)
         {
             Json::Value param;
-            param["paramname"] = source.ApiList[i].inputparam[j].paramname;
-            param["paramtype"] = source.ApiList[i].inputparam[j].paramtype;
-            param["index"] = source.ApiList[i].inputparam[j].index;
+            param["paramname"] = ApiList[i].inputparam[j].paramname;
+            param["paramtype"] = ApiList[i].inputparam[j].paramtype;
+            param["index"] = ApiList[i].inputparam[j].index;
             cap["inputparam"].append(param);
         }
-        for (int k = 0; k < source.ApiList[i].returnparam.size(); k++)
+        for (int k = 0; k < ApiList[i].returnparam.size(); k++)
         {
             Json::Value returnparam;
-            returnparam["paramname"] = source.ApiList[i].returnparam[k].paramname;
-            returnparam["paramtype"] = source.ApiList[i].returnparam[k].paramtype;
-            returnparam["index"] = source.ApiList[i].returnparam[k].index;
+            returnparam["paramname"] = ApiList[i].returnparam[k].paramname;
+            returnparam["paramtype"] = ApiList[i].returnparam[k].paramtype;
+            returnparam["index"] = ApiList[i].returnparam[k].index;
             cap["returnparam"].append(returnparam);
         }
         jnode["ApiList"].append(cap);
     }
     // devicelist part
-    for (int i = 0; i < source.abilityinstancelist.size(); i++)
+    for (int i = 0; i < abilityinstancelist.size(); i++)
     {
         Json::Value cap;
-        cap["devicename"] = source.abilityinstancelist[i].devicename;
-        cap["deviceid"] = source.abilityinstancelist[i].deviceid;
-        cap["deviceip"] = source.abilityinstancelist[i].deviceip;
-        cap["port"] = source.abilityinstancelist[i].port;
-        cap["status"] = source.abilityinstancelist[i].status;
+        cap["devicename"] = abilityinstancelist[i].devicename;
+        cap["deviceid"] = abilityinstancelist[i].deviceid;
+        cap["deviceip"] = abilityinstancelist[i].deviceip;
+        cap["port"] = abilityinstancelist[i].port;
+        cap["status"] = abilityinstancelist[i].status;
         jnode["abilityinstancelist"].append(cap);
     }
     Json::FastWriter writer;
+
     return writer.write(jnode);
+}
+
+bool Ability::updateAbility(std::string data)
+{
+    return UnMarshal(data);
 }
