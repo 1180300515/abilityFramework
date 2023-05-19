@@ -1,0 +1,159 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: microphonedevices.stable.example.com
+spec:
+  group: stable.example.com
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: define microphone spec
+          type: object
+          required:
+            - spec
+            - status
+          properties:
+            spec:
+              type: object
+              required:
+                - kind
+                - version
+                - properties
+              properties:
+                kind:
+                  type: string
+                version:
+                  type: string
+                hostname:
+                  type: string
+                capability1:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                     - name
+                     - api
+                    properties:
+                      name:
+                        type: string
+                      api:
+                        type: array
+                        items:
+                          type: string
+                capability2:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                     - name
+                     - api
+                    properties:
+                      name:
+                        type: string
+                      api:
+                        type: array
+                        items:
+                          type: string
+                properties:
+                  type: object
+                  required:
+                    - channelNumber
+                    - bitWidth
+                    - interface
+                  properties:
+                    sampleRates:
+                      type: string
+                    channelNumber:
+                      type: integer
+                    bitWidth:
+                      type: integer
+                    hardwareName:
+                      type: string
+                    volume:
+                      type: integer
+                    mute:
+                      type: boolean
+                    description:
+                      type: string
+                    interface:
+                      type: string
+                customprops:
+                  type: object
+                  description: custom properties to describe a microphone device
+            status:
+              type: object
+              required:
+                - occupancy
+              properties:
+                occupancy:
+                  type: boolean
+            api:
+              type: object
+              properties:
+                function:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - name
+                      - param
+                      - returnparam
+                    properties:
+                      name: 
+                        type: string
+                      param:
+                        type: array
+                        items:
+                          required:
+                            - name
+                            - type
+                            - index
+                          properties:
+                            name:
+                              type: string
+                            type:
+                              type: string
+                            index:
+                              type: string
+                          type: object
+                      returnparam:
+                        type: array
+                        items:
+                          required:
+                            - name
+                            - type
+                            - index
+                          properties:
+                            name:
+                              type: string
+                            type:
+                              type: string
+                            index:
+                              type: string
+                          type: object
+            devicelist:
+              type: array
+              items:
+                type: object
+                properties:
+                  devicename:
+                    type: string
+                  deviceid:
+                    type: string
+                  deviceip:
+                    type: string
+                  deviceport:
+                    type: string
+                  status:
+                    type: string
+  scope: Namespaced
+  names:
+    kind: MicrophoneDevice
+    singular: microphonedevice
+    plural: microphonedevices
+
+
+

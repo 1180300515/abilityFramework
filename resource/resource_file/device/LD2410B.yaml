@@ -1,0 +1,37 @@
+apiVersion: stable.example.com/v1
+kind: SensorDevice
+metadata:
+  name: "LD2410B-presence-sensor"
+spec:
+  kind: sensor
+  version: "1.0"
+  hostname: ""
+  capability1:
+    - name: ""
+      api:
+        - ""
+  capability2:
+    - name: ""
+      api:
+        - ""
+  properties:
+    location: unknown
+    vendor: unknown
+    interface: ""
+  customprops:
+    detectionAngle: "±60"
+    OTAsupport: "yes"
+    distanceResolution: "each range gate 0.2m or 0.75m , max 8 range gate"
+status:
+  occupancy: false
+api:
+  function:
+    - name: "getDistance"
+      param:
+        - name: "distance"
+          type: "uint16_t*"
+          index: "1"
+      returnparam:
+        - name: "result"
+          type: "uint8_t"
+          index: "1"

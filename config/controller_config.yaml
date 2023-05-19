@@ -1,0 +1,7 @@
+switch:
+  loadcrd: true
+  loadinstance: true
+  loadability: true
+  logintofile: false
+value:
+  httpserveraddr: "http://0.0.0.0:8000"

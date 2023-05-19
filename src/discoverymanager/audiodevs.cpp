@@ -44,7 +44,7 @@ static void context_state_callback(pa_context *c, void *userdata)
             pa_operation_unref(o);
         }
 
-        std::cout << "ccc " << std::endl;
+        //std::cout << "ccc " << std::endl;
 
         o = pa_context_get_source_info_list(c, source_info_callback, nullptr);
         if (o)
@@ -71,10 +71,10 @@ std::pair<std::vector<AudioDevice>, std::vector<AudioDevice>> getAudioInfo()
     pa_context *context = pa_context_new(mainloop_api, "Device Details");
 
     pa_context_set_state_callback(context, context_state_callback, nullptr);
-    std::cout << "connect " << std::endl;
+    //std::cout << "connect " << std::endl;
     pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
 
-    std::cout << "Before run" << std::endl;
+    //std::cout << "Before run" << std::endl;
     pa_threaded_mainloop_start(mainloop);
     // usleep(2000 * 1000);
     // std::cout << "Quit the loop." << std::endl;
@@ -87,26 +87,26 @@ std::pair<std::vector<AudioDevice>, std::vector<AudioDevice>> getAudioInfo()
     sleep(2);
     pa_threaded_mainloop_stop(mainloop);
 
-    std::cout << "Output devices:" << std::endl;
-    for (const auto &device : outputDevices)
-    {
-        std::cout << "  " << device.description << std::endl;
-        std::cout << "  " << device.name << std::endl;
-        std::cout << "  " << device.volume << std::endl;
-        std::cout << "  " << device.mute << std::endl;
-        std::cout << "  " << device.sampleRate << std::endl;
-        std::cout << "  " << device.channels << std::endl;
-    }
+    // std::cout << "Output devices:" << std::endl;
+    // for (const auto &device : outputDevices)
+    // {
+    //     std::cout << "  " << device.description << std::endl;
+    //     std::cout << "  " << device.name << std::endl;
+    //     std::cout << "  " << device.volume << std::endl;
+    //     std::cout << "  " << device.mute << std::endl;
+    //     std::cout << "  " << device.sampleRate << std::endl;
+    //     std::cout << "  " << device.channels << std::endl;
+    // }
 
-    std::cout << "Input devices:" << std::endl;
-    for (const auto &device : inputDevices)
-    {
-        std::cout << "  " << device.description << std::endl;
-        std::cout << "  " << device.name << std::endl;
-        std::cout << "  " << device.volume << std::endl;
-        std::cout << "  " << device.mute << std::endl;
-        std::cout << "  " << device.sampleRate << std::endl;
-        std::cout << "  " << device.channels << std::endl;
-    }
+    // std::cout << "Input devices:" << std::endl;
+    // for (const auto &device : inputDevices)
+    // {
+    //     std::cout << "  " << device.description << std::endl;
+    //     std::cout << "  " << device.name << std::endl;
+    //     std::cout << "  " << device.volume << std::endl;
+    //     std::cout << "  " << device.mute << std::endl;
+    //     std::cout << "  " << device.sampleRate << std::endl;
+    //     std::cout << "  " << device.channels << std::endl;
+    // }
     return std::make_pair(inputDevices, outputDevices);
 }
