@@ -4,77 +4,88 @@
 #include <map>
 #include <sys/sysinfo.h>
 
-enum SystemStatus
-{
-    IDLE,
-    LIGHT_LOAD,
-    MEDIUM_LOAD,
-    HIGH_LOAD,
-    OVERLOADED,
-    UNKNOWN
+enum class SystemLoad {
+    Increasing,
+    Decreasing,
+    Stable,
+    Unknown
 };
 
-std::map<SystemStatus, std::string> statusToString = 
-{
-    {IDLE, "Idle"},
-    {LIGHT_LOAD, "Light Load"},
-    {MEDIUM_LOAD, "Medium Load"},
-    {HIGH_LOAD, "High Load"},
-    {OVERLOADED, "Overloaded"},
-    {UNKNOWN, "Unknown"}
+enum class SystemStatus {
+    Overloaded,
+    Busy,
+    Optimal,
+    Idle,
+    Unknown
 };
 
-std::string get_status_string(SystemStatus status)
-{
-    return statusToString[status];
+std::string systemStatusToString(SystemStatus status) {
+    switch(status) {
+        case SystemStatus::Overloaded:
+            return "Overloaded";
+        case SystemStatus::Busy:
+            return "Busy";
+        case SystemStatus::Optimal:
+            return "Optimal";
+        case SystemStatus::Idle:
+            return "Idle";
+        default:
+            return "Unknown";
+    }
 }
 
-SystemStatus get_system_status()
+std::string systemLoadToString(SystemLoad load) {
+    switch(load) {
+        case SystemLoad::Increasing:
+            return "Increasing";
+        case SystemLoad::Decreasing:
+            return "Decreasing";
+        case SystemLoad::Stable:
+            return "Stable";
+        default:
+            return "Unknown";
+    }
+}
+
+SystemLoad getSystemLoad(double load1, double load5, double load15) {
+    if (load1 > load5 && load5 > load15) {
+        return SystemLoad::Increasing;
+    } else if (load1 < load5 && load5 < load15) {
+        return SystemLoad::Decreasing;
+    } else {
+        return SystemLoad::Stable;
+    }
+}
+
+SystemStatus getSystemStatus(double load1, double load15, int cpuCores) {
+    if (load15 > cpuCores) {
+        return SystemStatus::Overloaded;
+    } else if (load1 < cpuCores / 2.0) {
+        return SystemStatus::Idle;
+    } else if (load1 >= cpuCores / 2.0 && load1 <= cpuCores * 1.5) {
+        return SystemStatus::Optimal;
+    } else {
+        return SystemStatus::Busy;
+    }
+}
+
+
+std::string get_system_status()
 {
-    std::ifstream loadavg_file("/proc/loadavg");
-    if (!loadavg_file)
-    {
-        std::cerr << "Error: Unable to open /proc/loadavg" << std::endl;
-        return UNKNOWN;
+    std::ifstream file("/proc/loadavg");
+    if (!file) {
+        std::cerr << "Cannot open /proc/loadavg\n";
     }
 
-    std::string loadavg_str;
-    std::getline(loadavg_file, loadavg_str);
-    std::istringstream iss(loadavg_str);
-
-    double loadavg_1min, loadavg_5min, loadavg_15min;
-    if (!(iss >> loadavg_1min >> loadavg_5min >> loadavg_15min))
-    {
-        std::cerr << "Error: Unable to read load averages" << std::endl;
-        return UNKNOWN;
+    double load1, load5, load15;
+    if (!(file >> load1 >> load5 >> load15)) {
+        std::cerr << "Cannot read /proc/loadavg\n";
     }
 
-    // 获取CPU核心数
-    int num_cores = get_nprocs();
+    int cpuCores = std::thread::hardware_concurrency();
 
-    double loadavg_1min_per_core = loadavg_1min / num_cores;
-    double loadavg_5min_per_core = loadavg_5min / num_cores;
-    double loadavg_15min_per_core = loadavg_15min / num_cores;
+    SystemStatus status = getSystemStatus(load1, load15, cpuCores);
+    SystemLoad load = getSystemLoad(load1, load5, load15);
 
-    // 根据负载判断系统状态
-    if (loadavg_1min_per_core < 0.7)
-    {
-        return IDLE;
-    }
-    else if (loadavg_1min_per_core < 1)
-    {
-        return LIGHT_LOAD;
-    }
-    else if (loadavg_5min_per_core < 1)
-    {
-        return MEDIUM_LOAD;
-    }
-    else if (loadavg_15min_per_core < 1)
-    {
-        return HIGH_LOAD;
-    }
-    else
-    {
-        return OVERLOADED;
-    }
+    return systemStatusToString(status) + "," + systemLoadToString(load);
 }

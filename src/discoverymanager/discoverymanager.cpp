@@ -43,7 +43,7 @@ void udp_broadcast_sender()
   {
     char hostname[40];
     gethostname(hostname, sizeof(hostname));
-    std::string loadavg = get_status_string(get_system_status());
+    std::string loadavg = get_system_status();
     std::string message = std::string(hostname) + "+" + loadavg + "+" + std::to_string(std::time(nullptr));
 
     std::cout << L_PURPLE << "Broadcasting: " << message << NONE << std::endl;

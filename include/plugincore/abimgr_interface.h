@@ -13,6 +13,7 @@
 
 // 心跳信息
 struct HeartbeatInfo {
+    std::string abilityName;
     std::string status;
     std::chrono::steady_clock::time_point last_update;
 };
@@ -27,7 +28,7 @@ std::mutex heartbeat_map_mutex;
 void print_heartbeat_info() {
     // std::lock_guard<std::mutex> lock(heartbeat_map_mutex);
     for (const auto& pair : heartbeat_map) {
-        std::cout << "Port: " << pair.first << ", Status: " << pair.second.status
+        std::cout <<"AbilityName: " << pair.second.abilityName << ", Port: " << pair.first << ", Status: " << pair.second.status
                   << ", Last update: " << std::chrono::duration_cast<std::chrono::seconds>(pair.second.last_update.time_since_epoch()).count() << " seconds ago\n";
     }
 }
@@ -63,7 +64,7 @@ void run_http_server() {
         }
 
         std::lock_guard<std::mutex> lock(heartbeat_map_mutex);
-        heartbeat_map[port] = {req.get_param_value("status"), std::chrono::steady_clock::now()};
+        heartbeat_map[port] = { req.get_param_value("abilityName"), req.get_param_value("status"), std::chrono::steady_clock::now()};
         res.set_content("OK", "text/plain");
 
         print_heartbeat_info();
