@@ -69,4 +69,4 @@ add_executable(${PROJECT_NAME} src/main.cpp
     src/discoverymanager/dispdevs.cpp
     src/discoverymanager/localhw_discovery.cpp
     src/discoverymanager/discoverymanager.cpp)
-target_link_libraries(AbilityFramework yaml-cpp pulse X11 Xrandr v4l2)
+target_link_libraries(AbilityFramework yaml-cpp pulse X11 Xrandr v4l2 pthread dl)
