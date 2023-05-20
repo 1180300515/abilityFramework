@@ -31,9 +31,13 @@ public:
     // 删除设备
     void removeDevice(const std::string& hostname) {
 
+        std::cout << L_RED << "DevicePool removeDevice: " << hostname << NONE << std::endl;
         auto it = deviceList.find(hostname);
+        std::cout << "find result: " << (it == deviceList.end() ? "not found" : "found") << std::endl;
         if (it != deviceList.end()) {
+            std::cout << "Erased :" << it->first << std::endl;
             deviceList.erase(it);
+            std::cout << "Erased finished" << std::endl;
         } else {
             throw std::runtime_error("Device not found: " + hostname);
         }

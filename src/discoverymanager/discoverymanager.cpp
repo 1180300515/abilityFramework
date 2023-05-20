@@ -17,7 +17,8 @@
 #include "utils/color.h"
 
 std::map<std::string, Device> devices;
-DevicePool devicePool = DevicePool(getHostName() ,deviceProfile);
+std::string hostname = "luo980-aorus15gyc";
+DevicePool devicePool = DevicePool(hostname ,deviceProfile);
 DevicePoolExtended devicePoolExtended(devicePool);
 
 void udp_broadcast_sender(std::function<void(std::map<std::string, std::string>)> callback)
@@ -152,12 +153,12 @@ void udp_broadcast_receiver()
       if (it->second.IsOffline(current_time))
       {
         std::cout << L_PURPLE << "Remove device: " << it->second.hostname << NONE << std::endl;
-        it = devices.erase(it);
-        std::cout << PURPLE <<"devices removed" << NONE << std::endl;
         devicePool.removeDevice(it->second.hostname);
         std::cout << PURPLE <<"devicePool removed" << NONE << std::endl;
         devicePoolExtended.deleteDevice(it->second.hostname);
         std::cout << PURPLE <<"devicePoolExtended removed" << NONE << std::endl;
+        it = devices.erase(it);
+        std::cout << PURPLE <<"devices removed" << NONE << std::endl;
       }
       else
       {
@@ -187,8 +188,8 @@ void udp_broadcast_receiver()
   close(sock);
 }
 
-std::string getHostName(){
-    char hostname[40];
-    gethostname(hostname, sizeof(hostname));
-    return hostname;
-}
+// std::string getHostName(){
+//     char hostname[40];
+//     gethostname(hostname, sizeof(hostname));
+//     return hostname;
+// }
