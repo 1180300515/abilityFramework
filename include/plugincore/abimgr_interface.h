@@ -1,4 +1,3 @@
-#include <httplib.h>
 #include <unordered_map>
 #include <thread>
 #include <mutex>
@@ -9,6 +8,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <string>
+
+#include <httplib.h>
 
 #include "discoverymanager/localhw_interface.h"
 
@@ -98,3 +99,5 @@ bool start_program(const std::string& program_path) {
 
     return true;
 }
+
+

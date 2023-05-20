@@ -1,6 +1,7 @@
 #include "discoverymanager/localhw_interface.h"
 #include "discoverymanager/discmgr_interface.h"
 #include "discoverymanager/system_interface.h"
+#include "discoverymanager/devpool_interface.h"
 
 #include <map>
 #include <string>
@@ -14,6 +15,7 @@
 #include "utils/color.h"
 
 std::map<std::string, Device> devices;
+DevicePool devicePool = DevicePool(deviceProfile);
 
 void udp_broadcast_sender(std::function<void(std::map<std::string, std::string>)> callback)
 {
@@ -123,11 +125,17 @@ void udp_broadcast_receiver()
     std::string ip = inet_ntoa(remote_addr.sin_addr);
     if (devices.find(ip) == devices.end())
     {
+      // 增加设备对象
       devices[ip] = Device{hostname, ip, timestamp, 0, status};
+      DeviceProfile dp = getDeviceProfileFromHost(ip);
+      devicePool.addDevice(hostname, dp);
     }
     else
     {
+      // 更新设备对象
       devices[ip].Update(hostname, status, timestamp);
+      DeviceProfile dp = getDeviceProfileFromHost(ip);
+      devicePool.updateDevice(hostname, dp);
     }
 
     // 检查并移除离线的设备
@@ -137,6 +145,7 @@ void udp_broadcast_receiver()
       if (it->second.IsOffline(current_time))
       {
         it = devices.erase(it);
+        devicePool.removeDevice(it->second.hostname);
       }
       else
       {
@@ -162,4 +171,26 @@ void udp_broadcast_receiver()
   }
 
   close(sock);
+}
+
+DeviceProfile getDeviceProfileFromHost(const std::string& ip) {
+    // httplib::Client ccc("localhost", 8080); 
+    DeviceProfile dp;
+    // auto res = ccc.Get("/api/Devices");
+
+    // if (res && res->status == 200) {
+    //     // 响应成功，解析 JSON
+    //     Json::CharReaderBuilder rbuilder;
+    //     std::unique_ptr<Json::CharReader> const reader(rbuilder.newCharReader());
+    //     Json::Value root;
+    //     std::string errs;
+    //     bool parsingSuccessful = reader->parse(res->body.c_str(), res->body.c_str() + res->body.size(), &root, &errs);
+    //     if (!parsingSuccessful) {
+    //         throw std::runtime_error("Failed to parse JSON: " + errs);
+    //     }
+        
+    //     // 反序列化 DeviceProfile
+    //     dp = fromJson(root);   
+    // } 
+    return dp;
 }

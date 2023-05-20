@@ -2,7 +2,7 @@
 #include "discoverymanager/audio_interface.h"
 #include "discoverymanager/disp_interface.h"
 
-DeviceProfile deviceProfile;
+
 
 DeviceProfile getLocalHWInfo(){
     deviceProfile.cameraDevices = getCameraInfo();
