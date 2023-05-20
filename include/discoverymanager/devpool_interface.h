@@ -3,6 +3,7 @@
 
 #include "localhw_interface.h"
 #include "discmgr_interface.h"
+#include "utils/color.h"
 #include <unordered_map>
 
 // 在字符串键值对中查找指定键的值
@@ -17,16 +18,19 @@ public:
     std::map<std::string, DeviceProfile> deviceList;
     // 构造函数，初始化本地设备
     DevicePool(const DeviceProfile& localDeviceProfile) {
-        deviceList["localhost"] = localDeviceProfile;
+        std::cout << RED << "DevicePool constructor" << NONE << std::endl;
+        deviceList["luo980-aorus15gyc"] = localDeviceProfile;
     }
 
     // 添加设备
     void addDevice(const std::string& hostname, const DeviceProfile& deviceProfile) {
+        std::cout << L_RED << "DevicePool addDevice" << NONE << std::endl;
         deviceList[hostname] = deviceProfile;
     }
 
     // 删除设备
     void removeDevice(const std::string& hostname) {
+
         auto it = deviceList.find(hostname);
         if (it != deviceList.end()) {
             deviceList.erase(it);
@@ -77,6 +81,7 @@ public:
     }
 
     void addDevice(std::string hostname, DeviceProfile &deviceProfile){
+        std::cout << L_RED << "DevicePoolExtended addDevice: " << hostname << NONE << std::endl;
         for(const auto& micDevice : deviceProfile.micDevices){
             micDevices.push_back(audioDeviceToKeyValue(hostname, micDevice));
         }
@@ -92,8 +97,11 @@ public:
     }
 
     void deleteDevice(std::string hostname){
+        std::cout << L_RED << "DevicePoolExtended deleteDevice: " << hostname << NONE << std::endl;
         for (auto it = micDevices.begin(); it != micDevices.end();){
+            std::cout << "iteration: " << *it << std::endl;
             if (findValueByKey(*it, "hostname") == hostname){
+                std::cout << "find to delete: " << *it << std::endl;
                 it = micDevices.erase(it);
             } else {
                 ++it;

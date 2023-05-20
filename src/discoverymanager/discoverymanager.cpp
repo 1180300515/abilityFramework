@@ -129,6 +129,7 @@ void udp_broadcast_receiver()
     if (devices.find(ip) == devices.end())
     {
       // 增加设备对象
+      std::cout << L_PURPLE << "New device: " << hostname << NONE << std::endl;
       devices[ip] = Device{hostname, ip, timestamp, 0, status};
       DeviceProfile dp = getDeviceProfileFromHost(ip);
       devicePool.addDevice(hostname, dp);
@@ -137,6 +138,7 @@ void udp_broadcast_receiver()
     else
     {
       // 更新设备对象
+      std::cout << L_PURPLE << "Update device: " << hostname << NONE << std::endl;
       devices[ip].Update(hostname, status, timestamp);
       DeviceProfile dp = getDeviceProfileFromHost(ip);
       devicePool.updateDevice(hostname, dp);
@@ -149,6 +151,7 @@ void udp_broadcast_receiver()
     {
       if (it->second.IsOffline(current_time))
       {
+        std::cout << L_PURPLE << "Remove device: " << it->second.hostname << NONE << std::endl;
         it = devices.erase(it);
         devicePool.removeDevice(it->second.hostname);
         devicePoolExtended.deleteDevice(it->second.hostname);
