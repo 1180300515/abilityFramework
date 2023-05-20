@@ -66,7 +66,7 @@ void LocalhwPrint(){
 }
 
 DeviceProfile getDeviceProfileFromHost(const std::string& ip) {
-    httplib::Client ccc("localhost", 8080); 
+    httplib::Client ccc(ip, 8080); 
     DeviceProfile dp;
     auto res = ccc.Get("/api/Devices");
 
