@@ -18,6 +18,7 @@
 
 std::map<std::string, Device> devices;
 DevicePool devicePool = DevicePool(deviceProfile);
+DevicePoolExtended devicePoolExtended(devicePool);
 
 void udp_broadcast_sender(std::function<void(std::map<std::string, std::string>)> callback)
 {
@@ -131,6 +132,7 @@ void udp_broadcast_receiver()
       devices[ip] = Device{hostname, ip, timestamp, 0, status};
       DeviceProfile dp = getDeviceProfileFromHost(ip);
       devicePool.addDevice(hostname, dp);
+      devicePoolExtended.addDevice(hostname, dp);
     }
     else
     {
@@ -138,6 +140,7 @@ void udp_broadcast_receiver()
       devices[ip].Update(hostname, status, timestamp);
       DeviceProfile dp = getDeviceProfileFromHost(ip);
       devicePool.updateDevice(hostname, dp);
+      devicePoolExtended.updateDevice(hostname, dp);
     }
 
     // 检查并移除离线的设备
@@ -148,6 +151,7 @@ void udp_broadcast_receiver()
       {
         it = devices.erase(it);
         devicePool.removeDevice(it->second.hostname);
+        devicePoolExtended.deleteDevice(it->second.hostname);
       }
       else
       {
@@ -170,6 +174,8 @@ void udp_broadcast_receiver()
                 << devices.second.last_online_time
                 << NONE << std::endl;
     }
+
+    devicePoolExtended.print();
   }
 
   close(sock);

@@ -86,5 +86,6 @@ add_executable(${PROJECT_NAME} src/main.cpp
     src/discoverymanager/dispdevs.cpp
     src/discoverymanager/localhw_discovery.cpp
     src/discoverymanager/discoverymanager.cpp
+    src/discoverymanager/devpool.cpp
     ${SRC_LIST1} ${SRC_LIST2} ${SRC_LIST3})
 target_link_libraries(AbilityFramework sqlite3 jsoncpp glog yaml-cpp X11 pulse Xrandr v4l2 pthread dl)
