@@ -11,8 +11,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 # set(GLOG_INCLUDE_DIR /usr/include/glog)
 # set(GLOG_LIB_DIR /usr/lib/)
 
-# set(JSON_CPP_INCLUDE_DIR /usr/include/jsoncpp)
-# set(JSON_CPP_LIB_DIR /usr/lib/)
+set(JSON_CPP_INCLUDE_DIR /usr/include/jsoncpp)
+set(JSON_CPP_LIB_DIR /usr/lib/)
 
 # set(RAPIDJSON_INCLUDE_DIR /usr/include/rapidjson)
 # Macos specific
@@ -41,7 +41,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/modules)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 #include_directories(${CMAKE_SOURCE_DIR}/include {YAML_INCLUDE_DIR} {GLOG_INCLUDE_DIR} {JSON_CPP_INCLUDE_DIR} {RAPIDJSON_INCLUDE_DIR}) 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/include ${JSON_CPP_INCLUDE_DIR})
 
 find_package(yaml-cpp REQUIRED)
 find_package(glog REQUIRED)
