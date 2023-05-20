@@ -17,8 +17,8 @@
 #include "utils/color.h"
 
 std::map<std::string, Device> devices;
-std::string hostname = "luo980-aorus15gyc";
-DevicePool devicePool = DevicePool(hostname ,deviceProfile);
+// std::string hostname = "luo980-aorus15gyc";
+DevicePool devicePool = DevicePool(getHostName(), deviceProfile);
 DevicePoolExtended devicePoolExtended(devicePool);
 
 void udp_broadcast_sender(std::function<void(std::map<std::string, std::string>)> callback)
@@ -66,7 +66,7 @@ void udp_broadcast_sender(std::function<void(std::map<std::string, std::string>)
     gethostname(name, sizeof(name));
     for (auto &iter : devices)
     {
-      //if (iter.second.status != statusToString[OVERLOADED] && iter.second.hostname != name)
+      // if (iter.second.status != statusToString[OVERLOADED] && iter.second.hostname != name)
       if (iter.second.hostname != name)
       {
         record[iter.second.hostname] = iter.second.ip + ":8001";
@@ -154,11 +154,11 @@ void udp_broadcast_receiver()
       {
         std::cout << L_PURPLE << "Remove device: " << it->second.hostname << NONE << std::endl;
         devicePool.removeDevice(it->second.hostname);
-        std::cout << PURPLE <<"devicePool removed" << NONE << std::endl;
+        std::cout << PURPLE << "devicePool removed" << NONE << std::endl;
         devicePoolExtended.deleteDevice(it->second.hostname);
-        std::cout << PURPLE <<"devicePoolExtended removed" << NONE << std::endl;
+        std::cout << PURPLE << "devicePoolExtended removed" << NONE << std::endl;
         it = devices.erase(it);
-        std::cout << PURPLE <<"devices removed" << NONE << std::endl;
+        std::cout << PURPLE << "devices removed" << NONE << std::endl;
       }
       else
       {
@@ -188,8 +188,14 @@ void udp_broadcast_receiver()
   close(sock);
 }
 
-// std::string getHostName(){
-//     char hostname[40];
-//     gethostname(hostname, sizeof(hostname));
-//     return hostname;
-// }
+std::string getHostName()
+{
+  char hostname[256];
+  if (gethostname(hostname, sizeof(hostname)) != 0)
+  {
+    // 获取主机名失败
+    return "";
+  }
+  hostname[sizeof(hostname) - 1] = '\0'; // 确保以 null 结尾
+  return std::string(hostname);
+}
