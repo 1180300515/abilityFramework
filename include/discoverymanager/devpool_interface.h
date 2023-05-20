@@ -17,9 +17,9 @@ class DevicePool {
 public:
     std::map<std::string, DeviceProfile> deviceList;
     // 构造函数，初始化本地设备
-    DevicePool(const DeviceProfile& localDeviceProfile) {
+    DevicePool(std::string hostname, const DeviceProfile& localDeviceProfile) {
         std::cout << RED << "DevicePool constructor" << NONE << std::endl;
-        deviceList["luo980-aorus15gyc"] = localDeviceProfile;
+        deviceList[hostname] = localDeviceProfile;
     }
 
     // 添加设备

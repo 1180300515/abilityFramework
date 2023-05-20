@@ -44,6 +44,7 @@ struct Device
 extern std::map<std::string, Device> devices;
 void udp_broadcast_sender(std::function<void(std::map<std::string, std::string>)> callback);
 void udp_broadcast_receiver();
+std::string getHostName();
 // DeviceProfile getDeviceProfileFromHost(const std::string& ip);
 
 #endif // _DISCMGR_INTERFACE_H
