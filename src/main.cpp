@@ -12,43 +12,30 @@
 #include "controller/controller.h"
 #include "discoverymanager/discmgr_interface.h"
 #include "discoverymanager/localhw_interface.h"
+#include "glog/logging.h"
 
 using namespace plugs;
 
 // std::string getOsName();
 
-int main()
+int main(int argc, char **argv)
 {
-    // std::cout << "Hello World!" << std::endl;
-    // auto laninfo = new LANinfo();
-    // // std::cout << "LANinfo Observer vector address: " << &laninfo->observers << std::endl;
-    // // std::cout << "LANinfo Observer vector size: " << laninfo->observers.size() << std::endl;
-    // SubjectManager *subjectManager = new SubjectManager();
-    // // std::cout << "subjectManager address :" << subjectManager << std::endl;
-    // auto AMplugin = new PluginLoader("./config/testconfig.yaml");
-    // AMplugin->listPlugins();
-    // subjectManager->addSubject(laninfo);
+    // FLAGS_colorlogtostderr = true;   // log信息区分颜色
+    // FLAGS_logtostderr = 1;           // 允许log信息打印到屏幕
+    // google::InitGoogleLogging(argv[0]);
+    // LOG(INFO) << "Found cookies";
 
-    // // std::cout << "Get subjectManager subject address: " << std::endl;
-    // // for(auto [name, subject] : subjectManager->subjects){
-    // //     std::cout << name << " : " <<  subject << std::endl;
-    // // }
+    /*
+    auto laninfo = new LANinfo();
+    SubjectManager *subjectManager = new SubjectManager();
+    auto AMplugin = new PluginLoader("./config/testconfig.yaml");
+    AMplugin->listPlugins();
+    subjectManager->addSubject(laninfo);
 
-    // for (const auto &[name, plugin] : AMplugin->getPlugins())
-    // {
-    //     // std::cout << "Plugin name: " << name << std::endl;
-    //     // std::cout << "Plugin description: " << plugin->getDescription() << std::endl;
-    //     plugin->registerObserver(subjectManager);
-    // }
-    // // std::cout << "get laninfo observer nums: ";
-    // // laninfo->getObserverNums();
-    // // std::cout << "get laninfo observer nums: " << laninfo->observers.size() << std::endl;
-    // // std::cout << "get laninfo observer address: " << std::endl;
-    // // for(auto observer : laninfo->observers){
-    // //     std::cout << observer << std::endl;
-    // // }
-    // AMplugin->executePlugin("connection_mgr", subjectManager);
-    // AMplugin->executePlugin("ability_mgr", subjectManager);
+    for(auto [name, subject] : subjectManager->subjects){
+        std::cout << name << " : " <<  subject << std::endl;
+    }
+
 
     for (const auto &[name, plugin] : AMplugin->getPlugins())
     {
@@ -56,25 +43,16 @@ int main()
         // std::cout << "Plugin description: " << plugin->getDescription() << std::endl;
         plugin->registerObserver(subjectManager);
     }
-    // std::cout << "get laninfo observer nums: ";
-    // laninfo->getObserverNums();
-    // std::cout << "get laninfo observer nums: " << laninfo->observers.size() << std::endl;
-    // std::cout << "get laninfo observer address: " << std::endl;
-    // for(auto observer : laninfo->observers){
-    //     std::cout << observer << std::endl;
-    // }
     AMplugin->executePlugin("connection_mgr", subjectManager);
     AMplugin->executePlugin("ability_mgr", subjectManager);
-
-    std::cout << LocalhwPrint() << std::endl;
+    */
+    LocalhwPrint();
 
     std::thread http_server_thread(run_http_server);
     std::thread timeout_thread(check_timeout);
 
-    std::cout << "Start a program: " << start_program("./bin/helloworld") << std::endl;
+    // std::cout << "Start a program: " << start_program("./bin/helloworld") << std::endl;
 
-    http_server_thread.join();
-    timeout_thread.join();
 
     std::cout << "Not output anything." << std::endl;
 
@@ -82,9 +60,12 @@ int main()
     std::shared_ptr<Controller> controller = std::make_shared<Controller>();
     std::thread receiver_thread(udp_broadcast_receiver);
     std::thread sender_thread(udp_broadcast_sender, std::bind(&Controller::SetEdgeAddressRecord, controller , std::placeholders::_1));
+
     sleep(1);
     controller->Run();
     sender_thread.join();
     receiver_thread.join();
+    http_server_thread.join();
+    timeout_thread.join();
     return 0;
 }

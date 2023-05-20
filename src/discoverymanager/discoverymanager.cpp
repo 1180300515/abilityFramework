@@ -60,7 +60,8 @@ void udp_broadcast_sender(std::function<void(std::map<std::string, std::string>)
     gethostname(name, sizeof(name));
     for (auto &iter : devices)
     {
-      if (iter.second.status != statusToString[OVERLOADED] && iter.second.hostname != name)
+      //if (iter.second.status != statusToString[OVERLOADED] && iter.second.hostname != name)
+      if (iter.second.hostname != name)
       {
         record[iter.second.hostname] = iter.second.ip + ":8001";
       }

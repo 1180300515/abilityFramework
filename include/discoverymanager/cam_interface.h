@@ -9,6 +9,7 @@
 #include <vector>
 #include <cstring>
 #include <linux/videodev2.h>
+#include <json/json.h>
 
 // 定义一个摄像头设备的类
 class CameraHardware
@@ -33,6 +34,28 @@ public:
             //...复制其它成员...
         }
         return *this;
+    }
+
+    Json::Value toJson() const {
+        Json::Value root;
+        root["device_path"] = device_path;
+        root["driver"] = driver;
+        root["card"] = card;
+        root["bus_info"] = bus_info;
+        for (const auto& format : formats)
+            root["formats"].append(format);
+        return root;
+    }
+
+    static CameraHardware fromJson(const Json::Value& root) {
+        CameraHardware cam;
+        cam.device_path = root["device_path"].asString();
+        cam.driver = root["driver"].asString();
+        cam.card = root["card"].asString();
+        cam.bus_info = root["bus_info"].asString();
+        for (const auto& format : root["formats"])
+            cam.formats.push_back(format.asString());
+        return cam;
     }
 };
 

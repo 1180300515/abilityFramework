@@ -10,6 +10,8 @@
 #include <sys/wait.h>
 #include <string>
 
+#include "discoverymanager/localhw_interface.h"
+
 
 // 心跳信息
 struct HeartbeatInfo {
@@ -68,6 +70,10 @@ void run_http_server() {
         res.set_content("OK", "text/plain");
 
         print_heartbeat_info();
+    });
+
+    svr->Get("/api/Devices", [](const httplib::Request& req, httplib::Response& res) {
+        res.set_content(deviceProfile.toJson().toStyledString(), "application/json");
     });
 
     svr->listen("0.0.0.0", 8080);

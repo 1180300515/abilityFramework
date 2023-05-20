@@ -489,7 +489,7 @@ void Preprocessing()
 {
     // read config yaml file
     std::cout << "load config from file";
-    std::string config_file_path = "../config/controller_config.yaml";
+    std::string config_file_path = "config/controller_config.yaml";
     YAML::Node config;
     try
     {

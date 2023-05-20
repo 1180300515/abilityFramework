@@ -2,8 +2,9 @@
 #include "discoverymanager/audio_interface.h"
 #include "discoverymanager/disp_interface.h"
 
+DeviceProfile deviceProfile;
+
 DeviceProfile getLocalHWInfo(){
-    DeviceProfile deviceProfile;
     deviceProfile.cameraDevices = getCameraInfo();
     deviceProfile.displayDevices = getDisplayInfo();
     auto audioDevices = getAudioInfo();
@@ -12,7 +13,7 @@ DeviceProfile getLocalHWInfo(){
     return deviceProfile;
 }
 
-int LocalhwPrint(){
+void LocalhwPrint(){
     auto a =  getLocalHWInfo();
     for (const auto &device : a.micDevices)
     {
@@ -60,6 +61,4 @@ int LocalhwPrint(){
         std::cout << "  " << device.mmWidth << std::endl;
         std::cout << "  " << device.mmHeight << std::endl;
     }
-
-    return 0;
 }

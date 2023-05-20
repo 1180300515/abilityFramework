@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <pulse/pulseaudio.h>
+#include <json/json.h>
 
 class AudioDevice
 {
@@ -17,8 +18,30 @@ public:
     uint32_t sampleRate;
     uint8_t channels;
 
+    Json::Value toJson() const {
+        Json::Value root;
+        root["name"] = name;
+        root["description"] = description;
+        root["volume"] = volume;
+        root["mute"] = mute;
+        root["sampleRate"] = sampleRate;
+        root["channels"] = channels;
+        return root;
+    }
+
     AudioDevice(std::string name, std::string description, uint32_t volume, bool mute, uint32_t sampleRate, uint8_t channels)
         : name(name), description(description), volume(volume), mute(mute), sampleRate(sampleRate), channels(channels) {}
+
+    static AudioDevice fromJson(const Json::Value& root) {
+        return AudioDevice(
+            root["name"].asString(),
+            root["description"].asString(),
+            root["volume"].asUInt(),
+            root["mute"].asBool(),
+            root["sampleRate"].asUInt(),
+            root["channels"].asUInt()
+        );
+    }
 };
 
 static void sink_info_callback(pa_context *c, const pa_sink_info *info, int eol, void *userdata);
