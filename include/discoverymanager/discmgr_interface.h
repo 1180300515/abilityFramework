@@ -7,7 +7,7 @@
 #include <fstream>
 #include <functional>
 #include <map>
-#include <httplib.h>
+//#include <httplib.h>
 #include <json/json.h>
 
 struct Device
@@ -44,6 +44,6 @@ struct Device
 extern std::map<std::string, Device> devices;
 void udp_broadcast_sender(std::function<void(std::map<std::string, std::string>)> callback);
 void udp_broadcast_receiver();
-DeviceProfile getDeviceProfileFromHost(const std::string& ip);
+// DeviceProfile getDeviceProfileFromHost(const std::string& ip);
 
 #endif // _DISCMGR_INTERFACE_H

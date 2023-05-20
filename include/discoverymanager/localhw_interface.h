@@ -28,19 +28,8 @@ public:
     }
 };
 
-DeviceProfile fromJson(const Json::Value &root)
-{
-    DeviceProfile profile;
-    for (const auto &cam : root["cameraDevices"])
-        profile.cameraDevices.push_back(CameraHardware::fromJson(cam));
-    for (const auto &disp : root["displayDevices"])
-        profile.displayDevices.push_back(DisplayInfo::fromJson(disp));
-    for (const auto &mic : root["micDevices"])
-        profile.micDevices.push_back(AudioDevice::fromJson(mic));
-    for (const auto &speaker : root["speakerDevices"])
-        profile.speakerDevices.push_back(AudioDevice::fromJson(speaker));
-    return profile;
-}
+DeviceProfile getDeviceProfileFromHost(const std::string& ip);
+DeviceProfile fromJson2Profile(const Json::Value &root);
 
 DeviceProfile getLocalHWInfo();
 void LocalhwPrint();

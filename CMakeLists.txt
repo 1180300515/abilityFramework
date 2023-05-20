@@ -78,6 +78,7 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/src/controller/mongoose SRC_LIST3)
 
 add_executable(${PROJECT_NAME} src/main.cpp 
     src/plugincore/pluginload.cpp 
+    src/plugincore/abimgr.cpp
     src/eventhandler/eventhandler.cpp
     src/discoverymanager/discoverymanager.cpp
     src/discoverymanager/audiodevs.cpp

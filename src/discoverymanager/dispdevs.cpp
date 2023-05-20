@@ -1,4 +1,6 @@
 #include "discoverymanager/disp_interface.h"
+#include <X11/Xlib.h>
+#include <X11/extensions/Xrandr.h>
 
 std::vector<DisplayInfo> getDisplayInfo()
 {

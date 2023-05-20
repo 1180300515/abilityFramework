@@ -3,8 +3,6 @@
 
 #include <iostream>
 #include <vector>
-#include <X11/Xlib.h>
-#include <X11/extensions/Xrandr.h>
 #include <json/json.h>
 
 class DisplayInfo

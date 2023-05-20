@@ -3,6 +3,8 @@
 #include "discoverymanager/system_interface.h"
 #include "discoverymanager/devpool_interface.h"
 
+#include "plugincore/abimgr_interface.h"
+
 #include <map>
 #include <string>
 #include <ctime>
@@ -173,24 +175,3 @@ void udp_broadcast_receiver()
   close(sock);
 }
 
-DeviceProfile getDeviceProfileFromHost(const std::string& ip) {
-    // httplib::Client ccc("localhost", 8080); 
-    DeviceProfile dp;
-    // auto res = ccc.Get("/api/Devices");
-
-    // if (res && res->status == 200) {
-    //     // 响应成功，解析 JSON
-    //     Json::CharReaderBuilder rbuilder;
-    //     std::unique_ptr<Json::CharReader> const reader(rbuilder.newCharReader());
-    //     Json::Value root;
-    //     std::string errs;
-    //     bool parsingSuccessful = reader->parse(res->body.c_str(), res->body.c_str() + res->body.size(), &root, &errs);
-    //     if (!parsingSuccessful) {
-    //         throw std::runtime_error("Failed to parse JSON: " + errs);
-    //     }
-        
-    //     // 反序列化 DeviceProfile
-    //     dp = fromJson(root);   
-    // } 
-    return dp;
-}
