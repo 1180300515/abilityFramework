@@ -627,6 +627,8 @@ void Preprocessing()
     {
         LOG(ERROR) << "Could not open directory : " << ABILITY_FILE_PATH;
     }
+    // auto generate undefine hardware resource
+    dbManager::getInstance().RunHarwareResourceAutogen();
 
     // load cloud address form the database
     manager.DBGetCloudAddress();
