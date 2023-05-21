@@ -18,8 +18,11 @@
 
 std::map<std::string, Device> devices;
 // std::string hostname = "luo980-aorus15gyc";
+DeviceProfile deviceProfile = getLocalHWInfo();
 DevicePool devicePool = DevicePool(getHostName(), deviceProfile);
 DevicePoolExtended devicePoolExtended(devicePool);
+// extern DevicePool devicePool;
+// extern DevicePoolExtended devicePoolExtended;
 
 void udp_broadcast_sender(std::function<void(std::map<std::string, std::string>)> callback)
 {
@@ -132,9 +135,11 @@ void udp_broadcast_receiver()
       // 增加设备对象
       std::cout << L_PURPLE << "New device: " << hostname << NONE << std::endl;
       devices[ip] = Device{hostname, ip, timestamp, 0, status};
-      DeviceProfile dp = getDeviceProfileFromHost(ip);
-      devicePool.addDevice(hostname, dp);
-      devicePoolExtended.addDevice(hostname, dp);
+      if (hostname != getHostName()){
+        DeviceProfile dp = getDeviceProfileFromHost(ip);
+        devicePool.addDevice(hostname, dp);
+        devicePoolExtended.addDevice(hostname, dp);
+      }
     }
     else
     {

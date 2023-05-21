@@ -4,15 +4,19 @@
 
 #include <httplib.h>
 
-DeviceProfile deviceProfile;
+extern DeviceProfile deviceProfile;
 
 DeviceProfile getLocalHWInfo(){
-    deviceProfile.cameraDevices = getCameraInfo();
-    deviceProfile.displayDevices = getDisplayInfo();
+    DeviceProfile dp;
+    // std::cout << "start to get local hw info" << std::endl;
+    dp.cameraDevices = getCameraInfo();
+    dp.displayDevices = getDisplayInfo();
     auto audioDevices = getAudioInfo();
-    deviceProfile.micDevices = audioDevices.first;
-    deviceProfile.speakerDevices = audioDevices.second;
-    return deviceProfile;
+    dp.micDevices = audioDevices.first;
+    dp.speakerDevices = audioDevices.second;
+    // dp.print();
+    // std::cout << "finish to get local hw info" << std::endl;
+    return dp;
 }
 
 void LocalhwPrint(){

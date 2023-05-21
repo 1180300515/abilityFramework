@@ -42,6 +42,15 @@ public:
             root["channels"].asUInt()
         );
     }
+
+    void print(){
+        std::cout << "name: " << name << std::endl;
+        std::cout << "description: " << description << std::endl;
+        std::cout << "volume: " << volume << std::endl;
+        std::cout << "mute: " << mute << std::endl;
+        std::cout << "sampleRate: " << sampleRate << std::endl;
+        std::cout << "channels: " << static_cast<int>(channels) << std::endl;
+    }
 };
 
 static void sink_info_callback(pa_context *c, const pa_sink_info *info, int eol, void *userdata);

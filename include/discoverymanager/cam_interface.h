@@ -57,6 +57,17 @@ public:
             cam.formats.push_back(format.asString());
         return cam;
     }
+
+    void print(){
+        std::cout << "device_path: " << device_path << std::endl;
+        std::cout << "driver: " << driver << std::endl;
+        std::cout << "card: " << card << std::endl;
+        std::cout << "bus_info: " << bus_info << std::endl;
+        std::cout << "formats: ";
+        for (const auto& format : formats)
+            std::cout << format << " ";
+        std::cout << std::endl << std::endl;
+    }
 };
 
 std::vector<CameraHardware> getCameraInfo();

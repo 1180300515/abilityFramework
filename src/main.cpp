@@ -8,10 +8,11 @@
 
 #include "eventhandler/eventhandler.h"
 
-#include "discoverymanager/localhw_interface.h"
 #include "controller/controller.h"
 #include "discoverymanager/discmgr_interface.h"
 #include "discoverymanager/localhw_interface.h"
+#include "discoverymanager/devpool_interface.h"
+
 #include "glog/logging.h"
 
 using namespace plugs;
@@ -46,7 +47,9 @@ int main(int argc, char **argv)
     AMplugin->executePlugin("connection_mgr", subjectManager);
     AMplugin->executePlugin("ability_mgr", subjectManager);
     */
-    LocalhwPrint();
+    // LocalhwPrint();
+    // DevicePool devicePool = DevicePool(getHostName(), deviceProfile);
+    // DevicePoolExtended devicePoolExtended(devicePool);
 
     std::thread http_server_thread(run_http_server);
     std::thread timeout_thread(check_timeout);

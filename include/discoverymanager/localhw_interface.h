@@ -26,6 +26,21 @@ public:
             root["speakerDevices"].append(speaker.toJson());
         return root;
     }
+
+    void print(){
+        std::cout << "cameraDevices: " << std::endl;
+        for (auto &cam : cameraDevices)
+            cam.print();
+        std::cout << "displayDevices: " << std::endl;
+        for (auto &disp : displayDevices)
+            disp.print();
+        std::cout << "micDevices: " << std::endl;
+        for (auto &mic : micDevices)
+            mic.print();
+        std::cout << "speakerDevices: " << std::endl;
+        for (auto &speaker : speakerDevices)
+            speaker.print();
+    }
 };
 
 DeviceProfile getDeviceProfileFromHost(const std::string& ip);

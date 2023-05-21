@@ -39,6 +39,16 @@ public:
         disp.mmHeight = root["mmHeight"].asInt();
         return disp;
     }
+
+    void print(){
+        std::cout << "screen: " << screen << std::endl;
+        std::cout << "x: " << x << std::endl;
+        std::cout << "y: " << y << std::endl;
+        std::cout << "width: " << width << std::endl;
+        std::cout << "height: " << height << std::endl;
+        std::cout << "mmWidth: " << mmWidth << std::endl;
+        std::cout << "mmHeight: " << mmHeight << std::endl;
+    }
 };
 
 
