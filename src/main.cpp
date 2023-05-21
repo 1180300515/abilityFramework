@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     std::thread http_server_thread(run_http_server);
     std::thread timeout_thread(check_timeout);
 
-    // std::cout << "Start a program: " << start_program("./bin/helloworld") << std::endl;
+    std::cout << "Start a program: " << start_program("./bin/helloworld") << std::endl;
 
 
     std::cout << "Not output anything." << std::endl;

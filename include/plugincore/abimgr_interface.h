@@ -19,8 +19,18 @@ struct HeartbeatInfo {
     std::string abilityName;
     std::string status;
     std::chrono::steady_clock::time_point last_update;
+
+    Json::Value toJson(int port) const {
+        Json::Value j;
+        j["abilityName"] = abilityName;
+        j["status"] = status;
+        j["last_update"] = std::chrono::duration_cast<std::chrono::milliseconds>(last_update.time_since_epoch()).count();
+        j["port"] = port;
+        return j;
+    }
 };
 
+Json::Value mapToJson(const std::unordered_map<int, HeartbeatInfo>& map);
 // 心跳信息映射表
 extern std::unordered_map<int, HeartbeatInfo> heartbeat_map;
 

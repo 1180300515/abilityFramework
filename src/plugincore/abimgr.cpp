@@ -51,6 +51,10 @@ void run_http_server() {
         res.set_content(deviceProfile.toJson().toStyledString(), "application/json");
     });
 
+    svr->Get("/api/AbilityRunning", [](const httplib::Request& req, httplib::Response& res) {
+        res.set_content(mapToJson(heartbeat_map).toStyledString(), "application/json");
+    });
+
     svr->listen("0.0.0.0", 8080);
 }
 
@@ -71,4 +75,12 @@ bool start_program(const std::string& program_path) {
     }
 
     return true;
+}
+
+Json::Value mapToJson(const std::unordered_map<int, HeartbeatInfo>& map) {
+    Json::Value j;
+    for (const auto& kv : map) {
+        j.append(kv.second.toJson(kv.first));
+    }
+    return j;
 }
