@@ -6,6 +6,7 @@ std::unordered_map<int, HeartbeatInfo> heartbeat_map;
 std::mutex heartbeat_map_mutex;
 extern std::shared_ptr<Controller> controller;
 
+
 void print_heartbeat_info()
 {
     // std::lock_guard<std::mutex> lock(heartbeat_map_mutex);
@@ -70,6 +71,17 @@ void run_http_server()
         for (auto kv : controller->ability_instances){
             std::cout << RED << kv.first << NONE << std::endl;
         }
+        AbilityInfoExtractList extractList = buildAbilityInfoExtractList(*controller);
+        extractList.print();
+        DependTreeArray dependTreeArray = GenerateDependTreeArray(extractList);
+
+        for (const auto& tree : dependTreeArray.trees) {
+            PrintTreeIterative(tree);
+            std::cout << "\n";
+        }
+
+        DependTreeArray newTreeArray = GenerateDependTreeArrayWithDevices(devicePoolExtended, dependTreeArray);
+        PrintDependTreeArray(newTreeArray);
         res.set_content("OK", "text/plain"); });
 
     svr->listen("0.0.0.0", 8080);
@@ -123,6 +135,161 @@ std::string stripSlashPrefix(const std::string& str) {
     return str;
 }
 
-std::vector<std::string> getDeviceDependsList(std::shared_ptr<Controller> & ctrl){
-    
+
+
+DependTreeArray GenerateDependTreeArray(AbilityInfoExtractList& list) {
+    std::unordered_map<std::string, TreeNode> map;
+
+    for (const auto& ability : list.abilities) {
+        TreeNode node{ability, {}, 0};
+        map[ability.name] = node;
+    }
+
+    for (const auto& ability : list.abilities) {
+        for (const auto& depend : ability.depends.abilities) {
+            if (map.count(depend) > 0 && map[depend].children.at(0).ability.name != "none") {
+                map[depend].children.push_back(map[ability.name]);
+                map[ability.name].level = map[depend].level + 1;
+            }
+        }
+    }
+
+    DependTreeArray treeArray;
+
+    for (const auto& pair : map) {
+        if (pair.second.level == 0) {
+            treeArray.trees.push_back(pair.second);
+        }
+    }
+
+    return treeArray;
+}
+
+AbilityInfoExtractList buildAbilityInfoExtractList(Controller& controller) {
+    AbilityInfoExtractList extractList;
+
+    for (const auto& abilityPair : controller.ability_instances) {
+        const std::shared_ptr<Ability>& ability = abilityPair.second;
+
+        AbilityInfoExtract abilityInfo;
+        abilityInfo.name = stripSlashPrefix(abilityPair.first);
+        abilityInfo.depends = ability->depends;
+
+        extractList.abilities.push_back(abilityInfo);
+    }
+
+    return extractList;
+}
+
+void PrintTreeIterative(const TreeNode& root) {
+    std::stack<std::pair<const TreeNode*, std::string>> stk;
+    stk.push({&root, ""});
+
+    while (!stk.empty()) {
+        const TreeNode* node = stk.top().first;
+        std::string indent = stk.top().second;
+        stk.pop();
+
+        std::cout << indent << "Name: " << node->ability.name << ", Level: " << node->level << "\n";
+
+        for (auto it = node->children.rbegin(); it != node->children.rend(); ++it) {
+            stk.push({&(*it), indent + "  "});
+        }
+    }
+}
+
+void GenerateNodes(TreeNode& node, DevicePoolExtended& devicePool, DependTreeArray& treeArray) {
+    if (!node.ability.depends.devices.empty()) {
+        std::vector<std::vector<std::string>*> deviceLists;
+
+        for (const auto& device : node.ability.depends.devices) {
+            std::vector<std::string>* deviceList = nullptr;
+            
+            if (device == "mic") {
+                deviceList = &devicePool.micDevices;
+            } else if (device == "speaker") {
+                deviceList = &devicePool.speakerDevices;
+            } else if (device == "camera") {
+                deviceList = &devicePool.cameraDevices;
+            } else if (device == "display") {
+                deviceList = &devicePool.displayDevices;
+            }
+
+            if (deviceList && !deviceList->empty()) {
+                deviceLists.push_back(deviceList);
+            } else {
+                return;  // If any required device list is empty, don't create any instance.
+            }
+        }
+
+        // Generate all combinations of devices.
+        std::vector<std::vector<std::string>> combinations = cartesianProduct(deviceLists);
+        for (const auto& combination : combinations) {
+            TreeNode newNode{node.ability, node.children, node.level};
+            newNode.ability.depends.devices = combination;  // Store the devices into the ability instance.
+            treeArray.trees.push_back(newNode);
+        }
+    }
+
+    for (auto& child : node.children) {
+        GenerateNodes(child, devicePool, treeArray);
+    }
+}
+
+
+DependTreeArray GenerateDependTreeArrayWithDevices(DevicePoolExtended& devicePool, DependTreeArray& treeArray) {
+    DependTreeArray newTreeArray;
+
+    for (auto& tree : treeArray.trees) {
+        GenerateNodes(tree, devicePool, newTreeArray);
+    }
+
+    return newTreeArray;
+}
+
+
+std::vector<std::vector<std::string>> cartesianProduct(const std::vector<std::vector<std::string>*>& lists) {
+    std::vector<std::vector<std::string>> result;
+    std::vector<std::string> combination(lists.size());
+
+    size_t counter = 0;
+    while (true) {
+        for (size_t i = 0; i < lists.size(); ++i) {
+            combination[i] = (*lists[i])[counter % lists[i]->size()];
+        }
+
+        result.push_back(combination);
+
+        ++counter;
+        for (size_t i = 0; i < lists.size(); ++i) {
+            if (counter % lists[i]->size() != 0) {
+                break;
+            } else if (i == lists.size() - 1) {
+                return result;
+            }
+        }
+    }
+}
+
+void PrintDependTreeArray(const DependTreeArray& treeArray) {
+    int treeIdx = 1;
+    for (const auto& tree : treeArray.trees) {
+        std::cout << "Tree " << treeIdx++ << ":\n";
+        PrintTreeNode(tree);
+    }
+}
+
+void PrintTreeNode(const TreeNode& node) {
+    std::string indent(node.level * 2, ' ');
+
+    std::cout << indent << "AbilityName: " << node.ability.name << ", Level: " << node.level << "\n";
+    std::cout << indent << "Depends on devices: ";
+    for (const auto& device : node.ability.depends.devices) {
+        std::cout << device << " ";
+    }
+    std::cout << "\n";
+
+    for (const auto& child : node.children) {
+        PrintTreeNode(child);
+    }
 }
