@@ -9,9 +9,9 @@ description: this is a camera
 followed: default
 depends:
   abilities:
-    - ands
+    - none
   devices:
-    - dsakjd
+    - camera
 spec:
   vendor: oppo
   resolution: 720

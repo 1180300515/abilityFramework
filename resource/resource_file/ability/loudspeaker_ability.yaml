@@ -9,7 +9,9 @@ description: this is a loudspeaker
 followed: default
 depends:
   abilities:
-    - dhaks
+    - none
+  devices:
+    - speaker
 spec:
   sampleRates: "16000"
   channelNumber: 8
@@ -17,7 +19,7 @@ spec:
   interface: standardinterface
 ApiList:
   - ApiType: RPC
-    ApiName: Getcamera
+    ApiName: Open
     inputparam:
       - paramname: param1
         paramtype: string
@@ -30,7 +32,33 @@ ApiList:
         paramtype: string
         index: "1"
   - ApiType: RPC
-    ApiName: Setcamera
+    ApiName: Close
+    inputparam:
+      - paramname: param1
+        paramtype: string
+        index: "1"
+      - paramname: param2
+        paramtype: string
+        index: "2"
+    returnparam:
+      - paramname: param3
+        paramtype: string
+        index: "1"
+  - ApiType: RPC
+    ApiName: Play
+    inputparam:
+      - paramname: param1
+        paramtype: string
+        index: "1"
+      - paramname: param2
+        paramtype: string
+        index: "2"
+    returnparam:
+      - paramname: param3
+        paramtype: string
+        index: "1"
+  - ApiType: RPC
+    ApiName: Configure
     inputparam:
       - paramname: param1
         paramtype: string

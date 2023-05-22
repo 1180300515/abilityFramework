@@ -47,6 +47,6 @@ void run_http_server();
 
 bool start_program(const std::string& program_path);
 
+bool fileExists(const std::string& filename);
 
-
-
+std::string stripSlashPrefix(const std::string& str);
