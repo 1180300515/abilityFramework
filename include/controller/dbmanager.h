@@ -48,6 +48,10 @@ private:
      * add the loudspeaker info into the instance
     */
     void insertloudspeakerInfo(Json::Value &jnode);
+    /**
+     * auto generate instance from the deviceprofile
+    */
+    void DBAutoGenerateInstance();
 
 public:
     // singleton
@@ -118,6 +122,7 @@ public:
     bool DBCleanAbility();
     bool DBCleanCRD();
 
+    void RunHarwareResourceAutogen();
     // // 以下弃用
     // /**
     //  * delete a instance from the instance table

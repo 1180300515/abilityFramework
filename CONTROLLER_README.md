@@ -55,6 +55,10 @@ log 储存日志文件
 - 默认udp接收端口号: 8001
 - 默认udp广播端口号: 8888
 
+## 硬件资源自动生成Instance
+位于dbManager的DBAutoGenerateInstance函数中，需要修改默认生成的内容，请修改该函数、
+
+
 ## 数据包类型
 - **edge和cloud同步的相关数据包**  
 包括`sync-kv , sync-c2s , sync-s2c`

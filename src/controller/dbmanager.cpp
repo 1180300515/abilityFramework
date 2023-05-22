@@ -122,6 +122,118 @@ void dbManager::insertloudspeakerInfo(Json::Value &jnode)
     jnode["spec"]["properties"]["mute"] = a.mute;
     jnode["spec"]["properties"]["description"] = a.description;
 }
+
+void dbManager::DBAutoGenerateInstance()
+{
+    if (profile.cameraDevices.size() != 0)
+    {
+        int count = 1;
+        for (auto &iter : profile.cameraDevices)
+        {
+            CameraInstance instance;
+            instance.apiVersion = "stable.example.com/v1";
+            instance.kind = CameraDeviceResourcetype;
+            instance.metadata.name = "Camera-autogen-" + std::to_string(count);
+            count++;
+            instance.metadata.namespace_name = "default";
+            instance.spec.version = "1.0";
+            instance.spec.hostname = device_hostname;
+            instance.spec.kind = "camera";
+            // properties part
+            instance.spec.properties.vendor = "unknown";
+            instance.spec.properties.resolution = "720";
+            instance.spec.properties.location = "unknown";
+            instance.spec.properties.wideAngle = 90;
+            instance.spec.properties.focusMethod = "unknown";
+            instance.spec.properties.telephoto = false;
+            instance.spec.properties.interface = "unknown";
+            instance.spec.properties.deviceNode = iter.device_path;
+            instance.spec.properties.driverName = iter.driver;
+            instance.spec.properties.cardType = iter.card;
+            instance.spec.properties.busInfo = iter.bus_info;
+            instance.spec.properties.description = "ignore";
+            for (int i = 0; i < iter.formats.size(); i++)
+            {
+                instance.spec.properties.supportFormat.emplace_back(iter.formats[i]);
+            }
+            // status part
+            instance.status.occupancy = false;
+
+            std::string data = instance.Marshal();
+            if (!DBStoreDeviceInstances(data))
+            {
+                LOG(ERROR) << "db add instance : " << instance.metadata.name << " fail";
+            }
+        }
+    }
+    if (profile.micDevices.size() != 0)
+    {
+        int count = 0;
+        for (auto &iter : profile.micDevices)
+        {
+            MicrophoneInstance instance;
+            instance.apiVersion = "stable.example.com/v1";
+            instance.kind = MicrophoneDeviceResourcetype;
+            instance.metadata.name = "Mic-autogen-" + std::to_string(count);
+            count++;
+            instance.metadata.namespace_name = "default";
+            instance.spec.version = "1.0";
+            instance.spec.hostname = device_hostname;
+            instance.spec.kind = "microphone";
+            // properties part
+            instance.spec.properties.channelNumber = 0;
+            instance.spec.properties.bitWidth = 0;
+            instance.spec.properties.interface = "unknown";
+            instance.spec.properties.hardwareName = iter.name;
+            instance.spec.properties.sampleRates = std::to_string(iter.sampleRate);
+            instance.spec.properties.volume = (int)iter.volume;
+            instance.spec.properties.mute = iter.mute;
+            instance.spec.properties.description = iter.description;
+            // status part
+            instance.status.occupancy = false;
+
+            std::string data = instance.Marshal();
+            if (!DBStoreDeviceInstances(data))
+            {
+                LOG(ERROR) << "db add instance : " << instance.metadata.name << " fail";
+            }
+        }
+    }
+    if (profile.speakerDevices.size() != 0)
+    {
+        int count = 0;
+        for (auto &iter : profile.speakerDevices)
+        {
+            LoudspeakerInstance instance;
+            instance.apiVersion = "stable.example.com/v1";
+            instance.kind = LoudspeakerDeviceResourcetype;
+            instance.metadata.name = "Louspeaker-autogen-" + std::to_string(count);
+            count++;
+            instance.metadata.namespace_name = "default";
+            instance.spec.version = "1.0";
+            instance.spec.hostname = device_hostname;
+            instance.spec.kind = "loudspeaker";
+            // properties part
+            instance.spec.properties.channelNumber = 0;
+            instance.spec.properties.bitWidth = 0;
+            instance.spec.properties.interface = "unknown";
+            instance.spec.properties.hardwareName = iter.name;
+            instance.spec.properties.sampleRates = std::to_string(iter.sampleRate);
+            instance.spec.properties.volume = (int)iter.volume;
+            instance.spec.properties.mute = iter.mute;
+            instance.spec.properties.description = iter.description;
+            // status part
+            instance.status.occupancy = false;
+
+            std::string data = instance.Marshal();
+            if (!DBStoreDeviceInstances(data))
+            {
+                LOG(ERROR) << "db add instance : " << instance.metadata.name << " fail";
+            }
+        }
+    }
+}
+
 // static member init
 std::vector<CrdDBStruct> dbManager::crdstructs;
 std::vector<InstanceDBStruct> dbManager::instancestructs;
@@ -631,6 +743,11 @@ bool dbManager::DBCleanCRD()
     LOG(INFO) << "db clean crd resource success";
 
     return true;
+}
+
+void dbManager::RunHarwareResourceAutogen()
+{
+    DBAutoGenerateInstance();
 }
 
 int dbManager::crd_callback(void *unused, int columenCount, char **columnValue, char **columnName)
