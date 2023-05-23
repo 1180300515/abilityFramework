@@ -20,6 +20,7 @@
 struct HeartbeatInfo
 {
     std::string abilityName;
+    std::string abilityPort;
     std::string status;
     std::chrono::steady_clock::time_point last_update;
 
@@ -30,6 +31,7 @@ struct HeartbeatInfo
         j["status"] = status;
         j["last_update"] = std::chrono::duration_cast<std::chrono::milliseconds>(last_update.time_since_epoch()).count();
         j["port"] = port;
+        j["abilityPort"] = abilityPort;
         return j;
     }
 };
