@@ -55,7 +55,7 @@ void run_http_server()
         }
 
         std::lock_guard<std::mutex> lock(heartbeat_map_mutex);
-        heartbeat_map[port] = { req.get_param_value("abilityName"), req.get_param_value("status"), std::chrono::steady_clock::now()};
+        heartbeat_map[port] = { req.get_param_value("abilityName"), req.get_param_value("abilityPort"), req.get_param_value("status"),  std::chrono::steady_clock::now()};
         res.set_content("OK", "text/plain");
 
         print_heartbeat_info(); });
@@ -82,7 +82,7 @@ void run_http_server()
 
         DependTreeArray newTreeArray = GenerateDependTreeArrayWithDevices(devicePoolExtended, dependTreeArray);
         PrintDependTreeArray(newTreeArray);
-        res.set_content("OK", "text/plain"); });
+        res.set_content(serializeDependTreeArray(newTreeArray).toStyledString(), "application/json"); });
 
     svr->listen("0.0.0.0", 8080);
 }
@@ -292,4 +292,28 @@ void PrintTreeNode(const TreeNode& node) {
     for (const auto& child : node.children) {
         PrintTreeNode(child);
     }
+}
+
+Json::Value serializeNode(const TreeNode& node) {
+    Json::Value jsonNode;
+    jsonNode["name"] = node.ability.name;
+    jsonNode["level"] = node.level;
+    for (const auto& ability : node.ability.depends.abilities) {
+        jsonNode["depends"]["abilities"].append(ability);
+    }
+    for (const auto& device : node.ability.depends.devices) {
+        jsonNode["depends"]["devices"].append(device);
+    }
+    for (const auto& child : node.children) {
+        jsonNode["children"].append(serializeNode(child));
+    }
+    return jsonNode;
+}
+
+Json::Value serializeDependTreeArray(const DependTreeArray& treeArray) {
+    Json::Value jsonTreeArray;
+    for (const auto& tree : treeArray.trees) {
+        jsonTreeArray.append(serializeNode(tree));
+    }
+    return jsonTreeArray;
 }

@@ -103,6 +103,9 @@ public:
     }
 };
 
+Json::Value serializeNode(const TreeNode& node);
+Json::Value serializeDependTreeArray(const DependTreeArray& treeArray);
+
 class AbilitySupportedList
 {
 public:
