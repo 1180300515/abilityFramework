@@ -1,6 +1,6 @@
 build/*
 lib/modules/*
-bin/*
+bin/AbilityFramework
 build/.cmake
 CMakeFiles/cmake.check_cache
 CMakeFiles/CMakeDirectoryInformation.cmake
@@ -119,7 +119,6 @@ CMakeLists.txt.bak
 .vscode/settings.json
 .vscode/
 CMakeFiles/
-bin/
 build/
 CMakeCache.txt
 Makefile
