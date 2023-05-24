@@ -40,13 +40,26 @@ set(JSON_CPP_LIB_DIR /usr/lib/)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/modules)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
+set(PROTO_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include/protos)
+
 #include_directories(${CMAKE_SOURCE_DIR}/include {YAML_INCLUDE_DIR} {GLOG_INCLUDE_DIR} {JSON_CPP_INCLUDE_DIR} {RAPIDJSON_INCLUDE_DIR}) 
-include_directories(${CMAKE_SOURCE_DIR}/include ${JSON_CPP_INCLUDE_DIR})
 
 find_package(yaml-cpp REQUIRED)
 find_package(glog REQUIRED)
 find_package(jsoncpp REQUIRED)
 find_package(X11 REQUIRED)
+find_package(protobuf REQUIRED)
+
+find_package(PkgConfig)
+pkg_search_module(GRPC REQUIRED grpc++)
+pkg_search_module(PROTOBUF REQUIRED protobuf)
+
+message(STATUS "=== PROTOBUF_LIBRARIES: ${PROTOBUF_LIBRARIES}")
+message(STATUS "=== PROTOBUF_INCLUDE_DIRS: ${PROTOBUF_INCLUDE_DIRS}")
+message(STATUS "=== GRPC_LIBRARIES: ${GRPC_LIBRARIES}")
+message(STATUS "=== GRPC_INCLUDE_DIRS: ${GRPC_INCLUDE_DIRS}")
+
+include_directories(${CMAKE_SOURCE_DIR}/include ${JSON_CPP_INCLUDE_DIR} ${PROTO_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS} ${GRPC_INCLUDE_DIRS})
 
 add_library(Module_A SHARED ${CMAKE_SOURCE_DIR}/src/plugincore/pluginload.cpp)
 set_target_properties(Module_A PROPERTIES
@@ -76,6 +89,8 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/src/controller SRC_LIST1)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/controller/common SRC_LIST2)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/controller/mongoose SRC_LIST3)
 
+include_directories(${PROJECT_SOURCE_DIR}/include/protos)
+
 add_executable(${PROJECT_NAME} src/main.cpp 
     src/plugincore/pluginload.cpp 
     src/plugincore/abimgr.cpp
@@ -87,5 +102,7 @@ add_executable(${PROJECT_NAME} src/main.cpp
     src/discoverymanager/localhw_discovery.cpp
     src/discoverymanager/discoverymanager.cpp
     src/discoverymanager/devpool.cpp
+    src/protos/abilityProto.grpc.pb.cc
+    src/protos/abilityProto.pb.cc
     ${SRC_LIST1} ${SRC_LIST2} ${SRC_LIST3})
-target_link_libraries(AbilityFramework sqlite3 jsoncpp glog yaml-cpp X11 pulse Xrandr v4l2 pthread dl)
+target_link_libraries(AbilityFramework sqlite3 jsoncpp glog yaml-cpp X11 pulse Xrandr v4l2 pthread dl crypto ssl z protobuf ${GRPC_LIBRARIES} ${PROTOBUF_LIBRARIES} )

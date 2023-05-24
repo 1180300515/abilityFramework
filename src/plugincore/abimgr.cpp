@@ -1,10 +1,13 @@
 #include "plugincore/abimgr_interface.h"
+#include "plugincore/lifecycle_interface.h"
 #include "controller/controller.h"
 #include "utils/color.h"
 
-std::unordered_map<int, HeartbeatInfo> heartbeat_map;
+HeartbeatMap heartbeat_map;
 std::mutex heartbeat_map_mutex;
 extern std::shared_ptr<Controller> controller;
+ProcessController processController;
+
 
 
 void print_heartbeat_info()
@@ -14,6 +17,16 @@ void print_heartbeat_info()
     {
         std::cout << "AbilityName: " << pair.second.abilityName << ", Port: " << pair.first << ", Status: " << pair.second.status
                   << ", Last update: " << std::chrono::duration_cast<std::chrono::seconds>(pair.second.last_update.time_since_epoch()).count() << " seconds ago\n";
+    }
+}
+
+void check_process(){
+    while(true){
+        std::cout << RED << "Enter Check Process thread" << NONE << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::lock_guard<std::mutex> lock(heartbeat_map_mutex);
+        std::cout << RED << "Got Lock" << NONE << std::endl;
+        processController.handleHeartbeat(heartbeat_map, std::nullopt);
     }
 }
 
@@ -49,13 +62,18 @@ void run_http_server()
         int port;
         try {
             port = std::stoi(req.get_param_value("port"));
+            std::cout << BLUE <<"Got heartbeat from port " << port << NONE << std::endl;
         } catch (const std::exception&) {
             res.status = 400;  // Bad Request
             return;
         }
 
         std::lock_guard<std::mutex> lock(heartbeat_map_mutex);
-        heartbeat_map[port] = { req.get_param_value("abilityName"), req.get_param_value("abilityPort"), req.get_param_value("status"),  std::chrono::steady_clock::now()};
+        std::cout << BLUE <<"store to heartbeat_map, got status: " << req.get_param_value("status") << NONE << std::endl;
+        heartbeat_map[port] = { req.get_param_value("abilityName"), std::stoi(req.get_param_value("abilityPort")), req.get_param_value("status"),  std::chrono::steady_clock::now()};
+        
+        std::cout << BLUE << "store to heartbeat_map finished" << NONE << std::endl;
+        
         res.set_content("OK", "text/plain");
 
         print_heartbeat_info(); });
@@ -225,6 +243,10 @@ void GenerateNodes(TreeNode& node, DevicePoolExtended& devicePool, DependTreeArr
         // Generate all combinations of devices.
         std::vector<std::vector<std::string>> combinations = cartesianProduct(deviceLists);
         for (const auto& combination : combinations) {
+            if(!fileExists(node.ability.name)) {
+                std::cout << "File " << node.ability.name << " does not exist.\n";
+                return;
+            }
             TreeNode newNode{node.ability, node.children, node.level};
             newNode.ability.depends.devices = combination;  // Store the devices into the ability instance.
             treeArray.trees.push_back(newNode);

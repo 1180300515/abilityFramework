@@ -5,6 +5,7 @@
 #include "plugincore/subject_mgr.h"
 #include "plugincore/event_interface.h"
 #include "plugincore/abimgr_interface.h"
+#include "plugincore/lifecycle_interface.h"
 
 #include "eventhandler/eventhandler.h"
 
@@ -23,6 +24,7 @@ int main(int argc, char **argv)
 {
     std::thread http_server_thread(run_http_server);
     std::thread timeout_thread(check_timeout);
+    std::thread chkproc_thread(check_process);
 
     std::cout << "Start a program: " << start_program("./bin/camera") << std::endl;
 

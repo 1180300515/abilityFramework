@@ -1,3 +1,6 @@
+#ifndef __ABIMGR_INTERFACE_H__
+#define __ABIMGR_INTERFACE_H__
+
 #include <unordered_map>
 #include <thread>
 #include <mutex>
@@ -20,7 +23,7 @@
 struct HeartbeatInfo
 {
     std::string abilityName;
-    std::string abilityPort;
+    int abilityPort;
     std::string status;
     std::chrono::steady_clock::time_point last_update;
 
@@ -35,6 +38,7 @@ struct HeartbeatInfo
         return j;
     }
 };
+
 
 class AbilityInfoExtract{
 public:
@@ -125,7 +129,8 @@ public:
 
 Json::Value mapToJson(const std::unordered_map<int, HeartbeatInfo> &map);
 // 心跳信息映射表
-extern std::unordered_map<int, HeartbeatInfo> heartbeat_map;
+using HeartbeatMap = std::unordered_map<int, HeartbeatInfo>;
+extern HeartbeatMap heartbeat_map;
 
 // 互斥锁保护心跳信息映射表
 extern std::mutex heartbeat_map_mutex;
@@ -135,6 +140,8 @@ void print_heartbeat_info();
 
 // 检查超时的函数
 void check_timeout();
+
+void check_process();
 
 void run_http_server();
 
@@ -155,3 +162,6 @@ std::vector<std::vector<std::string>> cartesianProduct(const std::vector<std::ve
 void PrintDependTreeArray(const DependTreeArray& treeArray);
 
 void PrintTreeNode(const TreeNode& node);
+
+
+#endif // __ABIMGR_INTERFACE_H__
