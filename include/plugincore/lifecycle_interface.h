@@ -115,13 +115,18 @@ public:
     void handleHeartbeat(std::unordered_map<int, HeartbeatInfo> &heartbeat_map, std::optional<CommandInfo> cmd_info)
     {
         // clean up the ended programs
+        std::cout << RED << "heartbeat map count: " << heartbeat_map.size() << NONE << std::endl;
+        std::cout << RED << "Clients count: " << clients.size() << NONE << std::endl;
+        std::cout << RED << "Threads count: " << threads.size() << NONE << std::endl;
+        std::cout << RED << "Start to clean abnormal programs" << NONE << std::endl;
         for (auto it = clients.begin(); it != clients.end();)
         {
+            std::cout << BLUE << "Enter the client loop, it: " << it->first << NONE << std::endl;
             if (heartbeat_map.find(it->first) == heartbeat_map.end())
             {
-                it = clients.erase(it);    // this process has ended, clean up the client
                 threads[it->first].join(); // ensure the thread is finished
                 threads.erase(it->first);  // this process has ended, clean up the thread
+                it = clients.erase(it);    // this process has ended, clean up the client
             }
             else
             {
@@ -129,6 +134,8 @@ public:
             }
         }
         std::cout << RED << "Finished clean up programs" << NONE << std::endl;
+        std::cout << RED << "Clients count: " << clients.size() << NONE << std::endl;
+        std::cout << RED << "Threads count: " << threads.size() << NONE << std::endl;
 
         for (auto &hb_entry : heartbeat_map)
         {
