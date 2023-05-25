@@ -169,6 +169,8 @@ public:
 |port|int|生命周期端口|
 |status|string|生命周期状态|
 
+能力端口为实际VDP建立业务连接时连接的端口，需要使用能力控制接口完成connect操作后才会有值，否则为0。
+
 返回的为一个数组，返回值和类型如上：
 
 ```JSON
@@ -270,7 +272,9 @@ std::string findValueByKey(const std::string& keyValueString, const std::string&
 
 能力名可以从能力支持查询中获得，对于跨端相机能力，因为树莓派端是生产者，所以connectIP和connectPort不需要指定，但不能为空，否则会出错。
 
-cmd的值可以为：connect, disconnect, terminate
+start可启动的能力仅限于AbilitySupport中得到的列表中的能力。
+
+cmd的值可以为：start, connect, disconnect, terminate
 
 ## 5. 服务器发现
 
