@@ -101,6 +101,20 @@ void run_http_server()
         DependTreeArray newTreeArray = GenerateDependTreeArrayWithDevices(devicePoolExtended, dependTreeArray);
         PrintDependTreeArray(newTreeArray);
         res.set_content(serializeDependTreeArray(newTreeArray).toStyledString(), "application/json"); });
+    
+    svr->Post("/api/AbilityRequest", [](const httplib::Request &req, httplib::Response &res){
+        std::cout << RED << "Receive Ability Request "<< NONE << std::endl;
+        auto cmd_g = CommandInfo{std::stoi(req.get_param_value("port")),
+                                req.get_param_value("abilityName"),
+                                req.get_param_value("cmd"),
+                                std::stoi(req.get_param_value("connectPort")),
+                                req.get_param_value("connectIP")};
+        cmd_g.print();
+        std::lock_guard<std::mutex> lock(heartbeat_map_mutex);
+        std::cout << RED << "Got Lock and handle the cmd" << NONE << std::endl;
+        processController.handleHeartbeat(heartbeat_map, cmd_g);
+        std::cout << RED << "Exit handle the cmd" << NONE << std::endl;
+    });
 
     svr->listen("0.0.0.0", 8080);
 }

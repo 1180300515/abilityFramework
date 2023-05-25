@@ -73,9 +73,40 @@ private:
 class CommandInfo
 {
 public:
+    int port;
+    std::string abilityName;
     std::string cmd;
     int connectPort;
     std::string connectIP;
+
+    CommandInfo(int port, std::string abilityName, std::string cmd, int connectPort, std::string connectIP)
+    {
+        this->port = port;
+        this->abilityName = abilityName;
+        this->cmd = cmd;
+        this->connectPort = connectPort;
+        this->connectIP = connectIP;
+    }
+
+    Json::Value toJson()
+    {
+        Json::Value root;
+        root["port"] = port;
+        root["abilityName"] = abilityName;
+        root["cmd"] = cmd;
+        root["connectPort"] = connectPort;
+        root["connectIP"] = connectIP;
+        return root;
+    }
+
+    void print()
+    {
+        std::cout << "port: " << port << std::endl;
+        std::cout << "abilityName: " << abilityName << std::endl;
+        std::cout << "cmd: " << cmd << std::endl;
+        std::cout << "connectPort: " << connectPort << std::endl;
+        std::cout << "connectIP: " << connectIP << std::endl;
+    }
 };
 
 class ProcessController
@@ -136,7 +167,7 @@ private:
             start_info.set_timestamp(time(0));
             client.Start(start_info);
         }
-        if (cmdinfo)
+        if (cmdinfo && port == cmdinfo->port && hbinfo.abilityName == cmdinfo->abilityName)
         {
             if (hbinfo.status == STATUS_STANDBY)
             {
@@ -145,16 +176,20 @@ private:
                     abilityUnit::ConnectInfo connect_info;
                     connect_info.set_ip(cmdinfo->connectIP);
                     connect_info.set_port(cmdinfo->connectPort);
+                    connect_info.set_timestamp(time(0));
                     client.Connect(connect_info);
+                    cmdinfo.reset();
                 }
                 else if (cmdinfo->cmd == CMD_TERMINATE)
                 {
                     abilityUnit::TerminateInfo terminate_info;
                     terminate_info.set_timestamp(time(0));
                     client.Terminate(terminate_info);
+                    cmdinfo.reset();
                 }
                 else
                 {
+                    cmdinfo.reset();
                 }
             }
             else if (hbinfo.status == STATUS_RUNNING)
@@ -164,12 +199,14 @@ private:
                     abilityUnit::DisconnectInfo disconnect_info;
                     disconnect_info.set_timestamp(time(0));
                     client.Disconnect(disconnect_info);
+                    cmdinfo.reset();
                 }
                 else if (cmdinfo->cmd == CMD_TERMINATE)
                 {
                     abilityUnit::TerminateInfo terminate_info;
                     terminate_info.set_timestamp(time(0));
                     client.Terminate(terminate_info);
+                    cmdinfo.reset();
                 }
                 else
                 {
@@ -182,20 +219,25 @@ private:
                     abilityUnit::ConnectInfo connect_info;
                     connect_info.set_ip(cmdinfo->connectIP);
                     connect_info.set_port(cmdinfo->connectPort);
+                    connect_info.set_timestamp(time(0));
                     client.Connect(connect_info);
+                    cmdinfo.reset();
                 }
                 else if (cmdinfo->cmd == CMD_TERMINATE)
                 {
                     abilityUnit::TerminateInfo terminate_info;
                     terminate_info.set_timestamp(time(0));
                     client.Terminate(terminate_info);
+                    cmdinfo.reset();
                 }
                 else
                 {
+                    cmdinfo.reset();
                 }
             }
             else if (hbinfo.status == STATUS_TERMINATE)
             {
+                cmdinfo.reset();
             }
         }
     }

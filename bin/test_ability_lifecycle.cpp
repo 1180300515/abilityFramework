@@ -122,7 +122,10 @@ class AbilityImpl : public Ability::Service
             if (time(0) - request->timestamp() > 10 ||
                 request->timestamp() > time(0))
             {
-                cout << "request timestamp error" << endl;
+                cout << "request timestamp error: " 
+                    << "Now time is : " << time(0) 
+                    << ". Request time is :" << request->timestamp() 
+                    << endl;
                 response->set_code(RESPONSE_ERROR);
                 response->set_msg("request timestamp error");
             }
@@ -243,8 +246,8 @@ void OnConnect()
 void OnDisconnect()
 {
     cout << "OnDisconnect" << endl;
-    ability_server->Shutdown();
-    ability_cq->Shutdown();
+    // ability_server->Shutdown();
+    // ability_cq->Shutdown();
     GLOBAL_STATUS = STATUS_SUSPEND;
 }
 
@@ -324,7 +327,7 @@ void heartbeat_loop()
         std::cout << "status: " << GLOBAL_STATUS << std::endl;
         params.emplace("status", global2string(GLOBAL_STATUS));
         // string status = (GLOBAL_STATUS);
-        params.emplace("abilityPort", abilityPort);
+        params.emplace("abilityPort", to_string(abilityPort));
         auto res = cli.Post("/heartbeat", params);
 
         if (res)
