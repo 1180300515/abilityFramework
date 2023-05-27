@@ -7,7 +7,7 @@ HeartbeatMap heartbeat_map;
 std::mutex heartbeat_map_mutex;
 extern std::shared_ptr<Controller> controller;
 ProcessController processController;
-
+DependTreeArray abilityTreeArray;
 
 
 void print_heartbeat_info()
@@ -98,9 +98,9 @@ void run_http_server()
             std::cout << "\n";
         }
 
-        DependTreeArray newTreeArray = GenerateDependTreeArrayWithDevices(devicePoolExtended, dependTreeArray);
-        PrintDependTreeArray(newTreeArray);
-        res.set_content(serializeDependTreeArray(newTreeArray).toStyledString(), "application/json"); });
+        abilityTreeArray = GenerateDependTreeArrayWithDevices(devicePoolExtended, dependTreeArray);
+        PrintDependTreeArray(abilityTreeArray);
+        res.set_content(serializeDependTreeArray(abilityTreeArray).toStyledString(), "application/json"); });
     
     svr->Post("/api/AbilityRequest", [](const httplib::Request &req, httplib::Response &res){
         std::cout << RED << "Receive Ability Request "<< NONE << std::endl;
@@ -110,6 +110,9 @@ void run_http_server()
                                 std::stoi(req.get_param_value("connectPort")),
                                 req.get_param_value("connectIP")};
         cmd_g.print();
+        if (cmd_g.cmd == CMD_START && abilityTreeArray.hasAbility(cmd_g.abilityName)){
+            start_program(cmd_g.abilityName);
+        }
         std::lock_guard<std::mutex> lock(heartbeat_map_mutex);
         std::cout << RED << "Got Lock and handle the cmd" << NONE << std::endl;
         processController.handleHeartbeat(heartbeat_map, cmd_g);
@@ -119,7 +122,7 @@ void run_http_server()
     svr->listen("0.0.0.0", 8080);
 }
 
-bool start_program(const std::string &program_path)
+bool start_program(const std::string &abilityName)
 {
     pid_t pid = fork();
 
@@ -133,10 +136,10 @@ bool start_program(const std::string &program_path)
         // 我们在父进程中，pid是子进程的PID
     }
     else
-    {
+    {   
+        std::string program_path = "bin/" + abilityName;
         // 我们在子进程中，启动新的程序
         execl(program_path.c_str(), program_path.c_str(), (char *)NULL);
-
         // 如果execl返回，那么说明出错了
         return false;
     }

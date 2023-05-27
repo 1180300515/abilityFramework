@@ -24,6 +24,7 @@ using grpc::Status;
 #define STATUS_SUSPEND "SUSPEND"
 #define STATUS_TERMINATE "TERMINATE"
 
+#define CMD_START "start"
 #define CMD_CONNECT "connect"
 #define CMD_DISCONNECT "disconnect"
 #define CMD_TERMINATE "terminate"

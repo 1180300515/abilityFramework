@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     std::thread timeout_thread(check_timeout);
     std::thread chkproc_thread(check_process);
 
-    std::cout << "Start a program: " << start_program("./bin/camera") << std::endl;
+    // std::cout << "Start a program: " << start_program("./bin/camera") << std::endl;
 
     Preprocessing();
     // std::shared_ptr<Controller> controller = std::make_shared<Controller>();

@@ -75,6 +75,14 @@ class DependTreeArray {
 public:
     std::vector<TreeNode> trees;
 
+    bool hasAbility(const std::string& abilityName) const {
+        for(auto& tree: trees){
+            if(tree.ability.name == abilityName){
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 DependTreeArray GenerateDependTreeArray(AbilityInfoExtractList& list);
@@ -145,7 +153,7 @@ void check_process();
 
 void run_http_server();
 
-bool start_program(const std::string &program_path);
+bool start_program(const std::string &abilityName);
 
 bool fileExists(const std::string &filename);
 
