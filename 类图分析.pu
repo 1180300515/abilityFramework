@@ -1,0 +1,338 @@
+@startuml observer design pattern
+class Subject {
+    +std::string name
+    +std::vector<Observer*> observers
+    +const std::string &getName() const
+    +virtual void registerObserver(Observer *observer) = 0
+    +virtual void unregisterObserver(Observer *observer) = 0
+    +virtual void notifyObservers(const std::string &message) = 0
+    +void getObserverNums()
+    +void transportMessage(Observer *observer, const std::string &message)
+}
+class observer{
+    -std::vector<std::string> subjectNames
+    +void update(const std::string &message)
+    +std::vector<std::string> getSubjectNames() const
+    +void addSubjectName(const std::string &name)
+}
+class SubjectManager {
+    -std::map<std::string, Subject *> subjects
+    +void addSubject(Subject *subject)
+    +Subject *getSubject(const std::string &name)
+    +bool unregisterSubject(const std::string &name)
+    +void listSubjects()
+}
+class LANInfo {
+    +void registerObserver(Observer *observer)
+    +void unregisterObserver(Observer *observer)
+    +void notifyObservers(const std::string &message)
+    +void getObserverNums()
+    +void transportMessage(Observer *observer, const std::string &message)
+}
+Subject <|-- LANInfo : 实现
+Subject o-- observer
+SubjectManager o-- Subject
+@enduml
+
+@startuml 类图分析
+class AbilityManager {
+
+}
+
+class Controller
+{
+    -int sockid
+    +std::map<std::string, std::string> versionRecord
+    -std::shared_ptr<ConnectionManager> connection_
+
+    +std::map<std::string, std::shared_ptr<CameraInstance>> camera_instances
+    +std::map<std::string, std::shared_ptr<LoudspeakerInstance>> loudspeaker_instances
+    +std::map<std::string, std::shared_ptr<SensorInstance>> sensor_instances
+    +std::map<std::string, std::shared_ptr<MicrophoneInstance>> mic_instances
+    +std::map<std::string, std::shared_ptr<Ability>> ability_instances
+    +std::map<std::string, std::shared_ptr<NonLocalResource>> nonlocal_instances_
+    +std::mutex nonlocal_lock_
+    +std::mutex camera_lock_
+    +std::mutex loudspeaker_lock_
+    +std::mutex sensor_lock_
+    +std::mutex mic_lock_
+
+
+    +std::shared_ptr<Controller> getptr()
+    +Controller() = default
+    +~Controller() = default
+    +std::string isLocalResource(std::string key)
+    +void SetConnection()
+    +void LoadResource()
+    +void SetEdgeAddressRecord(std::map<std::string , std::string> record)
+    +void Run()
+    +void HandleResourceSync(KeyAndDataPackages data)
+    +void HandleResourceSyncEdge(KeyAndDataPackages data)
+    +void RefreshKVRecord()
+    +std::string GetNonLocalFormat()
+}
+class ConnectionManager
+{
+    -std::map<std::string, std::string> edgeAddressRecord_
+    -std::mutex lock_
+    -std::shared_ptr<CloudConnection> cloud_
+    {field}-std::function<void(KeyAndDataPackages)> cloudCallback_
+    {field}-std::function<void(KeyAndDataPackages)> edgeCallback_
+
+    -std::shared_ptr<Controller> controller_
+
+    +ConnectionManager(std::shared_ptr<Controller> controller)
+    +~ConnectionManager() = default
+    +void RegisterCloudCallback(std::function<void(KeyAndDataPackages)> func)
+    +void RegisterEdgeCallback(std::function<void(KeyAndDataPackages)> func)
+    +bool SendMessageToCloud(std::string data)
+    +void SetEdgeAddressRecord(std::map<std::string , std::string> record)
+    +void HttpServerThread()
+    +void CloudSyncThread()
+    +void EdgeSyncServerThread()
+    +void EdgeSyncThread()
+    +void Run()
+}
+abstract class CloudConnection 
+{
+    +std::string cloudAddress_
+    +std::function<void(KeyAndDataPackages)> callback_
+    +CloudConnection(std::string address) : cloudAddress_(address){}
+    +~CloudConnection() = default
+    +void RegisterCallback(std::function<void(KeyAndDataPackages)> func)
+    +bool CheckConnection()
+    +virtual void Connect() = 0
+    +virtual void CloseConnection() = 0
+    +virtual bool SendMessage(std::string data) = 0
+    +virtual void ReceiveMessage() = 0
+}
+
+class CloudTCPConnection
+{
+    -const char *tcpaddr
+    -uint16_t tcpport
+    -int sockid = -1
+
+    +CloudTCPClient() = default
+    +~CloudTCPClient() = default
+    +void Connect()
+    +void CloseConnection()
+    +bool SendMessage(std::string data)
+    +void ReceiveMessage()
+}
+abstract class EdgeConnection
+{
+    +std::string edgeaddress_
+
+    +EdgeConnection(std::string address) : edgeaddress_(address){}
+    +~EdgeConnection() = default
+    +virtual bool SendMessage(std::string data) = 0
+}
+class EdgeUDPConnection
+{
+    -int sockId_
+
+    +EdgeUDPConnection(std::string address) : EdgeConnection(address){}
+    +~EdgeUDPConnection()
+
+    +bool SendMessage(std::string data)
+}
+class dbManager
+{
+    -DeviceProfile profile
+    -static std::vector<CrdDBStruct> crdstructs
+    -static std::vector<InstanceDBStruct> instancestructs
+    -static std::vector<AbilityDBStruct> abilitystructs
+    -sqlite3 *db
+    -static int crd_callback(void *unused, int columenCount, char **columnValue, char **columnName)
+    -static int instance_callback(void *unused, int columenCount, char **columnValue, char **columnName)
+    -static int ability_callback(void *unused, int columenCount, char **columnValue, char **columnName)
+    -static int cloud_address_callback(void *unused, int columenCount, char **columnValue, char **columnName)
+    -dbManager()
+    -void insertCameraInfo(Json::Value &jnode)
+    -void insertMicInfo(Json::Value &jnode)
+    -void insertloudspeakerInfo(Json::Value &jnode)
+    -void DBAutoGenerateInstance()
+    +static dbManager &getInstance()
+    +~dbManager() = default
+    +dbManager(const dbManager &) = delete
+    +dbManager &operator=(const dbManager) = delete
+    +bool RegisterCrd(const std::string &filepath)
+    +bool AddAbilityInstance(const std::string &filepath)
+    +bool AddDeviceInstance(const std::string &filepath)
+    +bool DBGetDeviceInstances(std::map<std::string, std::shared_ptr<CameraInstance>> &instance)
+    +bool DBGetDeviceInstances(std::map<std::string, std::shared_ptr<LoudspeakerInstance>> &instance)
+    +bool DBGetDeviceInstances(std::map<std::string, std::shared_ptr<SensorInstance>> &instance)   
+    +bool DBGetDeviceInstances(std::map<std::string, std::shared_ptr<MicrophoneInstance>> &instance)
+    +bool DBGetAbilityInstances(std::map<std::string, std::shared_ptr<Ability>> &instance)
+    +bool DBStoreDeviceInstances(std::string data)
+    +bool DBUpdateDeviceInstance(std::string &data)
+    +bool DBDelteDeviceInstance(std::string &key)
+    +bool DBStoreCloudAddress()
+    +bool DBGetCloudAddress()
+    +bool DBCleanDeviceInstances()
+    +bool DBCleanAbility()
+    +bool DBCleanCRD()
+    +void RunHarwareResourceAutogen()
+}
+class CloudTCPConnection extends CloudConnection
+class EdgeUDPConnection extends EdgeConnection
+
+Controller <.down.> ConnectionManager : 关联
+
+Controller <.right.> dbManager : 关联
+
+ConnectionManager o-- CloudConnection
+ConnectionManager o-- EdgeConnection
+struct KeyAndDataPackages
+{
+    std::vector<KeyDatapack> data
+    std::string hostname
+    std::string packageType
+}
+struct KeyDatapack
+{
+    std::string key
+    std::string version
+    std::string eventType
+    std::string resourceType
+    std::string data
+}
+KeyAndDataPackages *-- KeyDatapack : 组合
+Controller <.. KeyAndDataPackages : 依赖
+
+together {
+    class Instance
+    class CameraInstance
+    class SensorInstance
+    class MicrophoneInstance
+    class LoudspeakerInstance
+}
+
+class CameraInstance
+{
+    +CameraSpec spec
+    +std::string Marshal()  
+    +bool UnMarshal(std::string source) 
+    +bool updateInstance(std::string data) 
+    +std::string getInstanceVersion()
+}
+class LoudspeakerInstance
+{
+    +LoudspeakerSpec spec
+    +std::string Marshal()  
+    +bool UnMarshal(std::string source) 
+    +bool updateInstance(std::string data)
+    +std::string getInstanceVersion() 
+}
+class MicrophoneInstance {
+    +MicrophoneSpec spec
+    +std::string Marshal()
+    +bool UnMarshal(std::string source)
+    +bool updateInstance(std::string data)
+    +std::string getInstanceVersion()
+}
+class SensorInstance
+{
+    +SensorSpec spec
+    +std::string Marshal()  
+    +std::string UnMarshal(std::string source) 
+    +bool updateInstance(std::string data) 
+    +std::string getInstanceVersion()
+}
+class Ability {
+    +std::string apiVersion
+    +std::string kind
+    +Metadata metadata
+    +std::string level
+    +std::string abilityname
+    +std::string description
+    +std::string followed
+    +Abilitydepends depends
+    +std::map<std::string, std::string> spec
+    +std::vector<Aapi> ApiList
+    +std::vector<Aabilityinstance> abilityinstancelist
+
+    +std::mutex abilitylock_
+
+    +bool UnMarshal(const std::string source)
+    +std::string Marshal()
+    +bool updateAbility(std::string data)
+}
+Controller o-left- Ability : 聚合
+Controller o-- CameraInstance : 聚合
+Controller o-- LoudspeakerInstance : 聚合
+Controller o-- SensorInstance : 聚合
+Controller o-- MicrophoneInstance : 聚合
+abstract class Instance
+{
+    +std::string apiVersion
+    +std::string kind
+    +Metadata metadata
+    +Status status
+    +Api api
+    +std::mutex resourcelock_ 
+    +std::vector<DeviceDescribe> devicelist
+    +virtual std::string Marshal() = 0 
+    +virtual bool UnMarshal(std::string source)
+    +virtual bool updateInstance(std::string data) = 0
+}
+class CameraInstance extends Instance
+class LoudspeakerInstance extends Instance
+class SensorInstance extends Instance
+class MicrophoneInstance extends Instance
+
+
+
+class DeviceProfile {
+    +std::vector<CameraHardware> cameraDevices
+    +std::vector<DisplayInfo> displayDevices
+    +std::vector<AudioDevice> micDevices
+    +std::vector<AudioDevice> speakerDevices
+    +Json::Value toJson() const
+    +void print()
+}
+DeviceProfile <.left.> dbManager : 关联
+
+class CameraHardware {
+    +std::string device_path
+    +std::string driver
+    +std::string card
+    +std::string bus_info
+    +std::vector<std::string> formats
+    +CameraHardware &operator=(const CameraHardware &other)
+    +Json::Value toJson() const
+    +static CameraHardware fromJson(const Json::Value& root)
+    +void print()
+}
+
+class DisplayInfo {
+    +int screen
+    +int x
+    +int y
+    +int width
+    +int height
+    +int mmWidth
+    +int mmHeight
+    +Json::Value toJson() const
+    +static DisplayInfo fromJson(const Json::Value& root)
+    +void print()
+}
+
+class AudioDevice {
+    +std::string name
+    +std::string description
+    +uint32_t volume
+    +bool mute
+    +uint32_t sampleRate
+    +uint8_t channels
+    +Json::Value toJson() const
+    +static AudioDevice fromJson(const Json::Value& root) 
+    +void print()
+}
+
+DeviceProfile o-- DisplayInfo : 聚合
+DeviceProfile o-- AudioDevice : 聚合
+DeviceProfile o-- CameraHardware : 聚合
+
+@enduml
