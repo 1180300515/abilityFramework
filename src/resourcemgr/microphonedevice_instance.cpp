@@ -1,8 +1,8 @@
+#include "microphonedevice_instance.h"
+
 #include "json/json.h"
 
-#include "controller/common/louspeakerdevice_instance.h"
-
-std::string LoudspeakerInstance::Marshal()
+std::string MicrophoneInstance::Marshal()
 {
     std::lock_guard<std::mutex> locker(resourcelock_);
     Json::Value jnode;
@@ -18,11 +18,22 @@ std::string LoudspeakerInstance::Marshal()
     jnode["spec"]["properties"]["sampleRates"] = spec.properties.sampleRates;
     jnode["spec"]["properties"]["channelNumber"] = spec.properties.channelNumber;
     jnode["spec"]["properties"]["bitWidth"] = spec.properties.bitWidth;
-    jnode["spec"]["properties"]["hardwareName"] = spec.properties.hardwareName;
-    jnode["spec"]["properties"]["volume"] = spec.properties.volume;
-    jnode["spec"]["properties"]["mute"] = spec.properties.mute;
     jnode["spec"]["properties"]["description"] = spec.properties.description;
     jnode["spec"]["properties"]["interface"] = spec.properties.interface;
+
+    if (spec.capability1.size() != 0)
+    {
+        spec.capability1.clear();
+    }
+    if (spec.capability2.size() != 0)
+    {
+        spec.capability2.clear();
+    }
+    if (spec.customprops.size() != 0)
+    {
+        spec.customprops.clear();
+    }
+
     for (int i = 0; i < spec.capability1.size(); i++)
     {
         Json::Value cap;
@@ -85,30 +96,16 @@ std::string LoudspeakerInstance::Marshal()
     return writer.write(jnode);
 }
 
-bool LoudspeakerInstance::UnMarshal(std::string source)
+bool MicrophoneInstance::UnMarshal(std::string source)
 {
     std::lock_guard<std::mutex> locker(resourcelock_);
-    Instance::UnMarshal(source);
+    InstanceInfo::UnMarshal(source);
     Json::Value jnode;
     Json::Reader reader;
     reader.parse(source, jnode);
     spec.kind = jnode["spec"]["kind"].asString();
     spec.version = jnode["spec"]["version"].asString();
     spec.hostname = jnode["spec"]["hostname"].asString();
-
-    if (spec.capability1.size() != 0)
-    {
-        spec.capability1.clear();
-    }
-    if (spec.capability2.size() != 0)
-    {
-        spec.capability2.clear();
-    }
-    if (spec.customprops.size() != 0)
-    {
-        spec.customprops.clear();
-    }
-
     if (jnode["spec"].isMember("capability1"))
     {
         for (int i = 0; i < jnode["spec"]["capability1"].size(); i++)
@@ -155,12 +152,12 @@ bool LoudspeakerInstance::UnMarshal(std::string source)
     return true;
 }
 
-bool LoudspeakerInstance::updateInstance(std::string data)
+bool MicrophoneInstance::updateInstance(std::string data)
 {
     return UnMarshal(data);
 }
 
-std::string LoudspeakerInstance::getInstanceVersion()
+std::string MicrophoneInstance::getInstanceVersion()
 {
     return spec.version;
 }

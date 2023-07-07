@@ -1,8 +1,9 @@
 #ifndef SENSORDEVICE_INSTANCE_H
 #define SENSORDEVICE_INSTANCE_H
 
-#include "controller/common/common_struct.h"
-#include "controller/common/Instance.h"
+#include <map>
+
+#include "instance_info.h"
 
 // sensor part
 struct Sensorproperties
@@ -21,7 +22,7 @@ struct SensorSpec
     Sensorproperties properties;
     std::map<std::string,std::string> customprops;
 };
-class SensorInstance : public Instance
+class SensorInstance : public InstanceInfo
 {
 public:
     SensorSpec spec;

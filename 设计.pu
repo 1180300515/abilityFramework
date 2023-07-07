@@ -5,10 +5,7 @@ namespace DM {
         -DevicePool devicepool
         -DevicePoolExtended devicepoolextended
 
-        -void udp_broadcast_sender()
-        -void udp_broadcast_receiver()
-        -std::string getHostName()
-        -std::function<void(std::map<std::string, std::string> record) callback
+        -std::function<void(std::map<std::string, std::string>) callback
         -std::function<void()
 
         +Run()
@@ -16,7 +13,27 @@ namespace DM {
         +Getdevicepoolextended()
     }
     class UDPDiscovery {
+        -std::map<std::string, Device> devices
+        -std::function<void(std::map<std::string, std::string>) callback
 
+        -std::string getHostName()
+        -void udp_broadcast_sender()
+        -void udp_broadcast_receiver()
+        +RegisterCallback(std::function<void(std::map<std::string, std::string>) callback)
+
+
+    }
+    struct Device
+    {
+        std::string hostname;
+        std::string ip;
+        std::time_t last_online_time;
+        std::time_t online_duration;
+        std::string status;
+
+        bool IsOffline(std::time_t current_time) const
+
+        void Update(const std::string &new_hostname, const std::string &new_status, std::time_t new_timestamp)
     }
     class BLEDiscovery {
 
@@ -86,8 +103,9 @@ namespace RM {
         +std::string GetNonLocalFormat()
     }
     note left of ResourceManager::instances_
-        将各种device合并到一起，避免后续增加时改动过多
+    将各种device合并到一起,避免后续增加时改动过多
     end note
+
     note left of ResourceManager::OnEdgeAddressRecord
     局域网内设备扫描后清单的回调,DiscoveryManager调用
     end note
@@ -300,7 +318,6 @@ namespace DB {
 namespace HS {
     class HttpServer {
         -std::string address
-        -std::funtion<> callback
 
         +run_http_server()
     }
@@ -311,11 +328,31 @@ namespace LC {
     class LifeCycleDeal {
         -std::unordered_map<int, std::thread> threads
         -std::unordered_map<int, std::unique_ptr<AbilityClient>> clients
+        -std::unordered_map<int, HeartbeatInfo> heartbeat_map
+        -std::mutex heartbeat_map_mutex
 
-        +void handleHeartbeat()
-        -void controlProcess()
+        -void controlProcess(AbilityClient &client, const int &port, HeartbeatInfo &hbinfo, std::optional<CommandInfo> &cmdinfo)
+        +void handleHeartbeat(std::optional<CommandInfo> cmd_info)
+        +void AddHeartbeatInfo(HeartbeatInfo info)
+        
+        +void check_timeout()
+        +void check_process()
 
     }
+    note left of LifeCycleDeal::threads
+    单独的线程
+    调用clients中对应的去完成传入参数的要求
+    end note
+    note left of LifeCycleDeal::clients
+    和ability通信的RPC客户端
+    end note
+    note left of LifeCycleDeal::heartbeat_map
+    接收到的心跳包,作为判断client是否存活的依据
+    end note
+    note right of LifeCycleDeal
+    负责管理能力生命周期
+    end note
+
     class AbilityClient {
         -std::unique_ptr<abilityUnit::Ability::Stub> stub_
         +void Start(const abilityUnit::StartInfo &start_info)
@@ -337,13 +374,6 @@ namespace LC {
     LifeCycleDeal *-- AbilityClient : 组合
     LifeCycleDeal o-- CommandInfo : 聚合
 
-    class HeartBeatDeal {
-        -std::unordered_map<int, HeartbeatInfo> heartbeat_map
-        -std::mutex heartbeat_map_mutex
-
-        +void check_timeout()
-        +void check_process()
-    }
     struct HeartbeatInfo {
         std::string abilityName
         int abilityPort
@@ -352,12 +382,8 @@ namespace LC {
 
         Json::Value toJson(int port) const
     }
-    note left of HeartBeatDeal::add_heartbeat
-    作为httpserver的一个回调
-    end note
-    note right of LifeCycleDeal
-    负责管理能力生命周期
-    end note
+
+    
 }
 
 namespace ARM {
@@ -368,6 +394,10 @@ namespace ARM {
     }
     class AbilityRelationManager {
         -std::unordered_map<std::string, TreeNode> map
+
+        +void GenerateDependTree(AbilityInfoExtractList& list, DevicePoolExtended& devicePool)
+        +std::string serializeDependTree()
+        -void GenerateNodes(TreeNode& node, DevicePoolExtended& devicePool, DependTreeArray& treeArray)
     }
 
     note right of AbilityRelationManager

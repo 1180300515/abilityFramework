@@ -1,11 +1,14 @@
-#ifndef MICROPHONEDEVICE_INSTANCE_H
-#define MICROPHONEDEVICE_INSTANCE_H
+#ifndef LOUDSPEAKERDEVICE_INSTANCE_H
+#define LOUDSPEAKERDEVICE_INSTANCE_H
 
-#include "controller/common/common_struct.h"
-#include "controller/common/Instance.h"
+#include <map>
 
-struct MicrophoneProperties
+#include "instance_info.h"
+
+// loudspeaker part
+struct LoudspeakerProperties
 {
+    
     int channelNumber;
     int bitWidth;
     std::string interface;
@@ -16,23 +19,23 @@ struct MicrophoneProperties
     bool mute; // 是否静音
     std::string description;
 };
-struct MicrophoneSpec
+struct LoudspeakerSpec
 {
     std::string version;
     std::string hostname;
     std::string kind;
     std::vector<Acapability> capability1;
     std::vector<Acapability> capability2;
-    MicrophoneProperties properties;
+    LoudspeakerProperties properties;
     std::map<std::string,std::string> customprops;
 };
-class MicrophoneInstance : public Instance
+class LoudspeakerInstance : public InstanceInfo
 {
 public:
-    MicrophoneSpec spec;
+    LoudspeakerSpec spec;
     std::string Marshal();
     bool UnMarshal(std::string source);
     bool updateInstance(std::string data);
     std::string getInstanceVersion();
 };
-#endif //MICROPHONEDEVICE_INSTANCE_H
+#endif

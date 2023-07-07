@@ -1,8 +1,9 @@
 #ifndef CAMERADEVICE_INSTANCE_H
 #define CAMERADEVICE_INSTANCE_H
 
-#include "controller/common/common_struct.h"
-#include "controller/common/Instance.h"
+#include <map>
+
+#include "instance_info.h"
 
 // a cameradevice struct
 struct CameraProperties
@@ -33,7 +34,7 @@ struct CameraSpec
     std::map<std::string,std::string> customprops;
 };
 
-class CameraInstance : public Instance
+class CameraInstance : public InstanceInfo
 {
 public:
     CameraSpec spec;

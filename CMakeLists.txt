@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(AbilityFramework VERSION 0.1)
 
-set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
+set(CMAKE_CXX_COMPILER "/usr/bin/clang-14")
 set(CMAKE_CXX_FLAGS "-std=c++17 -O3")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
@@ -48,61 +48,88 @@ find_package(yaml-cpp REQUIRED)
 find_package(glog REQUIRED)
 find_package(jsoncpp REQUIRED)
 find_package(X11 REQUIRED)
-find_package(protobuf REQUIRED)
+# find_package(protobuf REQUIRED)
 
-find_package(PkgConfig)
-pkg_search_module(GRPC REQUIRED grpc++)
-pkg_search_module(PROTOBUF REQUIRED protobuf)
+find_package(Threads REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
+find_package(gRPC CONFIG REQUIRED)
 
-message(STATUS "=== PROTOBUF_LIBRARIES: ${PROTOBUF_LIBRARIES}")
-message(STATUS "=== PROTOBUF_INCLUDE_DIRS: ${PROTOBUF_INCLUDE_DIRS}")
-message(STATUS "=== GRPC_LIBRARIES: ${GRPC_LIBRARIES}")
-message(STATUS "=== GRPC_INCLUDE_DIRS: ${GRPC_INCLUDE_DIRS}")
+# find_package(PkgConfig)
+# pkg_search_module(GRPC REQUIRED grpc++)
+# pkg_search_module(PROTOBUF REQUIRED protobuf)
 
-include_directories(${CMAKE_SOURCE_DIR}/include ${JSON_CPP_INCLUDE_DIR} ${PROTO_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS} ${GRPC_INCLUDE_DIRS})
+# message(STATUS "=== PROTOBUF_LIBRARIES: ${PROTOBUF_LIBRARIES}")
+# message(STATUS "=== PROTOBUF_INCLUDE_DIRS: ${PROTOBUF_INCLUDE_DIRS}")
+# message(STATUS "=== GRPC_LIBRARIES: ${GRPC_LIBRARIES}")
+# message(STATUS "=== GRPC_INCLUDE_DIRS: ${GRPC_INCLUDE_DIRS}")
 
-add_library(Module_A SHARED ${CMAKE_SOURCE_DIR}/src/plugincore/pluginload.cpp)
-set_target_properties(Module_A PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/modules)
-target_include_directories(Module_A PUBLIC ${CMAKE_SOURCE_DIR}/include/plugincore)
-target_link_libraries(Module_A yaml-cpp)
+# include_directories(${JSON_CPP_INCLUDE_DIR} ${PROTO_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS} ${GRPC_INCLUDE_DIRS})
 
-add_library(ability_mgr SHARED ${CMAKE_SOURCE_DIR}/src/abilitymanager/abimanager.cpp)
-set_target_properties(ability_mgr PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/modules)
-target_include_directories(ability_mgr PUBLIC ${CMAKE_SOURCE_DIR}/include/abilitymanager)
-target_link_libraries(ability_mgr)
+# add_library(Module_A SHARED ${CMAKE_SOURCE_DIR}/src/plugincore/pluginload.cpp)
+# set_target_properties(Module_A PROPERTIES
+#     CXX_STANDARD 17
+#     CXX_STANDARD_REQUIRED ON
+#     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/modules)
+# target_include_directories(Module_A PUBLIC ${CMAKE_SOURCE_DIR}/include/plugincore)
+# target_link_libraries(Module_A yaml-cpp)
 
-add_library(connection_mgr SHARED ${CMAKE_SOURCE_DIR}/src/connmanager/connmanager.cpp)
-set_target_properties(connection_mgr PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/modules)
-target_include_directories(connection_mgr PUBLIC ${CMAKE_SOURCE_DIR}/include/connmanager)
-target_link_libraries(connection_mgr)
+# add_library(ability_mgr SHARED ${CMAKE_SOURCE_DIR}/src/abilitymanager/abimanager.cpp)
+# set_target_properties(ability_mgr PROPERTIES
+#     CXX_STANDARD 17
+#     CXX_STANDARD_REQUIRED ON
+#     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/modules)
+# target_include_directories(ability_mgr PUBLIC ${CMAKE_SOURCE_DIR}/include/abilitymanager)
+# target_link_libraries(ability_mgr)
 
-aux_source_directory(${PROJECT_SOURCE_DIR}/src/controller SRC_LIST1)
-aux_source_directory(${PROJECT_SOURCE_DIR}/src/controller/common SRC_LIST2)
-aux_source_directory(${PROJECT_SOURCE_DIR}/src/controller/mongoose SRC_LIST3)
+# add_library(connection_mgr SHARED ${CMAKE_SOURCE_DIR}/src/connmanager/connmanager.cpp)
+# set_target_properties(connection_mgr PROPERTIES
+#     CXX_STANDARD 17
+#     CXX_STANDARD_REQUIRED ON
+#     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/modules)
+# target_include_directories(connection_mgr PUBLIC ${CMAKE_SOURCE_DIR}/include/connmanager)
+# target_link_libraries(connection_mgr)
+
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/protos protos)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/abilityrelationmgr abilityrelationmgr)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/connectionmgr connectionmgr)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/databasemgr databasemgr)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/discoverymgr discoverymgr)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/lifecyclemgr lifecyclemgr)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/resourcemgr resourcemgr)
+
 
 include_directories(${PROJECT_SOURCE_DIR}/include/protos)
+include_directories(${PROJECT_SOURCE_DIR}/include/utils)
+include_directories(${PROJECT_SOURCE_DIR}/include/abilityrelationmgr)
+include_directories(${PROJECT_SOURCE_DIR}/include/connectionmgr)
+include_directories(${PROJECT_SOURCE_DIR}/include/databasemgr)
+include_directories(${PROJECT_SOURCE_DIR}/include/discoverymgr)
+include_directories(${PROJECT_SOURCE_DIR}/include/lifecyclemgr)
+include_directories(${PROJECT_SOURCE_DIR}/include/resourcemgr)
+
 
 add_executable(${PROJECT_NAME} src/main.cpp 
-    src/plugincore/pluginload.cpp 
-    src/plugincore/abimgr.cpp
-    src/eventhandler/eventhandler.cpp
-    src/discoverymanager/discoverymanager.cpp
-    src/discoverymanager/audiodevs.cpp
-    src/discoverymanager/camdevs.cpp
-    src/discoverymanager/dispdevs.cpp
-    src/discoverymanager/localhw_discovery.cpp
-    src/discoverymanager/discoverymanager.cpp
-    src/discoverymanager/devpool.cpp
-    src/protos/abilityProto.grpc.pb.cc
-    src/protos/abilityProto.pb.cc
-    ${SRC_LIST1} ${SRC_LIST2} ${SRC_LIST3})
-target_link_libraries(AbilityFramework sqlite3 jsoncpp glog yaml-cpp X11 pulse Xrandr v4l2 pthread dl crypto ssl z protobuf ${GRPC_LIBRARIES} ${PROTOBUF_LIBRARIES} )
+    ${protos}
+    ${abilityrelationmgr}
+    ${connectionmgr}
+    ${databasemgr}
+    ${discoverymgr}
+    ${lifecyclemgr}
+    ${resourcemgr}
+)
+# add_executable(${PROJECT_NAME} src/main.cpp 
+#     src/plugincore/pluginload.cpp 
+#     src/plugincore/abimgr.cpp
+#     src/eventhandler/eventhandler.cpp
+#     src/discoverymanager/discoverymanager.cpp
+#     src/discoverymanager/audiodevs.cpp
+#     src/discoverymanager/camdevs.cpp
+#     src/discoverymanager/dispdevs.cpp
+#     src/discoverymanager/localhw_discovery.cpp
+#     src/discoverymanager/discoverymanager.cpp
+#     src/discoverymanager/devpool.cpp
+#     src/protos/abilityProto.grpc.pb.cc
+#     src/protos/abilityProto.pb.cc
+#     ${SRC_LIST1} ${SRC_LIST2} ${SRC_LIST3})
+# target_link_libraries(AbilityFramework sqlite3 JsonCpp::JsonCpp glog yaml-cpp X11 pulse Xrandr v4l2 pthread dl crypto ssl z protobuf ${GRPC_LIBRARIES} ${PROTOBUF_LIBRARIES} )
+target_link_libraries(AbilityFramework sqlite3 JsonCpp::JsonCpp glog yaml-cpp X11 pulse Xrandr v4l2 pthread dl crypto ssl z protobuf::libprotobuf gRPC::grpc++ )

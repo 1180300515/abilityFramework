@@ -1,8 +1,8 @@
+#include "sensordevice_instance.h"
+
 #include "json/json.h"
 
-#include "controller/common/cameradevice_instance.h"
-
-std::string CameraInstance::Marshal()
+std::string SensorInstance::Marshal()
 {
     std::lock_guard<std::mutex> locker(resourcelock_);
     Json::Value jnode;
@@ -16,21 +16,22 @@ std::string CameraInstance::Marshal()
     jnode["spec"]["version"] = spec.version;
     jnode["spec"]["hostname"] = spec.hostname;
     jnode["spec"]["properties"]["vendor"] = spec.properties.vendor;
-    jnode["spec"]["properties"]["resolution"] = spec.properties.resolution;
     jnode["spec"]["properties"]["location"] = spec.properties.location;
-    jnode["spec"]["properties"]["wideAngle"] = spec.properties.wideAngle;
-    jnode["spec"]["properties"]["focusMethod"] = spec.properties.focusMethod;
-    jnode["spec"]["properties"]["telephoto"] = spec.properties.telephoto;
-    jnode["spec"]["properties"]["deviceNode"] = spec.properties.deviceNode;
-    jnode["spec"]["properties"]["driverName"] = spec.properties.driverName;
-    jnode["spec"]["properties"]["cardType"] = spec.properties.cardType;
-    jnode["spec"]["properties"]["busInfo"] = spec.properties.busInfo;
-    jnode["spec"]["properties"]["description"] = spec.properties.description;
-    for (int i = 0; i < spec.properties.supportFormat.size(); i++)
-    {
-        jnode["spec"]["properties"]["supportFormat"].append(spec.properties.supportFormat[i]);
-    }
     jnode["spec"]["properties"]["interface"] = spec.properties.interface;
+
+    if (spec.capability1.size() != 0)
+    {
+        spec.capability1.clear();
+    }
+    if (spec.capability2.size() != 0)
+    {
+        spec.capability2.clear();
+    }
+    if (spec.customprops.size() != 0)
+    {
+        spec.customprops.clear();
+    }
+
     for (int i = 0; i < spec.capability1.size(); i++)
     {
         Json::Value cap;
@@ -93,34 +94,16 @@ std::string CameraInstance::Marshal()
     return writer.write(jnode);
 }
 
-bool CameraInstance::UnMarshal(std::string source)
+bool SensorInstance::UnMarshal(std::string source)
 {
     std::lock_guard<std::mutex> locker(resourcelock_);
-    Instance::UnMarshal(source);
+    InstanceInfo::UnMarshal(source);
     Json::Value jnode;
     Json::Reader reader;
     reader.parse(source, jnode);
     spec.kind = jnode["spec"]["kind"].asString();
     spec.version = jnode["spec"]["version"].asString();
     spec.hostname = jnode["spec"]["hostname"].asString();
-
-    if (spec.capability1.size() != 0)
-    {
-        spec.capability1.clear();
-    }
-    if (spec.capability2.size() != 0)
-    {
-        spec.capability2.clear();
-    }
-    if (spec.properties.supportFormat.size() != 0)
-    {
-        spec.properties.supportFormat.clear();
-    }
-    if (spec.customprops.size() != 0)
-    {
-        spec.customprops.clear();
-    }
-
     if (jnode["spec"].isMember("capability1"))
     {
         for (int i = 0; i < jnode["spec"]["capability1"].size(); i++)
@@ -148,20 +131,7 @@ bool CameraInstance::UnMarshal(std::string source)
         }
     }
     spec.properties.vendor = jnode["spec"]["properties"]["vendor"].asString();
-    spec.properties.resolution = jnode["spec"]["properties"]["resolution"].asString();
     spec.properties.location = jnode["spec"]["properties"]["location"].asString();
-    spec.properties.wideAngle = std::stoi(jnode["spec"]["properties"]["wideAngle"].asString());
-    spec.properties.focusMethod = jnode["spec"]["properties"]["focusMethod"].asString();
-    spec.properties.telephoto = (jnode["spec"]["properties"]["telephoto"].asString() == "true");
-    spec.properties.deviceNode = jnode["spec"]["properties"]["deviceNode"].asString();
-    spec.properties.driverName = jnode["spec"]["properties"]["driverName"].asString();
-    spec.properties.cardType = jnode["spec"]["properties"]["cardType"].asString();
-    spec.properties.busInfo = jnode["spec"]["properties"]["busInfo"].asString();
-    spec.properties.description = jnode["spec"]["properties"]["description"].asString();
-    for (int i = 0; i < jnode["spec"]["properties"]["supportFormat"].size(); i++)
-    {
-        spec.properties.supportFormat.emplace_back(jnode["spec"]["properties"]["supportFormat"][i].asString());
-    }
     spec.properties.interface = jnode["spec"]["properties"]["interface"].asString();
     if (jnode["spec"].isMember("customprops"))
     {
@@ -175,12 +145,12 @@ bool CameraInstance::UnMarshal(std::string source)
     return true;
 }
 
-bool CameraInstance::updateInstance(std::string data)
+bool SensorInstance::updateInstance(std::string data)
 {
     return UnMarshal(data);
 }
 
-std::string CameraInstance::getInstanceVersion()
+std::string SensorInstance::getInstanceVersion()
 {
     return spec.version;
 }
