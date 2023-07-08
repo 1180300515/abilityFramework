@@ -47,28 +47,39 @@ public:
     /**
      * read instance into the memory
      */
-    bool DBGetDeviceInstances(std::string resourcetype, std::map<std::string, std::string> &instance);
+    bool DBGetDeviceInstances(const std::string &resourcetype, std::map<std::string, std::string> &instance);
+    /**
+     * read ability into memory
+    */
     bool DBGetAbilityInstances(std::map<std::string, std::string> &instance);
-    /**
-     * store the instance into db
-     */
-    bool DBStoreDeviceInstances(std::string data);
-    /**
-     * update the instance
-     */
-    bool DBUpdateDeviceInstance(std::string &data);
-    /**
-     * delete the instance
-     */
-    bool DBDelteDeviceInstance(std::string &key);
-    /**
-     * store the cloud address into db
-     */
-    bool DBStoreCloudAddress();
     /**
      * read cloud address from db
      */
-    bool DBGetCloudAddress();
+    bool DBGetCloudAddress(std::string &cloudaddress);
+
+    bool DBStoreAbilityInstance(const std::string &data);
+    /**
+     * store the instance into db
+     */
+    bool DBStoreDeviceInstance(const std::string &data);
+    /**
+     * store the cloud address into db
+     */
+    bool DBStoreCloudAddress(const std::string &cloudaddress);
+    /**
+     * update the instance
+     */
+    bool DBUpdateDeviceInstance(const std::string &data);
+    /**
+     * update the ability
+    */
+    bool DBUpdateAbilityInstance(const std::string &data);
+    /**
+     * delete the instance
+     */
+    bool DBDelteDeviceInstance(const std::string &key);
+    
+    
     /**
      * clean db
      */
@@ -78,19 +89,20 @@ public:
 
 private:
     static std::vector<CrdDBStruct> crdstructs;
-    static std::vector<InstanceDBStruct> instancestructs;
-    static std::vector<AbilityDBStruct> abilitystructs;
+    static std::vector<InstanceDBStruct> devicestructs;
+    static std::vector<InstanceDBStruct> abilitystructs;
+    static std::string cloud_address;
 
     // the database
     sqlite3 *db;
 
     // the callback func of each table
     static int crd_callback(void *unused, int columenCount, char **columnValue, char **columnName);
-    static int instance_callback(void *unused, int columenCount, char **columnValue, char **columnName);
+    static int device_callback(void *unused, int columenCount, char **columnValue, char **columnName);
     static int ability_callback(void *unused, int columenCount, char **columnValue, char **columnName);
     static int cloud_address_callback(void *unused, int columenCount, char **columnValue, char **columnName);
 
-    DatabaseManager()=default;
+    DatabaseManager() = default;
 };
 
 #endif // DATABASE_MANAGER_H
