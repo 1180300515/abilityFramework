@@ -48,19 +48,12 @@ public:
      * read instance into the memory
      */
     bool DBGetDeviceInstances(const std::string &resourcetype, std::map<std::string, std::string> &instance);
-    /**
-     * read ability into memory
-    */
     bool DBGetAbilityInstances(std::map<std::string, std::string> &instance);
-    /**
-     * read cloud address from db
-     */
     bool DBGetCloudAddress(std::string &cloudaddress);
-
-    bool DBStoreAbilityInstance(const std::string &data);
     /**
-     * store the instance into db
-     */
+     * store the instance
+    */
+    bool DBStoreAbilityInstance(const std::string &data);
     bool DBStoreDeviceInstance(const std::string &data);
     /**
      * store the cloud address into db
@@ -70,20 +63,17 @@ public:
      * update the instance
      */
     bool DBUpdateDeviceInstance(const std::string &data);
-    /**
-     * update the ability
-    */
     bool DBUpdateAbilityInstance(const std::string &data);
     /**
      * delete the instance
      */
     bool DBDelteDeviceInstance(const std::string &key);
-    
+    bool DBDeleteAbilityInstance(const std::string &key);
     
     /**
      * clean db
      */
-    bool DBCleanDeviceInstances();
+    bool DBCleanDevice();
     bool DBCleanAbility();
     bool DBCleanCRD();
 
@@ -102,7 +92,7 @@ private:
     static int ability_callback(void *unused, int columenCount, char **columnValue, char **columnName);
     static int cloud_address_callback(void *unused, int columenCount, char **columnValue, char **columnName);
 
-    DatabaseManager() = default;
+    DatabaseManager();
 };
 
 #endif // DATABASE_MANAGER_H
