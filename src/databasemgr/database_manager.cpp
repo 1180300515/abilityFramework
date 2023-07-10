@@ -322,7 +322,7 @@ bool DatabaseManager::DBStoreAbilityInstance(const std::string &data)
     std::string instance_validate = GetAbilityValidatePart(instance_json);
     if (SchemaValidation(crd_schema, instance_validate))
     {
-        LOG(INFO) << "the ability pass the validate ";
+        LOG(INFO) << "the ability pass the schema validate ";
     }
     else
     {
