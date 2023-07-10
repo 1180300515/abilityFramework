@@ -429,11 +429,11 @@ namespace CM {
         -std::map<std::string, ConnectInfo> cloudAddressRecord_
         -std::mutex cloudlock_
 
-        -std::map<std::string, std::sharedptr<IConnection>> CloudConnectionRecord
-        -std::map<std::string, std::sharedptr<IConnection>> EndConnectionRecord
+        -std::map<std::string, std::shared_ptr<IConnection>> CloudConnectionRecord
+        -std::map<std::string, std::shared_ptr<IConnection>> EndConnectionRecord
 
-        -std::function<void(std::string bytes)> CloudDataCallback_
-        -std::function<void(std::string bytes)> EndDataCallback_
+        -std::function<void(std::string)> CloudDataCallback_
+        -std::function<void(std::string)> EndDataCallback_
 
         +OnEdgeAddressRecordChange(std::map<std::string, ConnectInfo> &address)
         +OnCloudAddressRecordChange(std::map<std::string, ConnectInfo> &address)
@@ -457,7 +457,7 @@ namespace CM {
 
         +ConnectbyUDP(std::string address) = default
         +~ConnectbyUDP() = default
-        +void Connect(std::string address)
+        +bool Connect(std::string address)
         +void Disconnect()
         +std::string SendAndReceviceMessage(std::string data)
     }
