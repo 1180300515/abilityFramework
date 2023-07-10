@@ -553,17 +553,50 @@ bool DatabaseManager::DBDeleteAbilityInstance(const std::string &key)
 
 bool DatabaseManager::DBCleanDevice()
 {
-    return false;
+    int rc;
+    char *erroms = 0;
+    std::string delete_sql = "DELETE FROM DEVICE;";
+    rc = sqlite3_exec(db, delete_sql.c_str(), device_callback, 0, &erroms);
+    if (rc)
+    {
+        LOG(ERROR) << "sql excute error: " << erroms;
+        return false;
+    }
+    LOG(INFO) << "db clean instance resource success";
+
+    return true;
 }
 
 bool DatabaseManager::DBCleanAbility()
 {
-    return false;
+    int rc;
+    char *erroms = 0;
+    std::string delete_sql = "DELETE FROM ABILITY;";
+    rc = sqlite3_exec(db, delete_sql.c_str(), ability_callback, 0, &erroms);
+    if (rc)
+    {
+        LOG(ERROR) << "sql excute error: " << erroms;
+        return false;
+    }
+    LOG(INFO) << "db clean ability resource success";
+
+    return true;
 }
 
 bool DatabaseManager::DBCleanCRD()
 {
-    return false;
+    int rc;
+    char *erroms = 0;
+    std::string delete_sql = "DELETE FROM CRD;";
+    rc = sqlite3_exec(db, delete_sql.c_str(), ability_callback, 0, &erroms);
+    if (rc)
+    {
+        LOG(ERROR) << "sql excute error: " << erroms;
+        return false;
+    }
+    LOG(INFO) << "db clean crd resource success";
+
+    return true;
 }
 
 int DatabaseManager::crd_callback(void *unused, int columenCount, char **columnValue, char **columnName)
@@ -664,6 +697,10 @@ int DatabaseManager::cloud_address_callback(void *unused, int columenCount, char
     cloud_address = columnValue[0];
     return SQLITE_OK;
 }
+
+std::vector<CrdDBStruct> DatabaseManager::crdstructs;
+std::vector<InstanceDBStruct> DatabaseManager::devicestructs;
+std::vector<InstanceDBStruct> DatabaseManager::abilitystructs;
 
 DatabaseManager::DatabaseManager()
 {
