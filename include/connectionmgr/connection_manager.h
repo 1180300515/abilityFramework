@@ -12,7 +12,13 @@
 class ConnectionManager
 {
 public:
+    /**
+     * the end address record change callback
+    */
     void OnEndAddressRecordChange(std::map<std::string, ConnectInfo> &address);
+    /**
+     * the cloud address record change callback
+    */
     void OnCloudAddressRecordChange(std::map<std::string, ConnectInfo> &address);
 
     void Init(std::function<void(std::string)> cloud, std::function<void(std::string)> end);
@@ -25,18 +31,25 @@ public:
 
     
 private:
-    std::map<std::string, ConnectInfo> endAddressRecord_;
+    std::unordered_map<std::string, ConnectInfo> endAddressRecord_; //Unique ID of the device（like hostname） and connect info
     std::mutex endlock_;
-    std::map<std::string, ConnectInfo> cloudAddressRecord_;
+    std::unordered_map<std::string, ConnectInfo> cloudAddressRecord_;
     std::mutex cloudlock_;
 
-    std::map<std::string, std::shared_ptr<IConnection>> CloudConnectionRecord;
-    std::map<std::string, std::shared_ptr<IConnection>> EndConnectionRecord;
+    std::unordered_map<std::string, std::shared_ptr<IConnection>> CloudConnectionRecord; // Unique ID of the device（like hostname）
+    std::unordered_map<std::string, std::shared_ptr<IConnection>> EndConnectionRecord;
 
     std::function<void(std::string)> CloudCallback_;
     std::function<void(std::string)> EndCallback_;
 
+    bool EndIsConnected = false;
+    bool CloudIsConnected = false;
 
+    /**
+     * handle the connection status
+    */
+    void EndConnectionHandling();
+    void CloudConnectionHandling();
 
 };
 #endif // CONNECTION_MANAGER_H

@@ -3,16 +3,17 @@
 
 #include "Iconnection.h"
 
-class ConnectbyUDP:public IConnection
+class ConnectByUDP:public IConnection
 {   
 public:
-    ConnectbyUDP(std::string address) : address(address){};
+    ConnectByUDP(std::string address) : address(address){};
+    ~ConnectByUDP();
     bool Connect(std::string address);
     bool Disconnect();
-    std::string SendAndReceviceMessage(std::string data);
+    std::optional<std::string> SendAndReceviceMessage(std::string data);
 
 private:
-    int sockid_;
+    int sockid;
     std::string address;
 };
 

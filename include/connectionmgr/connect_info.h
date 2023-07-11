@@ -12,11 +12,19 @@ enum ProtocolTendency
 
 enum ProtocolType
 {
+    RandomProtocol,
     UDP,
     TCP,
     WebSocket,
     HTTP,
     BLE
+};
+
+enum ConnectionStatus
+{
+    None,
+    Connected,
+    Disconnected
 };
 
 // describe a connection
@@ -25,8 +33,9 @@ struct ConnectInfo
     std::string destinationAddress;
     ProtocolType protocoltype;
     ProtocolTendency tendency;
-    bool isShortConnection;
-    bool alreadyConnected;
+
+    // describe the connect status
+   ConnectionStatus status;
 };
 
 #endif //CONNECT_INFO_H
