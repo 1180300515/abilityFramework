@@ -407,33 +407,47 @@ namespace ARM {
 
 namespace CM {
     enum ProtocolTendency {
-        Default
+        Random
         SpeedFirst
         LowPowerFirst
     }
     enum ProtocolType {
+        RandomProtocol
         UDP
         TCP
         WebSocket
         HTTP
         BLE
     }
+    enum ConnectionStatus
+    {
+        None,
+        Connected,
+        Disconnected
+    }
     struct ConnectInfo {
         std::string destinationAddress
         ProtocolType protocolType
         ProtocolTendency priority
+        ConnectionStatus status;
     }
     class ConnectionManager {
-        -std::map<std::string, ConnectInfo> EndAddressRecord_
+        -std::unordered_map<std::string, ConnectInfo> EndAddressRecord_
         -std::mutex endlock_
-        -std::map<std::string, ConnectInfo> cloudAddressRecord_
+        -std::unordered_map<std::string, ConnectInfo> cloudAddressRecord_
         -std::mutex cloudlock_
 
-        -std::map<std::string, std::shared_ptr<IConnection>> CloudConnectionRecord
-        -std::map<std::string, std::shared_ptr<IConnection>> EndConnectionRecord
+        -std::unordered_map<std::string, std::shared_ptr<IConnection>> CloudConnectionRecord
+        -std::unordered_map<std::string, std::shared_ptr<IConnection>> EndConnectionRecord
+
+        -bool EndIsConnected = false;
+        -bool CloudIsConnected = false;
 
         -std::function<void(std::string)> CloudDataCallback_
         -std::function<void(std::string)> EndDataCallback_
+
+        -void EndConnectionHandling();
+        -void CloudConnectionHandling();
 
         +OnEdgeAddressRecordChange(std::map<std::string, ConnectInfo> &address)
         +OnCloudAddressRecordChange(std::map<std::string, ConnectInfo> &address)
@@ -443,8 +457,8 @@ namespace CM {
         +void ConnectWithCloud()
         +void DisconnectWithEnd()
         +void DisconnectWithCloud()
-        +void SendAndReceviceMessageToCloud(std::string data)
-        +void SendAndReceviceMessageToEnd(std::string data)
+        +void SendAndReceviceMessageToCloud(const std::string &data)
+        +void SendAndReceviceMessageToEnd(const std::string &data)
     }
     interface IConnection{
         +virtual bool Connect(std::string address)
