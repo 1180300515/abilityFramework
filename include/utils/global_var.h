@@ -40,6 +40,16 @@ extern std::string device_hostname;
 #define INSTANCE_FILE_PATH "resource/resource_file/device"
 #define ABILITY_FILE_PATH "resource/resource_file/ability"
 #define EDGE_SYNC_PORT 8001
-
+//command type
+#define CMD_START "start"
+#define CMD_CONNECT "connect"
+#define CMD_DISCONNECT "disconnect"
+#define CMD_TERMINATE "terminate"
+//life status
+#define STATUS_INIT "INIT"
+#define STATUS_STANDBY "STANDBY"
+#define STATUS_RUNNING "RUNNING"
+#define STATUS_SUSPEND "SUSPEND"
+#define STATUS_TERMINATE "TERMINATE"
 
 #endif
