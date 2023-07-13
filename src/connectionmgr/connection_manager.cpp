@@ -173,27 +173,27 @@ void ConnectionManager::EndConnectionHandling()
     // None status handle
     for (auto &iter : endAddressRecord_)
     {
-        if (iter.second.status == None)
+        if (iter.second.status == ConnectionStatus::None)
         {
-            if (iter.second.protocoltype == RandomProtocol)
+            if (iter.second.protocoltype == ProtocolType::RandomProtocol)
             {
-                if (iter.second.tendency == Random)
+                if (iter.second.tendency == ProtocolTendency::Random)
                 {
                     auto connect = std::make_shared<ConnectByUDP>(iter.first);
                     this->EndConnectionRecord[iter.first] = connect;
                 }
             }
-            else if (iter.second.protocoltype == UDP)
+            else if (iter.second.protocoltype == ProtocolType::UDP)
             {
                 auto connect = std::make_shared<ConnectByUDP>(iter.first);
                 this->EndConnectionRecord[iter.first] = connect;
             }
-            else if (iter.second.protocoltype == TCP)
+            else if (iter.second.protocoltype == ProtocolType::TCP)
             {
                 auto connect = std::make_shared<ConnectByTCP>(iter.first);
                 this->EndConnectionRecord[iter.first] = connect;
             }
-            iter.second.status = Disconnected;
+            iter.second.status = ConnectionStatus::Disconnected;
         }
     }
 
@@ -204,7 +204,7 @@ void ConnectionManager::EndConnectionHandling()
         {
             if (this->EndConnectionRecord[iter.first]->Connect(iter.second.destinationAddress))
             {
-                iter.second.status = Connected;
+                iter.second.status = ConnectionStatus::Connected;
             }
             else
             {
@@ -215,7 +215,7 @@ void ConnectionManager::EndConnectionHandling()
         {
             if (this->EndConnectionRecord[iter.first]->Disconnect())
             {
-                iter.second.status = Disconnected;
+                iter.second.status = ConnectionStatus::Disconnected;
             }
             else
             {
@@ -246,27 +246,27 @@ void ConnectionManager::CloudConnectionHandling()
     // None status handle
     for (auto &iter : cloudAddressRecord_)
     {
-        if (iter.second.status == None)
+        if (iter.second.status == ConnectionStatus::None)
         {
-            if (iter.second.protocoltype == RandomProtocol)
+            if (iter.second.protocoltype == ProtocolType::RandomProtocol)
             {
-                if (iter.second.tendency == Random)
+                if (iter.second.tendency == ProtocolTendency::Random)
                 {
                     auto connect = std::make_shared<ConnectByUDP>(iter.first);
                     this->EndConnectionRecord[iter.first] = connect;
                 }
             }
-            else if (iter.second.protocoltype == UDP)
+            else if (iter.second.protocoltype == ProtocolType::UDP)
             {
                 auto connect = std::make_shared<ConnectByUDP>(iter.first);
                 this->EndConnectionRecord[iter.first] = connect;
             }
-            else if (iter.second.protocoltype == TCP)
+            else if (iter.second.protocoltype == ProtocolType::TCP)
             {
                 auto connect = std::make_shared<ConnectByTCP>(iter.first);
                 this->EndConnectionRecord[iter.first] = connect;
             }
-            iter.second.status = Disconnected;
+            iter.second.status = ConnectionStatus::Disconnected;
         }
     }
 
@@ -277,7 +277,7 @@ void ConnectionManager::CloudConnectionHandling()
         {
             if (this->CloudConnectionRecord[iter.first]->Connect(iter.second.destinationAddress))
             {
-                iter.second.status = Connected;
+                iter.second.status = ConnectionStatus::Connected;
             }
             else
             {
@@ -288,7 +288,7 @@ void ConnectionManager::CloudConnectionHandling()
         {
             if (this->CloudConnectionRecord[iter.first]->Disconnect())
             {
-                iter.second.status = Disconnected;
+                iter.second.status = ConnectionStatus::Disconnected;
             }
             else
             {
