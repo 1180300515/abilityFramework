@@ -5,25 +5,29 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <mutex>
 
-#include "device_pool.h"
-#include "udp_discovery.h"
+#include "discovery_device_info.h"
+#include "lan_ipv4_discovery.h"
 #include "ble_discovery.h"
 
 class DiscoveryManager
 {
 private:
-    DevicePool devicepool;
-    DevicePoolExtended devicepoolextended;
+    std::map<std::string, std::vector<DiscoveryDeviceInfo>> devices;
+    std::mutex lock_;
 
-    std::shared_ptr<UDPDiscovery> udpdiscovery_;
+    std::shared_ptr<LANIPV4Discovery> lanipv4discovery_;
     std::shared_ptr<BLEDiscovery> blediscovery_;
 
     std::function<void(std::map<std::string, std::string>)> callback;
 
+    /**
+     * as the lanipv4discovery, blediscovery.. callback
+    */
+    void ReceiveDeviceInfo(DiscoveryDeviceInfo info);
 public:
-    void Getdevicepool(DevicePool &devicepool);
-    void Getdevicepoolextended(DevicePoolExtended &devicepoolextended);
+    
 };
 
 #endif // DISCOVERY_MANAGER_H
