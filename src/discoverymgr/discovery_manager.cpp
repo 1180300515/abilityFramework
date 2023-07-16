@@ -6,7 +6,7 @@ void DiscoveryManager::ReceiveDeviceInfo(DiscoveryDeviceInfo info)
 {
     std::lock_guard<std::mutex> locker(lock_);
     auto iter = devices.find(info.hostname);
-    //insert ot update device
+    // insert ot update device
     if (iter == devices.end())
     {
         devices[info.hostname].emplace_back(info);
@@ -45,4 +45,40 @@ void DiscoveryManager::ReceiveDeviceInfo(DiscoveryDeviceInfo info)
             ++it;
         }
     }
+}
+
+void DiscoveryManager::Init(std::function<void(std::map<std::string, ConnectInfo>)> call)
+{
+    callback = call;
+    this->lanipv4discovery_ = std::make_shared<LANIPV4Discovery>();
+    this->lanipv4discovery_->RegisterCallback(std::bind(&DiscoveryManager::ReceiveDeviceInfo, this, std::placeholders::_1));
+
+    this->blediscovery_ = std::make_shared<BLEDiscovery>();
+    
+}
+
+void DiscoveryManager::Run()
+{
+    //start receiver
+    this->lanipv4discovery_->RunBroadcastReceiver();
+
+    while(1)
+    {
+        this->lanipv4discovery_->BroadcastSender();
+
+        sleep(4);
+        //deal the device and send to callbak func
+        std::map<std::string, ConnectInfo> callback_info;
+        for (const auto &iter : devices)
+        {
+            ConnectInfo new_info;
+            new_info.destinationAddress = iter.second.front().address;
+            new_info.protocoltype = ProtocolType::RandomProtocol;
+            new_info.status = ConnectionStatus::None;
+            new_info.tendency = ProtocolTendency::Random;
+            callback_info[iter.first] = new_info;
+        }
+        callback(callback_info);
+    }
+
 }
