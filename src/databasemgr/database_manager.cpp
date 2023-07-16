@@ -5,7 +5,7 @@
 #include "yaml_json_converter.h"
 #include "global_var.h"
 
-bool DatabaseManager::RegisterCrd(const std::string &filepath)
+bool DatabaseManager::RegistCrdFromFile(const std::string &filepath)
 {
     YAML::Node crd_yaml;
     Json::Value crd_json;
@@ -49,189 +49,230 @@ bool DatabaseManager::RegisterCrd(const std::string &filepath)
     return true;
 }
 
-bool DatabaseManager::AddAbilityInstance(const std::string &filepath)
+bool DatabaseManager::RegistCrd(const std::string &data)
 {
-    YAML::Node instance_yaml;
-    Json::Value instance_json;
-    try
-    {
-        instance_yaml = YAML::LoadFile(filepath);
-    }
-    catch (YAML::ParserException e)
-    {
-        LOG(ERROR) << "yaml is malformed.";
-        return false;
-    }
-    catch (YAML::BadFile e)
-    {
-        LOG(ERROR) << "file can't be load";
-        return false;
-    }
-    if (!YamlToJson(instance_yaml, instance_json))
-    {
-        LOG(ERROR) << "convert the yaml file in: " << filepath << " to json format fail";
-        return false;
-    }
+    Json::Value crd_json;
+    StringToJson(data, crd_json);
 
-    // check the crd is exist or not
-    std::string apiVersion_string = instance_json["apiVersion"].asString();
-    int flag = apiVersion_string.find("/");
-    std::string instance_group = apiVersion_string.substr(0, flag);
-    std::string instance_kind = instance_json["kind"].asString();
+    std::string crd_key_name = crd_json["metadata"]["name"].asString();
+    std::string crd_json_string = JsonToString(crd_json);
+    std::string crd_group_string = crd_json["spec"]["group"].asString();
+    std::string crd_kind_string = crd_json["spec"]["names"]["kind"].asString();
+    std::string crd_schema_string = GetCrdSchemaPart(crd_json);
 
-    crdstructs.clear();
-    std::string search_sql = "SELECt * FROM CRD WHERE APIGROUP = \'" + instance_group + "\' AND KIND = \'" + instance_kind + "\' ;";
+    std::string sql = "INSERT OR IGNORE INTO CRD (KEY,VALUE,APIGROUP,KIND,SCHEMA) VALUES (\'";
+    sql += crd_key_name + "\',\'" + crd_json_string + "\',\'" + crd_group_string + "\',\'" + crd_kind_string + "\',\'" + crd_schema_string + "\' );";
     int rc;
     char *erroms = 0;
-    rc = sqlite3_exec(db, search_sql.c_str(), crd_callback, 0, &erroms);
+    rc = sqlite3_exec(db, sql.c_str(), crd_callback, 0, &erroms);
     if (rc)
     {
         LOG(ERROR) << "sql excute error: " << erroms;
         return false;
     }
-    if (crdstructs.empty())
-    {
-        LOG(INFO) << "no matched crd registe,please registe before add instance";
-        return false;
-    }
-    LOG(INFO) << "find matched crd with group: " << instance_group << ", kind: " << instance_kind;
-
-    // json schema
-    std::string crd_schema = crdstructs.begin()->schema;
-    std::string instance_validate = GetAbilityValidatePart(instance_json);
-    if (SchemaValidation(crd_schema, instance_validate))
-    {
-        LOG(INFO) << "the instance in file: " << filepath << " pass the validate ";
-    }
-    else
-    {
-        LOG(INFO) << "validate fail about the file in: " << filepath;
-        return false;
-    }
-    // add instance into the ability table
-    std::string instance_name = instance_json["metadata"]["name"].asString();
-    std::string instance_value = JsonToString(instance_json);
-    std::string instance_version = apiVersion_string.substr(flag);
-    std::string instance_namespace = "default";
-    if (instance_json["metadata"].isMember("namespace"))
-    {
-        std::string instance_namespace = instance_json["metadata"]["namespace"].asString();
-    }
-    std::string instance_key = instance_namespace + "/" + instance_name;
-    std::string insert_sql = "INSERT OR IGNORE INTO ABILITY (KEY,VALUE,APIGROUP,KIND,VERSION) VALUES (\'";
-    insert_sql += instance_key + "\',\'" + instance_value + "\',\'" + instance_group + "\',\'" + instance_kind + "\',\'" + instance_version + "\' );";
-    int rc2;
-    char *erroms2 = 0;
-    rc2 = sqlite3_exec(db, insert_sql.c_str(), ability_callback, 0, &erroms2);
-    if (rc2)
-    {
-        LOG(ERROR) << "sql excute error with: " << erroms2;
-        return false;
-    }
-    LOG(INFO) << "add instance in file: " << filepath << " success";
+    LOG(INFO) << "register success with crd name: " << crd_key_name;
     return true;
 }
 
-bool DatabaseManager::AddDeviceInstance(const std::string &filepath)
+bool DatabaseManager::UnregistCrd(const std::string &name)
 {
-    YAML::Node instance_yaml;
-    Json::Value instance_json;
-    try
-    {
-        instance_yaml = YAML::LoadFile(filepath);
-    }
-    catch (YAML::ParserException e)
-    {
-        LOG(ERROR) << "yaml is malformed.";
-        return false;
-    }
-    catch (YAML::BadFile e)
-    {
-        LOG(ERROR) << "file can't be load";
-        return false;
-    }
-    if (!YamlToJsonForInstance(instance_yaml, instance_json))
-    {
-        LOG(ERROR) << "convert the yaml file in: " << filepath << " to json format fail";
-        return false;
-    }
-    // check the crd is exist or not in the crd table
-    std::string apiVersion_string = instance_json["apiVersion"].asString();
-    int flag = apiVersion_string.find("/");
-    std::string instance_group = apiVersion_string.substr(0, flag);
-    std::string instance_kind = instance_json["kind"].asString();
-    crdstructs.clear();
-    std::string search_sql = "SELECT * FROM CRD WHERE APIGROUP = \'" + instance_group + "\' AND KIND = \'" + instance_kind + "\' ;";
     int rc;
     char *erroms = 0;
-    rc = sqlite3_exec(db, search_sql.c_str(), crd_callback, 0, &erroms);
+    std::string delete_sql = "DELETE FROM CRD WHERE KEY = " + name + ";";
+    rc = sqlite3_exec(db, delete_sql.c_str(), ability_callback, 0, &erroms);
     if (rc)
     {
         LOG(ERROR) << "sql excute error: " << erroms;
         return false;
     }
-    if (crdstructs.empty())
-    {
-        LOG(INFO) << "no matched crd registe,please registe before add instance";
-        return false;
-    }
-    LOG(INFO) << "find matched crd with group: " << instance_group << ", kind: " << instance_kind;
-
-    // json schema
-    // std::string crd_schema = CrdSchemaRevise(crdstructs.begin()->schema);
-    std::string crd_schema = crdstructs.begin()->schema;
-    std::string instance_validate = GetInstanceValidatePart(instance_json);
-    if (SchemaValidation(crd_schema, instance_validate))
-    {
-        LOG(INFO) << "the instance in file: " << filepath << " pass the validate ";
-    }
-    else
-    {
-        LOG(INFO) << "validate fail about the file in: " << filepath;
-        return false;
-    }
-    // add instance into the instance table
-    std::string instance_name = instance_json["metadata"]["name"].asString();
-    std::string instance_namespace = "default";
-    if (instance_json["metadata"].isMember("namespace"))
-    {
-        std::string instance_namespace = instance_json["metadata"]["namespace"].asString();
-    }
-    std::string instance_key = instance_namespace + "/" + instance_name;
-    if (instance_json["spec"].isMember("hostname"))
-    {
-        char name[256];
-        gethostname(name, sizeof(name));
-        std::string hostname = name;
-
-        if (instance_json["spec"]["hostname"] != hostname && instance_json["spec"]["hostname"] != "")
-        {
-            LOG(ERROR) << "the " << instance_json["spec"]["hostname"] << " is not the local hostname";
-            return false;
-        }
-        else
-        {
-            instance_json["spec"]["hostname"] = hostname;
-        }
-    }
-
-    std::string instance_value = JsonToString(instance_json);
-    std::string instance_version = apiVersion_string.substr(flag + 1, apiVersion_string.size() - flag + 1);
-
-    std::string insert_sql = "INSERT OR IGNORE INTO DEVICE (KEY,VALUE,APIGROUP,KIND,VERSION) VALUES (\'";
-    insert_sql += instance_key + "\',\'" + instance_value + "\',\'" + instance_group + "\',\'" + instance_kind + "\',\'" + instance_version + "\' );";
-    int rc2;
-    char *erroms2 = 0;
-    rc2 = sqlite3_exec(db, insert_sql.c_str(), device_callback, 0, &erroms2);
-    if (rc2)
-    {
-        LOG(ERROR) << "sql excute error with: " << erroms2;
-        return false;
-    }
-    LOG(INFO) << "add instance in file: " << filepath << " success";
+    LOG(INFO) << "db clean " << name << " crd resource success";
 
     return true;
 }
+
+// bool DatabaseManager::AddAbilityInstance(const std::string &filepath)
+// {
+//     YAML::Node instance_yaml;
+//     Json::Value instance_json;
+//     try
+//     {
+//         instance_yaml = YAML::LoadFile(filepath);
+//     }
+//     catch (YAML::ParserException e)
+//     {
+//         LOG(ERROR) << "yaml is malformed.";
+//         return false;
+//     }
+//     catch (YAML::BadFile e)
+//     {
+//         LOG(ERROR) << "file can't be load";
+//         return false;
+//     }
+//     if (!YamlToJson(instance_yaml, instance_json))
+//     {
+//         LOG(ERROR) << "convert the yaml file in: " << filepath << " to json format fail";
+//         return false;
+//     }
+
+//     // check the crd is exist or not
+//     std::string apiVersion_string = instance_json["apiVersion"].asString();
+//     int flag = apiVersion_string.find("/");
+//     std::string instance_group = apiVersion_string.substr(0, flag);
+//     std::string instance_kind = instance_json["kind"].asString();
+
+//     crdstructs.clear();
+//     std::string search_sql = "SELECt * FROM CRD WHERE APIGROUP = \'" + instance_group + "\' AND KIND = \'" + instance_kind + "\' ;";
+//     int rc;
+//     char *erroms = 0;
+//     rc = sqlite3_exec(db, search_sql.c_str(), crd_callback, 0, &erroms);
+//     if (rc)
+//     {
+//         LOG(ERROR) << "sql excute error: " << erroms;
+//         return false;
+//     }
+//     if (crdstructs.empty())
+//     {
+//         LOG(INFO) << "no matched crd registe,please registe before add instance";
+//         return false;
+//     }
+//     LOG(INFO) << "find matched crd with group: " << instance_group << ", kind: " << instance_kind;
+
+//     // json schema
+//     std::string crd_schema = crdstructs.begin()->schema;
+//     std::string instance_validate = GetAbilityValidatePart(instance_json);
+//     if (SchemaValidation(crd_schema, instance_validate))
+//     {
+//         LOG(INFO) << "the instance in file: " << filepath << " pass the validate ";
+//     }
+//     else
+//     {
+//         LOG(INFO) << "validate fail about the file in: " << filepath;
+//         return false;
+//     }
+//     // add instance into the ability table
+//     std::string instance_name = instance_json["metadata"]["name"].asString();
+//     std::string instance_value = JsonToString(instance_json);
+//     std::string instance_version = apiVersion_string.substr(flag);
+//     std::string instance_namespace = "default";
+//     if (instance_json["metadata"].isMember("namespace"))
+//     {
+//         std::string instance_namespace = instance_json["metadata"]["namespace"].asString();
+//     }
+//     std::string instance_key = instance_namespace + "/" + instance_name;
+//     std::string insert_sql = "INSERT OR IGNORE INTO ABILITY (KEY,VALUE,APIGROUP,KIND,VERSION) VALUES (\'";
+//     insert_sql += instance_key + "\',\'" + instance_value + "\',\'" + instance_group + "\',\'" + instance_kind + "\',\'" + instance_version + "\' );";
+//     int rc2;
+//     char *erroms2 = 0;
+//     rc2 = sqlite3_exec(db, insert_sql.c_str(), ability_callback, 0, &erroms2);
+//     if (rc2)
+//     {
+//         LOG(ERROR) << "sql excute error with: " << erroms2;
+//         return false;
+//     }
+//     LOG(INFO) << "add instance in file: " << filepath << " success";
+//     return true;
+// }
+
+// bool DatabaseManager::AddDeviceInstance(const std::string &filepath)
+// {
+//     YAML::Node instance_yaml;
+//     Json::Value instance_json;
+//     try
+//     {
+//         instance_yaml = YAML::LoadFile(filepath);
+//     }
+//     catch (YAML::ParserException e)
+//     {
+//         LOG(ERROR) << "yaml is malformed.";
+//         return false;
+//     }
+//     catch (YAML::BadFile e)
+//     {
+//         LOG(ERROR) << "file can't be load";
+//         return false;
+//     }
+//     if (!YamlToJsonForInstance(instance_yaml, instance_json))
+//     {
+//         LOG(ERROR) << "convert the yaml file in: " << filepath << " to json format fail";
+//         return false;
+//     }
+//     // check the crd is exist or not in the crd table
+//     std::string apiVersion_string = instance_json["apiVersion"].asString();
+//     int flag = apiVersion_string.find("/");
+//     std::string instance_group = apiVersion_string.substr(0, flag);
+//     std::string instance_kind = instance_json["kind"].asString();
+//     crdstructs.clear();
+//     std::string search_sql = "SELECT * FROM CRD WHERE APIGROUP = \'" + instance_group + "\' AND KIND = \'" + instance_kind + "\' ;";
+//     int rc;
+//     char *erroms = 0;
+//     rc = sqlite3_exec(db, search_sql.c_str(), crd_callback, 0, &erroms);
+//     if (rc)
+//     {
+//         LOG(ERROR) << "sql excute error: " << erroms;
+//         return false;
+//     }
+//     if (crdstructs.empty())
+//     {
+//         LOG(INFO) << "no matched crd registe,please registe before add instance";
+//         return false;
+//     }
+//     LOG(INFO) << "find matched crd with group: " << instance_group << ", kind: " << instance_kind;
+
+//     // json schema
+//     // std::string crd_schema = CrdSchemaRevise(crdstructs.begin()->schema);
+//     std::string crd_schema = crdstructs.begin()->schema;
+//     std::string instance_validate = GetInstanceValidatePart(instance_json);
+//     if (SchemaValidation(crd_schema, instance_validate))
+//     {
+//         LOG(INFO) << "the instance in file: " << filepath << " pass the validate ";
+//     }
+//     else
+//     {
+//         LOG(INFO) << "validate fail about the file in: " << filepath;
+//         return false;
+//     }
+//     // add instance into the instance table
+//     std::string instance_name = instance_json["metadata"]["name"].asString();
+//     std::string instance_namespace = "default";
+//     if (instance_json["metadata"].isMember("namespace"))
+//     {
+//         std::string instance_namespace = instance_json["metadata"]["namespace"].asString();
+//     }
+//     std::string instance_key = instance_namespace + "/" + instance_name;
+//     if (instance_json["spec"].isMember("hostname"))
+//     {
+//         char name[256];
+//         gethostname(name, sizeof(name));
+//         std::string hostname = name;
+
+//         if (instance_json["spec"]["hostname"] != hostname && instance_json["spec"]["hostname"] != "")
+//         {
+//             LOG(ERROR) << "the " << instance_json["spec"]["hostname"] << " is not the local hostname";
+//             return false;
+//         }
+//         else
+//         {
+//             instance_json["spec"]["hostname"] = hostname;
+//         }
+//     }
+
+//     std::string instance_value = JsonToString(instance_json);
+//     std::string instance_version = apiVersion_string.substr(flag + 1, apiVersion_string.size() - flag + 1);
+
+//     std::string insert_sql = "INSERT OR IGNORE INTO DEVICE (KEY,VALUE,APIGROUP,KIND,VERSION) VALUES (\'";
+//     insert_sql += instance_key + "\',\'" + instance_value + "\',\'" + instance_group + "\',\'" + instance_kind + "\',\'" + instance_version + "\' );";
+//     int rc2;
+//     char *erroms2 = 0;
+//     rc2 = sqlite3_exec(db, insert_sql.c_str(), device_callback, 0, &erroms2);
+//     if (rc2)
+//     {
+//         LOG(ERROR) << "sql excute error with: " << erroms2;
+//         return false;
+//     }
+//     LOG(INFO) << "add instance in file: " << filepath << " success";
+
+//     return true;
+// }
 
 bool DatabaseManager::DBGetDeviceInstances(const std::string &resourcetype, std::map<std::string, std::string> &instance)
 {
@@ -290,11 +331,8 @@ bool DatabaseManager::DBGetCloudAddress(std::string &cloudaddress)
     return true;
 }
 
-bool DatabaseManager::DBStoreAbilityInstance(const std::string &data)
+bool DatabaseManager::DBStoreAbilityInstance(Json::Value &instance_json)
 {
-    Json::Value instance_json;
-    StringToJson(data, instance_json);
-
     std::string apiVersion_string = instance_json["apiVersion"].asString();
     int flag = apiVersion_string.find("/");
     std::string instance_group = apiVersion_string.substr(0, flag);
@@ -338,6 +376,7 @@ bool DatabaseManager::DBStoreAbilityInstance(const std::string &data)
     {
         std::string instance_namespace = instance_json["metadata"]["namespace"].asString();
     }
+    instance_json["metadata"]["namespace"] = instance_namespace;
     std::string instance_key = instance_namespace + "/" + instance_name;
     std::string insert_sql = "INSERT OR IGNORE INTO ABILITY (KEY,VALUE,APIGROUP,KIND,VERSION) VALUES (\'";
     insert_sql += instance_key + "\',\'" + instance_value + "\',\'" + instance_group + "\',\'" + instance_kind + "\',\'" + instance_version + "\' );";
@@ -353,11 +392,8 @@ bool DatabaseManager::DBStoreAbilityInstance(const std::string &data)
     return true;
 }
 
-bool DatabaseManager::DBStoreDeviceInstance(const std::string &data)
+bool DatabaseManager::DBStoreDeviceInstance(Json::Value &instance_json)
 {
-    Json::Value instance_json;
-    StringToJson(data, instance_json);
-
     // check the crd is exist or not in the crd table
     std::string apiVersion_string = instance_json["apiVersion"].asString();
     int flag = apiVersion_string.find("/");
@@ -399,6 +435,7 @@ bool DatabaseManager::DBStoreDeviceInstance(const std::string &data)
     {
         std::string instance_namespace = instance_json["metadata"]["namespace"].asString();
     }
+    instance_json["metadata"]["namespace"] = instance_namespace;
     std::string instance_key = instance_namespace + "/" + instance_name;
     if (instance_json["spec"].isMember("hostname"))
     {
@@ -457,10 +494,8 @@ bool DatabaseManager::DBStoreCloudAddress(const std::string &cloudaddress)
     return true;
 }
 
-bool DatabaseManager::DBUpdateDeviceInstance(const std::string &data)
+bool DatabaseManager::DBUpdateDeviceInstance(const Json::Value &jnode)
 {
-    Json::Value jnode;
-    StringToJson(data, jnode);
     std::string apiVersion_string = jnode["apiVersion"].asString();
     int flag = apiVersion_string.find("/");
     std::string instance_group = apiVersion_string.substr(0, flag);
@@ -468,10 +503,10 @@ bool DatabaseManager::DBUpdateDeviceInstance(const std::string &data)
 
     std::string instance_name = jnode["metadata"]["name"].asString();
     std::string instance_kind = jnode["kind"].asString();
-    std::string instance_value = data;
+    std::string instance_value = JsonToString(jnode);
     std::string instance_namespace = jnode["metadata"]["namespace"].asString();
-    std::string instance_key = instance_namespace + "/" +instance_name;
-    std::string update_sql = "UPDATE DEVICE SET VALUE = \'" + instance_value  + "\' , APIGROUP = \'" + instance_group + "\', KIND = \'" + instance_kind + "\', VERSION = \'" + instance_version;
+    std::string instance_key = instance_namespace + "/" + instance_name;
+    std::string update_sql = "UPDATE DEVICE SET VALUE = \'" + instance_value + "\' , APIGROUP = \'" + instance_group + "\', KIND = \'" + instance_kind + "\', VERSION = \'" + instance_version;
     update_sql += "\' WHERE NAME = \'" + instance_key + "\' ;";
     int rc;
     char *erroms = 0;
@@ -485,11 +520,8 @@ bool DatabaseManager::DBUpdateDeviceInstance(const std::string &data)
     return true;
 }
 
-bool DatabaseManager::DBUpdateAbilityInstance(const std::string &data)
+bool DatabaseManager::DBUpdateAbilityInstance(const Json::Value &instance_json)
 {
-    Json::Value instance_json;
-    StringToJson(data, instance_json);
-
     std::string apiVersion_string = instance_json["apiVersion"].asString();
     int flag = apiVersion_string.find("/");
     std::string instance_name = instance_json["metadata"]["name"].asString();
@@ -503,7 +535,7 @@ bool DatabaseManager::DBUpdateAbilityInstance(const std::string &data)
         std::string instance_namespace = instance_json["metadata"]["namespace"].asString();
     }
     std::string instance_key = instance_namespace + "/" + instance_name;
-    std::string update_sql = "UPDATE ABILITY SET VALUE = \'" + instance_value + "\' , APIGROUP = \'" +instance_group + "\', KIND = \'" + instance_kind + "\', VERSION = \'" + instance_version;
+    std::string update_sql = "UPDATE ABILITY SET VALUE = \'" + instance_value + "\' , APIGROUP = \'" + instance_group + "\', KIND = \'" + instance_kind + "\', VERSION = \'" + instance_version;
     update_sql += "\' WHERE NAME = \'" + instance_key + "\' ;";
     int rc2;
     char *erroms2 = 0;

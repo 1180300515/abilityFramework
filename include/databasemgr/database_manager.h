@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <sqlite3.h>
+#include "glog/logging.h"
 
 #include "database_store_struct.h"
 
@@ -14,6 +15,7 @@ class DatabaseManager
 public:
     static DatabaseManager &getInstance()
     {
+        LOG(INFO) << "init database manager" ;
         static DatabaseManager manager;
         return manager;
     }
@@ -27,23 +29,24 @@ public:
      *
      * @return whether success
      */
-    bool RegisterCrd(const std::string &filepath);
-
-    /**
-     * read file into the ability table
-     *
-     * @param filepath: the file path
-     *
-     * @return whether success
-     */
-    bool AddAbilityInstance(const std::string &filepath);
-    /**
-     * read file into the instance table
-     *
-     * @param filepath: the file path
-     * @return success or not
-     */
-    bool AddDeviceInstance(const std::string &filepath);
+    bool RegistCrdFromFile(const std::string &filepath);
+    bool RegistCrd(const std::string &data);
+    bool UnregistCrd(const std::string &name);
+    // /**
+    //  * read file into the ability table
+    //  *
+    //  * @param filepath: the file path
+    //  *
+    //  * @return whether success
+    //  */
+    // bool AddAbilityInstance(const std::string &filepath);
+    // /**
+    //  * read file into the instance table
+    //  *
+    //  * @param filepath: the file path
+    //  * @return success or not
+    //  */
+    // bool AddDeviceInstance(const std::string &filepath);
     /**
      * read instance into the memory
      */
@@ -53,8 +56,8 @@ public:
     /**
      * store the instance
     */
-    bool DBStoreAbilityInstance(const std::string &data);
-    bool DBStoreDeviceInstance(const std::string &data);
+    bool DBStoreAbilityInstance(Json::Value &instance_json);
+    bool DBStoreDeviceInstance(Json::Value &instance_json);
     /**
      * store the cloud address into db
      */
@@ -62,8 +65,8 @@ public:
     /**
      * update the instance
      */
-    bool DBUpdateDeviceInstance(const std::string &data);
-    bool DBUpdateAbilityInstance(const std::string &data);
+    bool DBUpdateDeviceInstance(const Json::Value &instance_json);
+    bool DBUpdateAbilityInstance(const Json::Value &instance_json);
     /**
      * delete the instance
      */
