@@ -7,8 +7,7 @@ bool UnMarshal(const std::string source, std::shared_ptr<NonLocalResource> des)
     Json::Value jnode;
     Json::Reader reader;
     reader.parse(source, jnode);
-    des->name = jnode["name"].asString();
-    des->namespace_name = jnode["namespace"].asString();
+    des->name = jnode["key"].asString();
     des->hostname = jnode["hostname"].asString();
     des->kind = jnode["kind"].asString();
     for (int i = 0; i < jnode["devicelist"].size(); i++)
@@ -27,8 +26,7 @@ bool UnMarshal(const std::string source, std::shared_ptr<NonLocalResource> des)
 std::string Marshal(std::shared_ptr<NonLocalResource> source)
 {
     Json::Value jnode;
-    jnode["name"] = source->name;
-    jnode["namespace"] = source->namespace_name;
+    jnode["key"] = source->key;
     jnode["hostname"] = source->hostname;
     jnode["kind"] = source->kind;
     for (int i = 0; i < source->devicelist.size(); i++)
