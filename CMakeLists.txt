@@ -96,6 +96,7 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/src/databasemgr databasemgr)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/discoverymgr discoverymgr)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/lifecyclemgr lifecyclemgr)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/resourcemgr resourcemgr)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/utils utils)
 
 
 include_directories(${PROJECT_SOURCE_DIR}/include/protos)
@@ -116,6 +117,7 @@ add_executable(${PROJECT_NAME} src/main.cpp
     ${discoverymgr}
     ${lifecyclemgr}
     ${resourcemgr}
+    ${utils}
 )
 # add_executable(${PROJECT_NAME} src/main.cpp 
 #     src/plugincore/pluginload.cpp 
