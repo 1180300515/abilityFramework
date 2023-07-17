@@ -19,12 +19,14 @@ extern std::string device_hostname;
 #define CloudSyncStepTwo "sync-s2c"
 #define CloudSyncStepThree "sync-c2s"
 #define CloudSyncAllOK "allok"
-#define EdgeSync "edgesync"
+#define EndSync "endsync"
+#define EndSyncAllOK "endok"
 // resource type
 #define CameraDeviceResourcetype "CameraDevice"
 #define SensorDeviceResourcetype "SensorDevice"
 #define LoudspeakerDeviceResourcetype "LoudspeakerDevice"
 #define MicrophoneDeviceResourcetype "MicrophoneDevice"
+#define AbilityResourcetype "Ability"
 // event type
 #define EdgeUpdateEventType "edgeupdate"
 #define EdgeDeleteEventType "edgedelete"
