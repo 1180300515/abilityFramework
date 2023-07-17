@@ -3,13 +3,19 @@
 
 #include <optional>
 #include <string>
+#include <functional>
 
 class IConnection
 {
 public:
-    virtual bool Connect(std::string address);
-    virtual bool Disconnect();
-    virtual std::optional<std::string> SendAndReceviceMessage(std::string data);
+    virtual bool Connect(std::string address) = 0;
+    virtual bool Disconnect() = 0;
+    virtual bool SendMessage(const std::string &data) = 0;
+    /**
+     * @brief server to receive message
+     * @param callback the receive message callback
+     */
+    virtual void StartServerToReceiveMessage(std::function<void(std::string)> callback) = 0;
 };
 
 #endif // ICONNECTION_H

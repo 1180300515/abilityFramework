@@ -28,32 +28,22 @@ void ConnectionManager::OnEndAddressRecordChange(std::map<std::string, ConnectIn
     this->endAddressRecord_ = newrecord;
 }
 
-void ConnectionManager::OnCloudAddressRecordChange(std::map<std::string, ConnectInfo> &address)
+void ConnectionManager::OnCloudAddressRecordChange(const ConnectInfo &address)
 {
     std::lock_guard<std::mutex> locker(cloudlock_);
-    std::unordered_map<std::string, ConnectInfo> newrecord;
-    for (const auto &iter : address)
+    if (cloudAddressRecord_.destinationAddress == cloudAddressRecord_.destinationAddress)
     {
-        if (cloudAddressRecord_.count(iter.first) == 0)
-        {
-            newrecord[iter.first] = iter.second;
-        }
-        else if (cloudAddressRecord_[iter.first].destinationAddress == iter.second.destinationAddress)
-        {
-            newrecord[iter.first] = cloudAddressRecord_[iter.first];
-        }
-        else
-        {
-            newrecord[iter.first] = iter.second;
-        }
+        cloudAddressRecord_ = address;
     }
-    this->cloudAddressRecord_ = newrecord;
+    else
+    {
+        cloudAddressRecord_ = address;
+    }
 }
 
-void ConnectionManager::Init(std::function<void(std::string)> cloud, std::function<void(std::string)> end)
+void ConnectionManager::Init(std::function<void(std::string)> servercall_)
 {
-    this->CloudCallback_ = cloud;
-    this->EndCallback_ = end;
+    this->recvCallback_ = servercall_;
 }
 
 bool ConnectionManager::ConnectWithEnd()
@@ -104,7 +94,7 @@ bool ConnectionManager::DisconnectWithCloud()
     return false;
 }
 
-void ConnectionManager::SendAndReceiveMessageToCloud(const std::string &data)
+void ConnectionManager::SendMessageToCloud(const std::string &data)
 {
     if (!CloudIsConnected)
     {
@@ -112,24 +102,18 @@ void ConnectionManager::SendAndReceiveMessageToCloud(const std::string &data)
     }
     else
     {
-        for (const auto &iter : CloudConnectionRecord)
+        if (CloudConnectionRecord->SendMessage(data))
         {
-            auto iterdata = iter.second->SendAndReceviceMessage(data);
-            if (iterdata != std::nullopt)
-            {
-                this->CloudCallback_(iterdata.value());
-            }
-            else
-            {
-                LOG(WARNING) << "send message to :" << iter.first << " fail";
-            }
+            LOG(INFO) << "send and receive message to cloud success";
         }
-
-        LOG(INFO) << "send and receive message to cloud success";
+        else
+        {
+            LOG(WARNING) << "send message to :" << cloudAddressRecord_.destinationAddress << " fail";
+        }
     }
 }
 
-void ConnectionManager::SendAndReceiveMessageToEnd(const std::string &data)
+void ConnectionManager::SendMessageToEnd(const std::string &data, std::optional<std::string> target_host)
 {
     if (!EndIsConnected)
     {
@@ -137,19 +121,31 @@ void ConnectionManager::SendAndReceiveMessageToEnd(const std::string &data)
     }
     else
     {
-        for (const auto &iter : EndConnectionRecord)
+        if (target_host == std::nullopt)
         {
-            auto iterdata = iter.second->SendAndReceviceMessage(data);
-            if (iterdata != std::nullopt)
+            for (const auto &iter : EndConnectionRecord)
             {
-                this->EndCallback_(iterdata.value());
+                if (iter.second->SendMessage(data))
+                {
+                    LOG(INFO) << "send message to end : " << iter.first << " success";
+                }
+                else
+                {
+                    LOG(WARNING) << "send message to :" << iter.first << " fail";
+                }
+            }
+        }
+        else
+        {
+            if (EndConnectionRecord[target_host.value()]->SendMessage(data))
+            {
+                LOG(INFO) << "send message to end : " << target_host.value() << " success";
             }
             else
             {
-                LOG(WARNING) << "send message to :" << iter.first << " fail";
+                LOG(WARNING) << "send message to :" << target_host.value() << " fail";
             }
         }
-        LOG(INFO) << "send and receive message to end success";
     }
 }
 
@@ -229,71 +225,48 @@ void ConnectionManager::CloudConnectionHandling()
 {
     std::lock_guard<std::mutex> locker2(cloudlock_);
 
-    // clean the nonexist connection
-    for (auto it = CloudConnectionRecord.begin(); it != CloudConnectionRecord.end();)
-    {
-        if (cloudAddressRecord_.count(it->first) == 0)
-        {
-            it->second->Disconnect();
-            CloudConnectionRecord.erase(it++);
-        }
-        else
-        {
-            it++;
-        }
-    }
-
     // None status handle
-    for (auto &iter : cloudAddressRecord_)
+    if (cloudAddressRecord_.status == ConnectionStatus::None)
     {
-        if (iter.second.status == ConnectionStatus::None)
+        if (cloudAddressRecord_.protocoltype == ProtocolType::RandomProtocol)
         {
-            if (iter.second.protocoltype == ProtocolType::RandomProtocol)
+            if (cloudAddressRecord_.tendency == ProtocolTendency::Random)
             {
-                if (iter.second.tendency == ProtocolTendency::Random)
-                {
-                    auto connect = std::make_shared<ConnectByUDP>(iter.first);
-                    this->EndConnectionRecord[iter.first] = connect;
-                }
+                this->CloudConnectionRecord = std::make_shared<ConnectByUDP>(cloudAddressRecord_.destinationAddress);
             }
-            else if (iter.second.protocoltype == ProtocolType::UDP)
-            {
-                auto connect = std::make_shared<ConnectByUDP>(iter.first);
-                this->EndConnectionRecord[iter.first] = connect;
-            }
-            else if (iter.second.protocoltype == ProtocolType::TCP)
-            {
-                auto connect = std::make_shared<ConnectByTCP>(iter.first);
-                this->EndConnectionRecord[iter.first] = connect;
-            }
-            iter.second.status = ConnectionStatus::Disconnected;
         }
+        else if (cloudAddressRecord_.protocoltype == ProtocolType::UDP)
+        {
+            this->CloudConnectionRecord = std::make_shared<ConnectByUDP>(cloudAddressRecord_.destinationAddress);
+        }
+        else if (cloudAddressRecord_.protocoltype == ProtocolType::TCP)
+        {
+            this->CloudConnectionRecord = std::make_shared<ConnectByTCP>(cloudAddressRecord_.destinationAddress);
+        }
+        cloudAddressRecord_.status = ConnectionStatus::Disconnected;
     }
 
     // connected or disconnected status check
-    for (auto &iter : cloudAddressRecord_)
+    if (CloudIsConnected)
     {
-        if (CloudIsConnected)
+        if (this->CloudConnectionRecord->Connect(cloudAddressRecord_.destinationAddress))
         {
-            if (this->CloudConnectionRecord[iter.first]->Connect(iter.second.destinationAddress))
-            {
-                iter.second.status = ConnectionStatus::Connected;
-            }
-            else
-            {
-                LOG(ERROR) << "connect with cloud : " << iter.first << " fail";
-            }
+            cloudAddressRecord_.status = ConnectionStatus::Connected;
         }
         else
         {
-            if (this->CloudConnectionRecord[iter.first]->Disconnect())
-            {
-                iter.second.status = ConnectionStatus::Disconnected;
-            }
-            else
-            {
-                LOG(ERROR) << "disconnect with cloud : " << iter.first << " fail";
-            }
+            LOG(ERROR) << "connect with cloud : " << cloudAddressRecord_.destinationAddress << " fail";
+        }
+    }
+    else
+    {
+        if (this->CloudConnectionRecord->Disconnect())
+        {
+            cloudAddressRecord_.status = ConnectionStatus::Disconnected;
+        }
+        else
+        {
+            LOG(ERROR) << "disconnect with cloud : " << cloudAddressRecord_.destinationAddress << " fail";
         }
     }
 }

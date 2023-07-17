@@ -8,7 +8,8 @@ class ConnectByWebsocket : public IConnection
 public:
     bool Connect(std::string address);
     bool Disconnect();
-    std::optional<std::string> SendAndReceviceMessage(std::string data);
+    bool SendMessage(const std::string &data);
+    void StartServerToReceiveMessage(std::function<void(std::string)> callback);
 
 private:
 };

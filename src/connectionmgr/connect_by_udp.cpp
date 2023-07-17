@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 
 #include "glog/logging.h"
+#include "global_var.h"
 
 ConnectByUDP::~ConnectByUDP()
 {
@@ -19,6 +20,8 @@ bool ConnectByUDP::Connect(std::string address)
         LOG(INFO) << "this UDP connection change destination from: " << this->address << " to: " << address;
         this->address = address;
     }
+    int index = this->address.find(":");
+    this->udpport = this->address.substr(index + 1);
     return true;
 }
 
@@ -28,7 +31,7 @@ bool ConnectByUDP::Disconnect()
     return true;
 }
 
-std::optional<std::string> ConnectByUDP::SendAndReceviceMessage(std::string data)
+bool ConnectByUDP::SendMessage(const std::string &data)
 {
     /* socket文件描述符 */
     int sock_fd;
@@ -38,7 +41,7 @@ std::optional<std::string> ConnectByUDP::SendAndReceviceMessage(std::string data
     if (sock_fd < 0)
     {
         LOG(ERROR) << "socket error";
-        return std::nullopt;
+        return false;
     }
     int index = this->address.find(":");
     std::string addr = this->address.substr(0, index);
@@ -54,28 +57,54 @@ std::optional<std::string> ConnectByUDP::SendAndReceviceMessage(std::string data
     len = sizeof(addr_serv);
 
     int send_num;
-    int recv_num;
-    char recv_buf[10000];
 
     send_num = sendto(sock_fd, (char *)data.c_str(), strlen((char *)data.c_str()), 0, (struct sockaddr *)&addr_serv, len);
 
     if (send_num < 0)
     {
         LOG(ERROR) << "udp send error:";
-        return std::nullopt;
+        return false;
     }
     this->sockid = sock_fd;
+    return true;
+}
 
-    recv_num = recvfrom(sock_fd, recv_buf, sizeof(recv_buf), 0, (struct sockaddr *)&addr_serv, (socklen_t *)&len);
-
-    if (recv_num < 0)
+void ConnectByUDP::StartServerToReceiveMessage(std::function<void(std::string)> callback)
+{
+    std::string port = this->udpport;
+    int sockfd;
+    struct sockaddr_in serv_addr;
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {
-        perror("recvfrom error:");
+        LOG(ERROR) << "socket create fail";
+        exit(1);
+    }
+    memset(&serv_addr, 0, sizeof(struct sockaddr_in));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(atoi(port.c_str()));
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    int len = sizeof(serv_addr);
+
+    if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr)) < 0)
+    {
+        LOG(ERROR) << "bind failed!";
         exit(1);
     }
 
-    recv_buf[recv_num] = '\0';
-    std::string recvmsg(recv_buf);
-    close(sock_fd);
-    return recvmsg;
+    char msg[10000];
+    int length;
+    struct sockaddr_in addr_client;
+    while (1)
+    {
+        memset(&msg, 0, sizeof(msg));
+        length = recvfrom(sockfd, (char *)&msg, sizeof(msg), 0, (struct sockaddr *)&addr_client, (socklen_t *)&len);
+        if (length < 0)
+        {
+            LOG(ERROR) << "recvfrom error";
+            exit(1);
+        }
+        std::string recvmsg(msg);
+        LOG(INFO) << "receive message " << recvmsg;
+        callback(recvmsg);
+    }
 }

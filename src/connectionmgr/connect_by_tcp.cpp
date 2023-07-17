@@ -55,14 +55,18 @@ bool ConnectByTCP::Disconnect()
     return true;
 }
 
-std::optional<std::string> ConnectByTCP::SendAndReceviceMessage(std::string data)
+bool ConnectByTCP::SendMessage(const std::string &data)
 {
     if (send(this->sockid, (char *)data.c_str(), strlen((char *)data.c_str()), 0) < 0)
     {
         LOG(WARNING) << "send to address: " << this->address << " fail!";
-        return std::nullopt;
+        return false;
     }
+    return true;
+}
 
+void ConnectByTCP::StartServerToReceiveMessage(std::function<void(std::string)> callback)
+{
     char msg[10000];
     int length;
     while (true)
@@ -70,8 +74,7 @@ std::optional<std::string> ConnectByTCP::SendAndReceviceMessage(std::string data
         memset(&msg, 0, sizeof(msg));
         length = recv(this->sockid, (char *)&msg, sizeof(msg), 0);
         std::string recvmsg(msg);
-        LOG(INFO) << "receive message from : " << this->address;
-        return recvmsg;
-    }
-    return std::nullopt;
+        LOG(INFO) << "receive message " << recvmsg;
+        callback(recvmsg);
+    } 
 }
