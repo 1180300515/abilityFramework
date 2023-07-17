@@ -7,6 +7,7 @@
 
 #include <sqlite3.h>
 #include "glog/logging.h"
+#include "json/json.h"
 
 #include "database_store_struct.h"
 
