@@ -5,23 +5,17 @@
 #include <vector>
 #include <memory>
 
-struct DeviceInfoDescribe
-{
-    std::string devicename;
-    std::string deviceid;
-    std::string deviceip;
-    std::string deviceport;
-    std::string status;
-};
+#include "common_struct_defination.h"
 
-// to describe a resource data that will keep in nonlocal host
+/**
+ * @brief to describe a resource data that will keep in nonlocal host
+ */
 struct NonLocalResource
 {
-    std::string name;
-    std::string namespace_name;
+    std::string key; // namespace/name
     std::string hostname;
     std::string kind;
-    std::vector<DeviceInfoDescribe> devicelist;
+    std::vector<DeviceDescribe> devicelist;
 };
 
 /**

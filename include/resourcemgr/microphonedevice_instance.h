@@ -3,7 +3,9 @@
 
 #include <map>
 
-#include "instance_info.h"
+#include "json/json.h"
+
+#include "device_instance_info.h"
 
 struct MicrophoneProperties
 {
@@ -27,13 +29,13 @@ struct MicrophoneSpec
     MicrophoneProperties properties;
     std::map<std::string,std::string> customprops;
 };
-class MicrophoneInstance : public InstanceInfo
+class MicrophoneInstance : public DeviceInstanceInfo
 {
 public:
     MicrophoneSpec spec;
     std::string Marshal();
-    bool UnMarshal(std::string source);
-    bool updateInstance(std::string data);
+    bool UnMarshal(const Json::Value &jnode);
+    bool updateInstance(const Json::Value &jnode);
     std::string getInstanceVersion();
 };
 #endif //MICROPHONEDEVICE_INSTANCE_H

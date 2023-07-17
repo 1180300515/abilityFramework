@@ -85,13 +85,10 @@ std::string LoudspeakerInstance::Marshal()
     return writer.write(jnode);
 }
 
-bool LoudspeakerInstance::UnMarshal(std::string source)
+bool LoudspeakerInstance::UnMarshal(const Json::Value &jnode)
 {
     std::lock_guard<std::mutex> locker(resourcelock_);
-    InstanceInfo::UnMarshal(source);
-    Json::Value jnode;
-    Json::Reader reader;
-    reader.parse(source, jnode);
+    DeviceInstanceInfo::UnMarshal(jnode);
     spec.kind = jnode["spec"]["kind"].asString();
     spec.version = jnode["spec"]["version"].asString();
     spec.hostname = jnode["spec"]["hostname"].asString();
@@ -155,9 +152,9 @@ bool LoudspeakerInstance::UnMarshal(std::string source)
     return true;
 }
 
-bool LoudspeakerInstance::updateInstance(std::string data)
+bool LoudspeakerInstance::updateInstance(const Json::Value &jnode)
 {
-    return UnMarshal(data);
+    return UnMarshal(jnode);
 }
 
 std::string LoudspeakerInstance::getInstanceVersion()

@@ -1,19 +1,19 @@
-#include "ability_info.h"
+#include "ability_instance_info.h"
 
 #include "json/json.h"
 
-bool AbilityInfo::UnMarshal(const std::string source)
+bool AbilityInstanceInfo::UnMarshal(const Json::Value &jnode)
 {
     std::lock_guard<std::mutex> locker(abilitylock_);
-    Json::Value jnode;
-    Json::Reader reader;
-    reader.parse(source, jnode);
     apiVersion = jnode["apiVersion"].asString();
     kind = jnode["kind"].asString();
+    metadata.name = jnode["metadata"]["name"].asString();
+    metadata.namespace_name = jnode["metadata"]["namespace"].asString();
     level = jnode["level"].asString();
     abilityname = jnode["abilityname"].asString();
     description = jnode["description"].asString();
     followed = jnode["followed"].asString();
+    version = jnode["version"].asString();
 
     if (depends.abilities.size() != 0)
     {
@@ -97,7 +97,7 @@ bool AbilityInfo::UnMarshal(const std::string source)
     return true;
 }
 
-std::string AbilityInfo::Marshal()
+std::string AbilityInstanceInfo::Marshal()
 {
     std::lock_guard<std::mutex> locker(abilitylock_);
     Json::Value jnode;
@@ -109,6 +109,7 @@ std::string AbilityInfo::Marshal()
     jnode["abilityname"] = abilityname;
     jnode["description"] = description;
     jnode["followed"] = followed;
+    jnode["version"] = version;
     if (depends.abilities.size() != 0)
     {
         for (auto &iter : depends.abilities)
@@ -167,7 +168,7 @@ std::string AbilityInfo::Marshal()
     return writer.write(jnode);
 }
 
-bool AbilityInfo::updateAbility(std::string data)
+bool AbilityInstanceInfo::updateAbility(const Json::Value &jnode)
 {
-    return UnMarshal(data);
+    return UnMarshal(jnode);
 }

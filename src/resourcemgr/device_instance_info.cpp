@@ -1,12 +1,9 @@
-#include "instance_info.h"
+#include "device_instance_info.h"
 
 #include "json/json.h"
 
-bool InstanceInfo::UnMarshal(std::string source)
+bool DeviceInstanceInfo::UnMarshal(const Json::Value &jnode)
 {
-    Json::Value jnode;
-    Json::Reader reader;
-    reader.parse(source, jnode);
     apiVersion = jnode["apiVersion"].asString();
     kind = jnode["kind"].asString();
     metadata.name = jnode["metadata"]["name"].asString();

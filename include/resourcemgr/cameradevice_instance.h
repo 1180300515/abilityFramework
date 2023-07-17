@@ -3,7 +3,9 @@
 
 #include <map>
 
-#include "instance_info.h"
+#include "json/json.h"
+
+#include "device_instance_info.h"
 
 // a cameradevice struct
 struct CameraProperties
@@ -34,13 +36,13 @@ struct CameraSpec
     std::map<std::string,std::string> customprops;
 };
 
-class CameraInstance : public InstanceInfo
+class CameraInstance : public DeviceInstanceInfo
 {
 public:
     CameraSpec spec;
     std::string Marshal();
-    bool UnMarshal(std::string source);
-    bool updateInstance(std::string data);
+    bool UnMarshal(const Json::Value &jnode);
+    bool updateInstance(const Json::Value &jnode);
     std::string getInstanceVersion();
 };
 

@@ -3,7 +3,9 @@
 
 #include <map>
 
-#include "instance_info.h"
+#include "json/json.h"
+
+#include "device_instance_info.h"
 
 // sensor part
 struct Sensorproperties
@@ -22,13 +24,13 @@ struct SensorSpec
     Sensorproperties properties;
     std::map<std::string,std::string> customprops;
 };
-class SensorInstance : public InstanceInfo
+class SensorInstance : public DeviceInstanceInfo
 {
 public:
     SensorSpec spec;
     std::string Marshal();
-    bool UnMarshal(std::string source);
-    bool updateInstance(std::string data);
+    bool UnMarshal(const Json::Value &jnode);
+    bool updateInstance(const Json::Value &jnode);
     std::string getInstanceVersion();
 };
 #endif

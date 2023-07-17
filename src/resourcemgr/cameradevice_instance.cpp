@@ -93,13 +93,10 @@ std::string CameraInstance::Marshal()
     return writer.write(jnode);
 }
 
-bool CameraInstance::UnMarshal(std::string source)
+bool CameraInstance::UnMarshal(const Json::Value &jnode)
 {
     std::lock_guard<std::mutex> locker(resourcelock_);
-    InstanceInfo::UnMarshal(source);
-    Json::Value jnode;
-    Json::Reader reader;
-    reader.parse(source, jnode);
+    DeviceInstanceInfo::UnMarshal(jnode);
     spec.kind = jnode["spec"]["kind"].asString();
     spec.version = jnode["spec"]["version"].asString();
     spec.hostname = jnode["spec"]["hostname"].asString();
@@ -175,9 +172,9 @@ bool CameraInstance::UnMarshal(std::string source)
     return true;
 }
 
-bool CameraInstance::updateInstance(std::string data)
+bool CameraInstance::updateInstance(const Json::Value &jnode)
 {
-    return UnMarshal(data);
+    return UnMarshal(jnode);
 }
 
 std::string CameraInstance::getInstanceVersion()

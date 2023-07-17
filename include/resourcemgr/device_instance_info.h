@@ -5,12 +5,12 @@
 #include <mutex>
 #include <vector>
 
+#include "json/json.h"
+
+#include "common_struct_defination.h"
+
 // common part struct define
-struct InstanceMetadata
-{
-    std::string name;
-    std::string namespace_name;
-};
+
 struct DStatus
 {
     bool occupancy;
@@ -36,23 +36,15 @@ struct Acapability
     std::string name;
     std::vector<std::string> api;
 };
-struct DeviceDescribe
-{
-    std::string devicename;
-    std::string deviceid;
-    std::string deviceip;
-    std::string deviceport;
-    std::string status;
-};
 
 /**
  * the base class of all the device
 */
-class InstanceInfo {
+class DeviceInstanceInfo {
 public:
     std::string apiVersion;
     std::string kind;
-    InstanceMetadata metadata;
+    Metadata metadata;
     DStatus status;
     Api api;
     std::vector<DeviceDescribe> devicelist;
@@ -60,8 +52,8 @@ public:
     std::mutex resourcelock_ ;
     
     virtual std::string Marshal() = 0;
-    virtual bool UnMarshal(std::string source);
-    virtual bool updateInstance(std::string data) = 0;
+    virtual bool UnMarshal(const Json::Value &jnode);
+    virtual bool updateInstance(const Json::Value &jnode) = 0;
     virtual std::string getInstanceVersion() = 0;
 };
 

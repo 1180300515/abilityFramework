@@ -3,7 +3,9 @@
 
 #include <map>
 
-#include "instance_info.h"
+#include "json/json.h"
+
+#include "device_instance_info.h"
 
 // loudspeaker part
 struct LoudspeakerProperties
@@ -29,13 +31,13 @@ struct LoudspeakerSpec
     LoudspeakerProperties properties;
     std::map<std::string,std::string> customprops;
 };
-class LoudspeakerInstance : public InstanceInfo
+class LoudspeakerInstance : public DeviceInstanceInfo
 {
 public:
     LoudspeakerSpec spec;
     std::string Marshal();
-    bool UnMarshal(std::string source);
-    bool updateInstance(std::string data);
+    bool UnMarshal(const Json::Value &jnode);
+    bool updateInstance(const Json::Value &jnode);
     std::string getInstanceVersion();
 };
 #endif

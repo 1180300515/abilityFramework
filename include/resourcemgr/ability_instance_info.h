@@ -1,18 +1,16 @@
-#ifndef ABILITY_INFO_H
-#define ABILITY_INFO_H
+#ifndef ABILITY_INSTANCE_INFO_H
+#define ABILITY_INSTANCE_INFO_H
 
 #include <string>
 #include <map>
 #include <vector>
 #include <mutex>
 
+#include "json/json.h"
+
+#include "common_struct_defination.h"
 
 // ability struct defination
-struct AbilityMetadata
-{
-    std::string name;
-    std::string namespace_name;
-};
 struct Aabilityparam
 {
     std::string paramname;
@@ -42,17 +40,18 @@ struct Abilitydepends
 
 /**
  * ability info defination
-*/
-class AbilityInfo
+ */
+class AbilityInstanceInfo
 {
 public:
     std::string apiVersion;
     std::string kind;
-    AbilityMetadata metadata;
+    Metadata metadata;
     std::string level;
     std::string abilityname;
     std::string description;
     std::string followed;
+    std::string version;
     Abilitydepends depends;
     std::map<std::string, std::string> spec;
     std::vector<Aapi> ApiList;
@@ -60,10 +59,9 @@ public:
 
     std::mutex abilitylock_;
 
-    bool UnMarshal(const std::string source);
+    bool UnMarshal(const Json::Value &jnode);
     std::string Marshal();
-    bool updateAbility(std::string data);
+    bool updateAbility(const Json::Value &jnode);
 };
 
-
-#endif // ABILITY_INFO_H
+#endif // ABILITY_INSTANCE_INFO_H
