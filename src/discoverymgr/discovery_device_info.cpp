@@ -7,7 +7,7 @@ bool DiscoveryDeviceInfo::IsOffline(std::time_t current_time) const
 
 void DiscoveryDeviceInfo::Update(const std::string &new_address,const std::string &new_status, std::time_t new_timestamp)
 {
-    address = address;
+    address = new_address;
     status = new_status;
 
     if (last_online_time != 0)
