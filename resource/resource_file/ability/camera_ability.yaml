@@ -7,6 +7,7 @@ level: "1"
 abilityname: camera
 description: this is a camera
 followed: default
+version: "1"
 depends:
   abilities:
     - none

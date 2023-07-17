@@ -17,6 +17,7 @@ spec:
             - abilityname
             - description
             - followed
+            - version
             - spec
             - ApiList
           properties:
@@ -35,6 +36,9 @@ spec:
               type: string
             followed:
               description: the name to follow
+              type: string
+            version:
+              description: the ability version 
               type: string
             depends:
               type: object
