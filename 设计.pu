@@ -516,7 +516,7 @@ namespace CM {
     ConnectionManager *-- IConnection
 }
 
-DB <-left-> RM.ResourceManager
+DB <-right-> RM.ResourceManager
 CM <-up-> RM.ResourceSyncManager
 DM <--> HS.HttpServer
 LC <-up-> HS.HttpServer
