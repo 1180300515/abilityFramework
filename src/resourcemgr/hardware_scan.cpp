@@ -286,10 +286,11 @@ void HardwareScan::sink_info_callback(pa_context *c, const pa_sink_info *info, i
     }
 }
 
-void HardwareScan::Init(std::function<bool(std::string, bool)> callback)
+void HardwareScan::Init(std::function<bool(std::string, bool)> callback, std::string hostname)
 {
     this->add_device_callback = callback;
     this->localHardwareScan();
+    this->hostname_ = hostname;
 }
 
 void HardwareScan::localHardwareScan()
@@ -313,7 +314,7 @@ void HardwareScan::AutoGenerateCR()
             count++;
             instance.metadata.namespace_name = "default";
             instance.spec.version = "1.0";
-            instance.spec.hostname = device_hostname;
+            instance.spec.hostname = hostname_;
             instance.spec.kind = "camera";
             // properties part
             instance.spec.properties.vendor = "unknown";
@@ -358,7 +359,7 @@ void HardwareScan::AutoGenerateCR()
             count++;
             instance.metadata.namespace_name = "default";
             instance.spec.version = "1.0";
-            instance.spec.hostname = device_hostname;
+            instance.spec.hostname = hostname_;
             instance.spec.kind = "microphone";
             // properties part
             instance.spec.properties.channelNumber = 0;
@@ -395,7 +396,7 @@ void HardwareScan::AutoGenerateCR()
             count++;
             instance.metadata.namespace_name = "default";
             instance.spec.version = "1.0";
-            instance.spec.hostname = device_hostname;
+            instance.spec.hostname = hostname_;
             instance.spec.kind = "loudspeaker";
             // properties part
             instance.spec.properties.channelNumber = 0;

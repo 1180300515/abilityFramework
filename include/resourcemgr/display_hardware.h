@@ -16,6 +16,7 @@ public:
 
     Json::Value toJson() const;
     static DisplayInfo fromJson(const Json::Value &root);
+    std::string ToKeyValue(std::string hostname) const;
     void print();
 };
 

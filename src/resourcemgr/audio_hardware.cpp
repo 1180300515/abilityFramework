@@ -15,6 +15,19 @@ Json::Value AudioDevice::toJson() const
     return root;
 }
 
+std::string AudioDevice::ToKeyValue(const std::string &hostname) const
+{
+    std::stringstream ss;
+    ss << "hostname:" << hostname << ",";
+    ss << "name:" << name << ",";
+    ss << "description:" << description << ",";
+    ss << "volume:" << volume << ",";
+    ss << "mute:" << (mute ? "true" : "false") << ",";
+    ss << "sampleRate:" << sampleRate << ",";
+    ss << "channels:" << static_cast<int>(channels);
+    return ss.str();
+}
+
 AudioDevice AudioDevice::fromJson(const Json::Value &root)
 {
 

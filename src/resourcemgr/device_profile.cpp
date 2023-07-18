@@ -30,3 +30,15 @@ void DeviceProfile::print()
     for (auto &speaker : speakerDevices)
         speaker.print();
 }
+
+void DeviceProfile::FromJson2Profile(const Json::Value &root)
+{
+    for (const auto &cam : root["cameraDevices"])
+        cameraDevices.push_back(CameraHardware::fromJson(cam));
+    for (const auto &disp : root["displayDevices"])
+        displayDevices.push_back(DisplayInfo::fromJson(disp));
+    for (const auto &mic : root["micDevices"])
+        micDevices.push_back(AudioDevice::fromJson(mic));
+    for (const auto &speaker : root["speakerDevices"])
+        speakerDevices.push_back(AudioDevice::fromJson(speaker));
+}

@@ -13,7 +13,7 @@ public:
      * @brief init the hardwarescan
      * @param callback add device callback function
      */
-    void Init(std::function<bool(std::string, bool)> callback);
+    void Init(std::function<bool(std::string, bool)> callback, std::string hostname);
     /**
      * @brief base the hardware info to generate CR
      */
@@ -57,6 +57,8 @@ private:
     // called when need to add device instance
     std::function<bool(std::string, bool)> add_device_callback;
     DeviceProfile profile;
+
+    std::string hostname_;
 };
 
 #endif // HARDWARE_SCAN_H

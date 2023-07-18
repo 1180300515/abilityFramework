@@ -43,6 +43,22 @@ CameraHardware CameraHardware::fromJson(const Json::Value &root)
     return cam;
 }
 
+std::string CameraHardware::ToKeyValue(std::string hostname) const
+{
+    std::stringstream ss;
+    ss << "hostname:" << hostname << ",";
+    ss << "device_path:" << device_path << ",";
+    ss << "driver:" << driver << ",";
+    ss << "card:" << card << ",";
+    ss << "bus_info:" << bus_info << ",";
+    ss << "formats:[";
+    for (const auto& format : formats) {
+        ss << format << " ";
+    }
+    ss << "]";
+    return ss.str();
+}
+
 void CameraHardware::print()
 {
     std::cout << "device_path: " << device_path << std::endl;

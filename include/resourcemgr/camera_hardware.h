@@ -17,12 +17,10 @@ public:
     //...更多属性和方法...
 
     CameraHardware &operator=(const CameraHardware &other);
-
     Json::Value toJson() const;
-
-    static CameraHardware fromJson(const Json::Value& root);
-
+    static CameraHardware fromJson(const Json::Value &root);
+    std::string ToKeyValue(std::string hostname) const;
     void print();
 };
 
-#endif //CAMERA_HARDWARE_H
+#endif // CAMERA_HARDWARE_H

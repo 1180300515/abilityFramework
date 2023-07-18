@@ -16,6 +16,7 @@ public:
     std::vector<AudioDevice> speakerDevices;
 
     Json::Value toJson() const;
+    void FromJson2Profile(const Json::Value &root);
     void print();
 };
 

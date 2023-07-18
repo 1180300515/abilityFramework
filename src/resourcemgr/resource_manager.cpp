@@ -402,6 +402,11 @@ bool ResourceManager::AbilityExistJudge(const std::string &key)
     return false;
 }
 
+void ResourceManager::EndAddressDiscovery(std::map<std::string, std::string> result)
+{
+    this->hardware_manager_->EndAddressResult(result);
+}
+
 void ResourceManager::LoadLocalResource()
 {
 }
@@ -410,9 +415,11 @@ void ResourceManager::Init(std::shared_ptr<ConnectionManager> connect)
 {
     getHostName();
     this->connection_ = connect;
-    connection_->Init(std::bind(&ResourceManager::recvMessageHandle, this, std::placeholders::_1));
+    connection_->Init(std::bind(&ResourceManager::RecvMessageHandle, this, std::placeholders::_1));
     this->hardware_ = std::make_shared<HardwareScan>();
-    this->hardware_->Init(std::bind(&ResourceManager::AddDeviceInstance , this , std::placeholders::_1, std::placeholders::_2));
+    this->hardware_->Init(std::bind(&ResourceManager::AddDeviceInstance, this, std::placeholders::_1, std::placeholders::_2), this->hostname_);
+    this->hardware_manager_ = std::make_shared<HardwareResourceManager>();
+    this->hardware_manager_->Init(this->hostname_);
 }
 
 void ResourceManager::Run()
@@ -437,6 +444,21 @@ void ResourceManager::RefreshKVRecord()
 std::string ResourceManager::GetHardwareDeviceInfo(bool format)
 {
     return hardware_->GetHardwareDeviceInfo(format);
+}
+
+std::vector<AbilityInfoExtract> ResourceManager::GetAbilityInfoExtractList()
+{
+    std::vector<AbilityInfoExtract> result;
+    std::lock_guard<std::mutex> locker(abilities_lock_);
+    for (const auto &iter : abilities_)
+    {
+        AbilityInfoExtract info;
+        info.name = StripSlashPrefix(iter.first);
+        info.depends.abilities = iter.second->depends.abilities;
+        info.depends.devices = iter.second->depends.devices;
+        result.emplace_back(info);
+    }
+    return result;
 }
 
 void ResourceManager::addNonLocalResource(const std::string &data)
@@ -700,7 +722,12 @@ void ResourceManager::endMessageHandle(const KeyAndDataPackages &data)
     }
 }
 
-void ResourceManager::recvMessageHandle(const std::string &message)
+std::vector<std::string> ResourceManager::GetHardWareResourceList(std::string type)
+{
+    return this->hardware_manager_->GetHardwareResourceList(type);
+}
+
+void ResourceManager::RecvMessageHandle(const std::string &message)
 {
     KeyAndDataPackages data;
     if (UnMarshalMessageStruct(message, data))

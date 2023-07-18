@@ -12,12 +12,15 @@
 #include "hardware_scan.h"
 #include "message_package_struct.h"
 #include "connection_manager.h"
+#include "ability_instance_info_extract.h"
+#include "hardware_device_resource_manager.h"
 
 class ResourceManager
 {
 public:
     ResourceManager();
     ~ResourceManager() = default;
+
     /**
      * @brief regist crd into database
      * @param data the crd data ot file path
@@ -40,7 +43,6 @@ public:
     bool AddAbilityInstance(const std::string &data, bool from_file = false);
     bool UpdateAbilityInstance(const std::string &data, bool from_file = false);
     bool DeleteAbilityInstance(const std::string &key);
-
     /**
      * @brief add a device instance (also called by the hardwarescan the add a device)
      * @param data the file path or the device data
@@ -50,23 +52,18 @@ public:
     bool AddDeviceInstance(const std::string &data, bool from_file = false);
     bool UpdateDeviceInstance(const std::string &data, bool from_file = false);
     bool DeleteDeviceInstance(const std::string &key);
-
-    /**
-     * @brief judge the key resource type
-     * @param key 
-     * @return 
-     */
-    std::string isLocalResource(std::string key);
-    /**
-     * @brief called by lifecycle manager to judge ability exist or not
-     * @param key the ability key
-     * @return exist or not
-     */
-    bool AbilityExistJudge(const std::string &key);
     /**
      * @brief
      */
     void LoadLocalResource();
+
+    /**
+     * @brief judge the key resource type
+     * @param key
+     * @return
+     */
+    std::string isLocalResource(std::string key);
+
     /**
      * @brief init the resource manager
      */
@@ -80,6 +77,35 @@ public:
      * @return the json string
      */
     std::string GetHardwareDeviceInfo(bool format = false);
+
+    // callback function defination
+    /**
+     * @brief called by lifecycle manager, judge ability exist or not
+     * @param key the ability key
+     * @return exist or not
+     */
+    bool AbilityExistJudge(const std::string &key);
+    /**
+     * @brief called by discovery manager, tell the discovery result
+     * @param result
+     */
+    void EndAddressDiscovery(std::map<std::string, std::string> result);
+    /**
+     * @brief called by ability relation manager, get the abilityinfo extract , the namespace/name will only keep name
+     * @return
+     */
+    std::vector<AbilityInfoExtract> GetAbilityInfoExtractList();
+    /**
+     * @brief called by ability relation manager, get the hardware
+     * @param type the hardware type
+     * @return 
+     */
+    std::vector<std::string> GetHardWareResourceList(std::string type);
+    /**
+     * @brief called by the connection manager, to handle the recv message received by the server
+     * @param message data
+     */
+    void RecvMessageHandle(const std::string &message);
 
 private:
     /**
@@ -97,11 +123,6 @@ private:
      * @param message data
      */
     void endMessageHandle(const KeyAndDataPackages &data);
-    /**
-     * @brief called by the connection manager to handle the recv message received by the server
-     * @param message data
-     */
-    void recvMessageHandle(const std::string &message);
     /**
      * @brief generate nonlocal format data
      * @return the result
@@ -122,6 +143,7 @@ private:
 
     std::shared_ptr<HardwareScan> hardware_;
     std::shared_ptr<ConnectionManager> connection_;
+    std::shared_ptr<HardwareResourceManager> hardware_manager_;
 
     std::map<std::string, std::string> versionRecord; // record the key and the version
     std::map<std::string, std::shared_ptr<DeviceInstanceInfo>> devices_;

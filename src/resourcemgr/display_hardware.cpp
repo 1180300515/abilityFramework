@@ -28,6 +28,20 @@ DisplayInfo DisplayInfo::fromJson(const Json::Value &root)
     return disp;
 }
 
+std::string DisplayInfo::ToKeyValue(std::string hostname) const
+{
+    std::stringstream ss;
+    ss << "hostname:" << hostname << ",";
+    ss << "screen:" << screen << ",";
+    ss << "x:" << x << ",";
+    ss << "y:" << y << ",";
+    ss << "width:" << width << ",";
+    ss << "height:" << height << ",";
+    ss << "mmWidth:" << mmWidth << ",";
+    ss << "mmHeight:" << mmHeight;
+    return ss.str();
+}
+
 void DisplayInfo::print()
 {
     std::cout << "screen: " << screen << std::endl;

@@ -16,14 +16,12 @@ public:
     uint32_t sampleRate;
     uint8_t channels;
 
-    Json::Value toJson() const ;
-
     AudioDevice(std::string name, std::string description, uint32_t volume, bool mute, uint32_t sampleRate, uint8_t channels)
         : name(name), description(description), volume(volume), mute(mute), sampleRate(sampleRate), channels(channels) {}
-
-    static AudioDevice fromJson(const Json::Value& root);
-
+    static AudioDevice fromJson(const Json::Value &root);
+    Json::Value toJson() const;
+    std::string ToKeyValue(const std::string &hostname) const;
     void print();
 };
 
-#endif //AUDIO_HARDWARE_H
+#endif // AUDIO_HARDWARE_H
