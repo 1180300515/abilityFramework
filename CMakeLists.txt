@@ -107,6 +107,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include/databasemgr)
 include_directories(${PROJECT_SOURCE_DIR}/include/discoverymgr)
 include_directories(${PROJECT_SOURCE_DIR}/include/lifecyclemgr)
 include_directories(${PROJECT_SOURCE_DIR}/include/resourcemgr)
+include_directories(${PROJECT_SOURCE_DIR}/include/httpserver)
 
 
 add_executable(${PROJECT_NAME} src/main.cpp 
