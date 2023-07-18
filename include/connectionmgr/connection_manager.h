@@ -13,11 +13,11 @@ class ConnectionManager
 {
 public:
     /**
-     * the end address record change callback
+     * called by discovery manager, when end address change 
      */
     void OnEndAddressRecordChange(std::map<std::string, ConnectInfo> &address);
     /**
-     * the cloud address record change callback
+     * called by httpserver, when cloudaddress change
      */
     void OnCloudAddressRecordChange(const ConnectInfo &address);
 
