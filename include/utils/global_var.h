@@ -4,14 +4,7 @@
 #include <string>
 
 #include "global_var.h"
-// extern the global var
 
-// the cloud server address
-extern std::string cloud_address;
-// the http sever address
-extern std::string http_server_address;
-
-extern std::string device_hostname;
 
 // data package type
 #define CloudNotify "notify"
@@ -42,6 +35,7 @@ extern std::string device_hostname;
 #define INSTANCE_FILE_PATH "resource/resource_file/device"
 #define ABILITY_FILE_PATH "resource/resource_file/ability"
 #define EDGE_SYNC_PORT 8001
+#define HTTP_SERVER_PORT 8080
 //command type
 #define CMD_START "start"
 #define CMD_CONNECT "connect"

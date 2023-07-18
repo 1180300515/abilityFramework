@@ -209,7 +209,7 @@ std::string GetCrdSchemaPart(const Json::Value &jnode)
 
 std::string GetInstanceKey(const Json::Value &jnode)
 {
-    return jnode["metadata"]["namespace"].asString() + "/" + jnode["metadata"]["name"].asString(); 
+    return jnode["metadata"]["namespace"].asString() + "/" + jnode["metadata"]["name"].asString();
 }
 
 std::string GetInstanceKind(const Json::Value &jnode)
@@ -233,4 +233,13 @@ std::string GetInstanceValidatePart(const Json::Value &jnode)
     tag.removeMember("kind");
     tag.removeMember("metadata");
     return JsonToString(tag);
+}
+std::string StripSlashPrefix(const std::string &str)
+{
+    size_t pos = str.rfind('/');
+    if (pos != std::string::npos)
+    {
+        return str.substr(pos + 1);
+    }
+    return str;
 }

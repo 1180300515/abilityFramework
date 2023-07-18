@@ -33,4 +33,6 @@ std::string GetInstanceKey(const Json::Value &jnode);
 
 std::string GetInstanceKind(const Json::Value &jnode);
 
+std::string StripSlashPrefix(const std::string &str);
+
 #endif // YAML_JSON_CONVERTER_H
