@@ -1,46 +1,28 @@
 #include <iostream>
 #include <thread>
-// #include "plugincore/plugin_interface.h"
-// #include "plugincore/obs_interface.h"
-// #include "plugincore/subject_mgr.h"
-// #include "plugincore/event_interface.h"
-// #include "plugincore/abimgr_interface.h"
-// #include "plugincore/lifecycle_interface.h"
-
-// #include "eventhandler/eventhandler.h"
-
-// #include "controller/controller.h"
-// #include "discoverymanager/discmgr_interface.h"
-// #include "discoverymanager/localhw_interface.h"
-// #include "discoverymanager/devpool_interface.h"
 
 #include "glog/logging.h"
 
-// std::shared_ptr<Controller> controller = std::make_shared<Controller>();
-
-// using namespace plugs;
+#include "resource_manager.h"
+#include "lifecycle_manager.h"
+#include "connection_manager.h"
+#include "http_server.h"
+#include "discovery_manager.h"
+#include "ability_relation_manager.h"
 
 int main(int argc, char **argv)
 {
-    // std::thread http_server_thread(run_http_server);
-    // std::thread timeout_thread(check_timeout);
-    // std::thread chkproc_thread(check_process);
-
-    // // std::cout << "Start a program: " << start_program("./bin/camera") << std::endl;
-
-    // Preprocessing();
-    // // std::shared_ptr<Controller> controller = std::make_shared<Controller>();
-
-
-    // std::thread receiver_thread(udp_broadcast_receiver);
-    // std::thread sender_thread(udp_broadcast_sender, std::bind(&Controller::SetEdgeAddressRecord, controller , std::placeholders::_1));
-
-    // sleep(1);
-    // controller->Run();
-
-    // sender_thread.join();
-    // receiver_thread.join();
-    // http_server_thread.join();
-    // timeout_thread.join();
+    auto resource_manager = std::make_shared<ResourceManager>();
+    auto lifecycle_manager = std::make_shared<LifeCycleManager>();
+    auto connection_manager = std::make_shared<ConnectionManager>();
+    auto http_server = std::make_shared<HttpServer>();
+    auto discovery_manager = std::make_shared<DiscoveryManager>();
+    auto ability_relation_manager = std::make_shared<AbilityRelationManager>();
+    discovery_manager->Init(std::bind(&ConnectionManager::OnEndAddressRecordChange, connection_manager, std::placeholders::_1),
+                            std::bind(&ResourceManager::EndAddressDiscoveryResult, resource_manager, std::placeholders::_1));
+    resource_manager->Init(connection_manager);
+    lifecycle_manager->Init(std::bind(&ResourceManager::AbilityExistJudge, resource_manager, std::placeholders::_1));
+    
+    http_server->Init(resource_manager, lifecycle_manager, ability_relation_manager, connection_manager);
     return 0;
 }
