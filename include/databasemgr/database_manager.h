@@ -16,7 +16,7 @@ class DatabaseManager
 public:
     static DatabaseManager &getInstance()
     {
-        LOG(INFO) << "init database manager" ;
+        LOG(INFO) << "init database manager";
         static DatabaseManager manager;
         return manager;
     }
@@ -56,11 +56,14 @@ public:
     bool DBGetCloudAddress(std::string &cloudaddress);
     /**
      * store the instance
-    */
+     */
     bool DBStoreAbilityInstance(Json::Value &instance_json);
     bool DBStoreDeviceInstance(Json::Value &instance_json);
+
     /**
-     * store the cloud address into db
+     * @brief store the cloud address into db , will delete the old address , insert new address
+     * @param cloudaddress
+     * @return
      */
     bool DBStoreCloudAddress(const std::string &cloudaddress);
     /**
@@ -73,7 +76,7 @@ public:
      */
     bool DBDelteDeviceInstance(const std::string &key);
     bool DBDeleteAbilityInstance(const std::string &key);
-    
+
     /**
      * clean db
      */
@@ -82,6 +85,7 @@ public:
     bool DBCleanCRD();
 
 private:
+    // 暂存回调函数处理的值
     static std::vector<CrdDBStruct> crdstructs;
     static std::vector<InstanceDBStruct> devicestructs;
     static std::vector<InstanceDBStruct> abilitystructs;
@@ -94,7 +98,7 @@ private:
     static int crd_callback(void *unused, int columenCount, char **columnValue, char **columnName);
     static int device_callback(void *unused, int columenCount, char **columnValue, char **columnName);
     static int ability_callback(void *unused, int columenCount, char **columnValue, char **columnName);
-    static int cloud_address_callback(void *unused, int columenCount, char **columnValue, char **columnName);
+    static int cloudaddress_callback(void *unused, int columenCount, char **columnValue, char **columnName);
 
     DatabaseManager();
 };

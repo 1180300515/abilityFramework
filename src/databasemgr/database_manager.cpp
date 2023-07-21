@@ -5,6 +5,12 @@
 #include "yaml_json_converter.h"
 #include "global_var.h"
 
+std::vector<CrdDBStruct> DatabaseManager::crdstructs;
+std::vector<InstanceDBStruct> DatabaseManager::devicestructs;
+std::vector<InstanceDBStruct> DatabaseManager::abilitystructs;
+std::string DatabaseManager::cloud_address;
+
+
 bool DatabaseManager::RegistCrdFromFile(const std::string &filepath)
 {
     YAML::Node crd_yaml;
@@ -320,7 +326,7 @@ bool DatabaseManager::DBGetCloudAddress(std::string &cloudaddress)
     int rc;
     char *erroms = 0;
     std::string search_sql = "select * from CLOUDADDRESS;";
-    rc = sqlite3_exec(db, search_sql.c_str(), cloud_address_callback, 0, &erroms);
+    rc = sqlite3_exec(db, search_sql.c_str(), cloudaddress_callback, 0, &erroms);
     if (rc)
     {
         LOG(ERROR) << "sql excute error: " << erroms;
@@ -477,14 +483,14 @@ bool DatabaseManager::DBStoreCloudAddress(const std::string &cloudaddress)
     int rc;
     char *erroms = 0;
     std::string delete_sql = "DELETE FROM CLOUDADDRESS;";
-    rc = sqlite3_exec(db, delete_sql.c_str(), cloud_address_callback, 0, &erroms);
+    rc = sqlite3_exec(db, delete_sql.c_str(), cloudaddress_callback, 0, &erroms);
     if (rc)
     {
         LOG(ERROR) << "sql excute error: " << erroms;
         return false;
     }
     std::string insert_sql = "INSERT OR IGNORE INTO CLOUDADDRESS ( ADDRESS ) VALUES (\'" + cloudaddress + "\');";
-    rc = sqlite3_exec(db, insert_sql.c_str(), cloud_address_callback, 0, &erroms);
+    rc = sqlite3_exec(db, insert_sql.c_str(), cloudaddress_callback, 0, &erroms);
     if (rc)
     {
         LOG(ERROR) << "sql excute error: " << erroms;
@@ -548,6 +554,7 @@ bool DatabaseManager::DBUpdateAbilityInstance(const Json::Value &instance_json)
     LOG(INFO) << "DB update ability: " << instance_key << " success";
     return true;
 }
+
 
 bool DatabaseManager::DBDelteDeviceInstance(const std::string &key)
 {
@@ -724,15 +731,12 @@ int DatabaseManager::ability_callback(void *unused, int columenCount, char **col
     return SQLITE_OK;
 }
 
-int DatabaseManager::cloud_address_callback(void *unused, int columenCount, char **columnValue, char **columnName)
+int DatabaseManager::cloudaddress_callback(void *unused, int columenCount, char **columnValue, char **columnName)
 {
     cloud_address = columnValue[0];
     return SQLITE_OK;
 }
 
-std::vector<CrdDBStruct> DatabaseManager::crdstructs;
-std::vector<InstanceDBStruct> DatabaseManager::devicestructs;
-std::vector<InstanceDBStruct> DatabaseManager::abilitystructs;
 
 DatabaseManager::DatabaseManager()
 {
@@ -799,7 +803,7 @@ DatabaseManager::DatabaseManager()
         LOG(ERROR) << "create table ABILITY failed with: " << errormes;
         exit(0);
     }
-    rc = sqlite3_exec(db, cloud_address_table_sql, cloud_address_callback, 0, &errormes);
+    rc = sqlite3_exec(db, cloud_address_table_sql, cloudaddress_callback, 0, &errormes);
     if (rc)
     {
         LOG(ERROR) << "create table CLOUDADDRESS failed with: " << errormes;
