@@ -30,7 +30,7 @@ enum ConnectionStatus
 // describe a connection
 struct ConnectInfo
 {
-    std::string destinationAddress;
+    std::string destinationAddress; // this address don't include the port(if ipv4)
     ProtocolType protocoltype;
     ProtocolTendency tendency;
 

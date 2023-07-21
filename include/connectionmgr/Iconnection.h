@@ -15,7 +15,11 @@ public:
      * @brief server to receive message
      * @param callback the receive message callback
      */
-    virtual void StartServerToReceiveMessage(std::function<void(std::string)> callback) = 0;
+    virtual void StartServerToReceiveMessage(std::function<void(std::string)> callback) = 0;   
+    /**
+     * @brief stop server
+     */
+    virtual void StopServerToReceiveMessage() = 0;
 };
 
 #endif // ICONNECTION_H

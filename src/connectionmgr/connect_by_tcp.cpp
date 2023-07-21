@@ -4,6 +4,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
 
 #include "glog/logging.h"
 
@@ -67,14 +70,29 @@ bool ConnectByTCP::SendMessage(const std::string &data)
 
 void ConnectByTCP::StartServerToReceiveMessage(std::function<void(std::string)> callback)
 {
+    fd_set readfds;
     char msg[10000];
     int length;
-    while (true)
+    while (alive)
     {
-        memset(&msg, 0, sizeof(msg));
-        length = recv(this->sockid, (char *)&msg, sizeof(msg), 0);
-        std::string recvmsg(msg);
-        LOG(INFO) << "receive message " << recvmsg;
-        callback(recvmsg);
-    } 
+        FD_ZERO(&readfds);
+        FD_SET(this->sockid, &readfds);
+        struct timeval tv;
+        tv.tv_sec = 1;
+        tv.tv_usec = 0;
+        select(this->sockid + 1, &readfds, NULL, NULL, &tv);
+        if (FD_ISSET(this->sockid, &readfds))
+        {
+            memset(&msg, 0, sizeof(msg));
+            length = recv(this->sockid, (char *)&msg, sizeof(msg), 0);
+            std::string recvmsg(msg);
+            LOG(INFO) << "receive message " << recvmsg;
+            callback(recvmsg);
+        }
+    }
+}
+
+void ConnectByTCP::StopServerToReceiveMessage()
+{
+    alive = false;
 }

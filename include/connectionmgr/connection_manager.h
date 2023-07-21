@@ -5,6 +5,7 @@
 #include <mutex>
 #include <memory>
 #include <functional>
+#include <thread>
 
 #include "connect_info.h"
 #include "Iconnection.h"
@@ -13,7 +14,7 @@ class ConnectionManager
 {
 public:
     /**
-     * called by discovery manager, when end address change 
+     * called by discovery manager, when end address change
      */
     void OnEndAddressRecordChange(std::map<std::string, ConnectInfo> &address);
     /**
@@ -21,19 +22,39 @@ public:
      */
     void OnCloudAddressRecordChange(const ConnectInfo &address);
 
-    void Init(std::function<void(std::string)> servercall_);
     /**
-     * @brief start the server to receive the message
+     * @brief init the connection manager
+     * @param servercall_
      */
-    void Run();
+    void Init(std::function<void(std::string)> servercall_);
+    bool JudgeCloudAddressExist();
+    bool JudgeEndAddressExist();
+    /**
+     * @brief connect with end,only exec once
+     * @return
+     */
     bool ConnectWithEnd();
+    /**
+     * @brief connect with cloud,only exec once
+     * @return
+     */
     bool ConnectWithCloud();
+    /**
+     * @brief disconnect with end
+     * @return 
+     */
     bool DisconnectWithEnd();
     bool DisconnectWithCloud();
     void SendMessageToCloud(const std::string &data);
     void SendMessageToEnd(const std::string &data, std::optional<std::string> target_host);
 
 private:
+    /**
+     * handle the connection status
+     */
+    void EndConnectionHandling();
+    void CloudConnectionHandling();
+
     std::unordered_map<std::string, ConnectInfo> endAddressRecord_; // Unique ID of the device（like hostname） and connect info
     std::mutex endlock_;
     ConnectInfo cloudAddressRecord_;
@@ -47,10 +68,7 @@ private:
     bool EndIsConnected = false;
     bool CloudIsConnected = false;
 
-    /**
-     * handle the connection status
-     */
-    void EndConnectionHandling();
-    void CloudConnectionHandling();
+    std::map<std::string, std::thread> serverList; // type(udp,..)and the server thread,don't include the tcp,use host to instead
+    std::map<std::string, std::shared_ptr<IConnection>> temporary_storage;//some protocol like udp need use a new object to start server
 };
 #endif // CONNECTION_MANAGER_H

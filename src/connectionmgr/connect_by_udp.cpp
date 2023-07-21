@@ -4,9 +4,19 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
 
 #include "glog/logging.h"
 #include "global_var.h"
+
+ConnectByUDP::ConnectByUDP(std::string address)
+{
+    this->address = address;
+    int index = this->address.find(":");
+    this->udpport = this->address.substr(index + 1);
+}
 
 ConnectByUDP::~ConnectByUDP()
 {
@@ -20,8 +30,6 @@ bool ConnectByUDP::Connect(std::string address)
         LOG(INFO) << "this UDP connection change destination from: " << this->address << " to: " << address;
         this->address = address;
     }
-    int index = this->address.find(":");
-    this->udpport = this->address.substr(index + 1);
     return true;
 }
 
@@ -77,7 +85,7 @@ void ConnectByUDP::StartServerToReceiveMessage(std::function<void(std::string)> 
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {
         LOG(ERROR) << "socket create fail";
-        exit(1);
+        return;
     }
     memset(&serv_addr, 0, sizeof(struct sockaddr_in));
     serv_addr.sin_family = AF_INET;
@@ -88,23 +96,40 @@ void ConnectByUDP::StartServerToReceiveMessage(std::function<void(std::string)> 
     if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr)) < 0)
     {
         LOG(ERROR) << "bind failed!";
-        exit(1);
+        return;
     }
+    fd_set readfds;
 
     char msg[10000];
     int length;
     struct sockaddr_in addr_client;
-    while (1)
+    while (alive)
     {
-        memset(&msg, 0, sizeof(msg));
-        length = recvfrom(sockfd, (char *)&msg, sizeof(msg), 0, (struct sockaddr *)&addr_client, (socklen_t *)&len);
-        if (length < 0)
+        FD_ZERO(&readfds);        
+        FD_SET(sockfd, &readfds); 
+        struct timeval tv;
+        tv.tv_sec = 1;
+        tv.tv_usec = 0;
+        select(sockfd + 1, &readfds, NULL, NULL, &tv);
+        if (FD_ISSET(sockfd, &readfds))
         {
-            LOG(ERROR) << "recvfrom error";
-            exit(1);
+            memset(&msg, 0, sizeof(msg));
+            // the send and receive in different thread, no need to block
+            length = recvfrom(sockfd, (char *)&msg, sizeof(msg), 0, (struct sockaddr *)&addr_client, (socklen_t *)&len);
+            if (length < 0)
+            {
+                LOG(ERROR) << "recvfrom error";
+                exit(1);
+            }
+            std::string recvmsg(msg);
+            LOG(INFO) << "receive message " << recvmsg;
+            callback(recvmsg);
         }
-        std::string recvmsg(msg);
-        LOG(INFO) << "receive message " << recvmsg;
-        callback(recvmsg);
     }
+    close(sockfd);
+}
+
+void ConnectByUDP::StopServerToReceiveMessage()
+{
+    alive = false;
 }
