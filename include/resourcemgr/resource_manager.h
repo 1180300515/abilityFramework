@@ -69,7 +69,7 @@ public:
      */
     void Init(std::shared_ptr<ConnectionManager> connect);
 
-    void Run();
+    void Run(bool startcloudsync,bool startendsync);
     void RefreshKVRecord();
     /**
      * @brief get the local hardware device json string
@@ -89,7 +89,7 @@ public:
      * @brief called by discovery manager, tell the discovery result
      * @param result
      */
-    void EndAddressDiscovery(std::map<std::string, std::string> result);
+    void EndAddressDiscoveryResult(std::map<std::string, std::string> &result);
     /**
      * @brief called by ability relation manager, get the abilityinfo extract , the namespace/name will only keep name
      * @return
@@ -129,6 +129,11 @@ private:
      */
     std::string generateNonLocalFormat();
     /**
+     * @brief generate key-value format data
+     * @return 
+     */
+    std::string generateKVFormat();
+    /**
      * @brief get the host name
      */
     void getHostName();
@@ -154,10 +159,10 @@ private:
     std::mutex abilities_lock_;
     std::mutex devices_lock_;
 
-    std::thread cloud_sync_;
-    std::thread end_sync_;
-
     std::string hostname_;
+
+    std::thread endsyncThread_;
+    std::thread cloudsyncThread_;
 };
 
 #endif // RESOURCE_MANAGER_H

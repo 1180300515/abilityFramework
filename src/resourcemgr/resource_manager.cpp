@@ -402,7 +402,7 @@ bool ResourceManager::AbilityExistJudge(const std::string &key)
     return false;
 }
 
-void ResourceManager::EndAddressDiscovery(std::map<std::string, std::string> result)
+void ResourceManager::EndAddressDiscoveryResult(std::map<std::string, std::string> &result)
 {
     this->hardware_manager_->EndAddressResult(result);
 }
@@ -422,8 +422,16 @@ void ResourceManager::Init(std::shared_ptr<ConnectionManager> connect)
     this->hardware_manager_->Init(this->hostname_);
 }
 
-void ResourceManager::Run()
+void ResourceManager::Run(bool startcloudsync, bool startendsync)
 {
+    if (startcloudsync)
+    {
+        this->cloudsyncThread_ = std::thread(&ResourceManager::cloudSyncThread, this);
+    }
+    if (startendsync)
+    {
+        this->endsyncThread_ = std::thread(&ResourceManager::endSyncThread, this);
+    }
 }
 
 void ResourceManager::RefreshKVRecord()
@@ -787,6 +795,22 @@ std::string ResourceManager::generateNonLocalFormat()
     return MarshalMessageStruct(data);
 }
 
+std::string ResourceManager::generateKVFormat()
+{
+    KeyAndDataPackages data;
+    data.hostname = this->hostname_;
+    data.packageType = CloudSyncStepOne;
+    for (const auto &iter : this->versionRecord)
+    {
+        KeyDatapack kd;
+        kd.key = iter.first;
+        kd.version = iter.second;
+        data.data.emplace_back(kd);
+    }
+    return MarshalMessageStruct(data);
+    ;
+}
+
 void ResourceManager::getHostName()
 {
     char hostname[256];
@@ -803,8 +827,41 @@ void ResourceManager::getHostName()
 
 void ResourceManager::cloudSyncThread()
 {
+    while (!connection_->JudgeCloudAddressExist())
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
+    if (!connection_->ConnectWithCloud())
+    {
+        LOG(ERROR) << "connect with cloud error";
+        return;
+    }
+    while (true)
+    {
+        LOG(INFO) << "Cloud sync begin";
+        this->RefreshKVRecord();
+        std::string data = generateKVFormat();
+        connection_->SendMessageToCloud(data);
+        sleep(4);
+    }
 }
 
 void ResourceManager::endSyncThread()
 {
+    while (!connection_->JudgeEndAddressExist())
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
+    if (!connection_->ConnectWithEnd())
+    {
+        LOG(ERROR) << "connect with end error";
+        return;
+    }
+    while (true)
+    {
+        LOG(INFO) << "End sync begin";
+        std::string data = generateNonLocalFormat();
+        connection_->SendMessageToEnd(data, std::nullopt);
+        sleep(4);
+    }
 }
