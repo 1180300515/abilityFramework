@@ -14,22 +14,28 @@
 
 class DiscoveryManager
 {
+public:
+    void Init(std::function<void(std::map<std::string, ConnectInfo>)> connection_,std::function<void(std::map<std::string, std::string>)> resource_);
+    void Run();
+
 private:
+    /**
+     * as the lanipv4discovery, blediscovery.. callback
+     */
+    void ReceiveDeviceInfo(DiscoveryDeviceInfo info);
+
     std::map<std::string, std::vector<DiscoveryDeviceInfo>> devices;
     std::mutex lock_;
 
     std::shared_ptr<LANIPV4Discovery> lanipv4discovery_;
     std::shared_ptr<BLEDiscovery> blediscovery_;
 
-    std::function<void(std::map<std::string, ConnectInfo>)> callback;
+    std::function<void(std::map<std::string, ConnectInfo>)> connection_callback;//connection manager callback function
+    std::function<void(std::map<std::string, std::string>)> resource_callback;//resource manager callback function
 
-    /**
-     * as the lanipv4discovery, blediscovery.. callback
-    */
-    void ReceiveDeviceInfo(DiscoveryDeviceInfo info);
-public:
-    void Init(std::function<void(std::map<std::string, ConnectInfo>)> call);
-    void Run();
+    std::string hostname_;
+
+    std::thread discovery_thread;
 };
 
 #endif // DISCOVERY_MANAGER_H

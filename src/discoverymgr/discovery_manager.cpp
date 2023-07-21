@@ -47,38 +47,61 @@ void DiscoveryManager::ReceiveDeviceInfo(DiscoveryDeviceInfo info)
     }
 }
 
-void DiscoveryManager::Init(std::function<void(std::map<std::string, ConnectInfo>)> call)
+void DiscoveryManager::Init(std::function<void(std::map<std::string, ConnectInfo>)> connection_, std::function<void(std::map<std::string, std::string>)> resource_)
 {
-    callback = call;
+    char hostname[256];
+    if (gethostname(hostname, sizeof(hostname)) != 0)
+    {
+        // 获取主机名失败
+        LOG(ERROR) << "get hostname fail";
+    }
+    hostname[sizeof(hostname) - 1] = '\0';
+    this->hostname_ = std::string(hostname);
+
+    connection_callback = connection_;
+    resource_callback = resource_;
+
     this->lanipv4discovery_ = std::make_shared<LANIPV4Discovery>();
     this->lanipv4discovery_->RegisterCallback(std::bind(&DiscoveryManager::ReceiveDeviceInfo, this, std::placeholders::_1));
 
     this->blediscovery_ = std::make_shared<BLEDiscovery>();
-    
 }
+
+
 
 void DiscoveryManager::Run()
 {
-    //start receiver
+    // start receiver
     this->lanipv4discovery_->RunBroadcastReceiver();
 
-    while(1)
+    this->discovery_thread = std::thread([this]()
     {
-        this->lanipv4discovery_->BroadcastSender();
-
-        sleep(4);
-        //deal the device and send to callbak func
-        std::map<std::string, ConnectInfo> callback_info;
-        for (const auto &iter : devices)
+        while (1)
         {
-            ConnectInfo new_info;
-            new_info.destinationAddress = iter.second.front().address;
-            new_info.protocoltype = ProtocolType::RandomProtocol;
-            new_info.status = ConnectionStatus::None;
-            new_info.tendency = ProtocolTendency::Random;
-            callback_info[iter.first] = new_info;
-        }
-        callback(callback_info);
-    }
+            this->lanipv4discovery_->BroadcastSender();
 
+            sleep(4);
+            // deal the device and send to callbak func
+            std::map<std::string, ConnectInfo> connection_callback_info;
+            std::map<std::string, std::string> resouce_callback_info;
+            for (const auto &iter : devices)
+            {
+                resouce_callback_info[iter.first] = iter.second.front().address;
+                if (iter.first == this->hostname_)
+                {
+                    //skip localhost
+                    continue;
+                }
+                ConnectInfo new_info;
+                new_info.destinationAddress = iter.second.front().address;
+                new_info.protocoltype = ProtocolType::RandomProtocol;
+                new_info.status = ConnectionStatus::None;
+                new_info.tendency = ProtocolTendency::Random;
+                connection_callback_info[iter.first] = new_info;
+            }
+            // tell the connection manager the discovery result
+            connection_callback(connection_callback_info);
+        } 
+    });
 }
+
