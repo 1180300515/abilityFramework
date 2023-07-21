@@ -67,6 +67,22 @@ bool LifeCycleManager::AddHeartbeatInfo(int port, HeartbeatInfo info)
     return true;
 }
 
+void LifeCycleManager::Init(std::function<bool(std::string)> callback)
+{
+    this->resourcemgr_checkexist = callback;
+}
+
+std::string LifeCycleManager::GetHeartbeatMap()
+{
+    std::lock_guard<std::mutex> locker(heartbeat_map_lock);
+    Json::Value data;
+    for (const auto &iter : this->heartbeat_map)
+    {
+        data.append(iter.second.toJson(iter.first));
+    }
+    return data.toStyledString();
+}
+
 void LifeCycleManager::lifeCycleDeal(AbilityClient &client, const int &port, HeartbeatInfo &hbinfo, std::optional<CommandInfo> &cmdinfo)
 {
     LOG(INFO) << RED << "Now status of Ability is :" << hbinfo.status << NONE << std::endl;
