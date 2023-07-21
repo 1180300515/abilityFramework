@@ -97,6 +97,8 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/src/discoverymgr discoverymgr)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/lifecyclemgr lifecyclemgr)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/resourcemgr resourcemgr)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/utils utils)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/httpserver httpserver)
+
 
 
 include_directories(${PROJECT_SOURCE_DIR}/include/protos)
@@ -119,6 +121,7 @@ add_executable(${PROJECT_NAME} src/main.cpp
     ${lifecyclemgr}
     ${resourcemgr}
     ${utils}
+    ${httpserver}
 )
 # add_executable(${PROJECT_NAME} src/main.cpp 
 #     src/plugincore/pluginload.cpp 
@@ -135,4 +138,4 @@ add_executable(${PROJECT_NAME} src/main.cpp
 #     src/protos/abilityProto.pb.cc
 #     ${SRC_LIST1} ${SRC_LIST2} ${SRC_LIST3})
 # target_link_libraries(AbilityFramework sqlite3 JsonCpp::JsonCpp glog yaml-cpp X11 pulse Xrandr v4l2 pthread dl crypto ssl z protobuf ${GRPC_LIBRARIES} ${PROTOBUF_LIBRARIES} )
-target_link_libraries(AbilityFramework sqlite3 JsonCpp::JsonCpp glog yaml-cpp X11 pulse Xrandr v4l2 pthread dl crypto ssl z protobuf::libprotobuf gRPC::grpc++ )
+target_link_libraries(AbilityFramework stdc++ sqlite3 JsonCpp::JsonCpp glog yaml-cpp X11 pulse Xrandr v4l2 pthread dl crypto ssl z protobuf::libprotobuf gRPC::grpc++ )
