@@ -34,7 +34,7 @@
 #define CRD_FILE_PATH "resource/resource_file/crd"
 #define INSTANCE_FILE_PATH "resource/resource_file/device"
 #define ABILITY_FILE_PATH "resource/resource_file/ability"
-#define EDGE_SYNC_PORT 8001
+#define EDGE_SYNC_PORT 8001 //include tcp and udp
 #define HTTP_SERVER_PORT 8080
 //command type
 #define CMD_START "start"
