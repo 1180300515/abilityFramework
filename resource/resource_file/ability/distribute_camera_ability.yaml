@@ -7,9 +7,11 @@ level: "1"
 abilityname: distribute-camera
 description: this is a distribute camera
 followed: default
-required: 
-  - camera
-  - display
+version: "1.0"
+depends: 
+  devices:
+    - camera
+    - display
 spec:
   vendor: oppo
   resolution: 720

@@ -7,6 +7,7 @@ level: "1"
 abilityname: loudspeaker
 description: this is a loudspeaker
 followed: default
+version: "1.0"
 depends:
   abilities:
     - none

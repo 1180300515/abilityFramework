@@ -7,6 +7,7 @@ level: "1"
 abilityname: display
 description: this is a display
 followed: default
+version: "1.0"
 spec:
   vendor: oppo
   resolution: 720

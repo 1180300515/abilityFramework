@@ -6,6 +6,7 @@ metadata:
 spec:
   version: "1.0"
   hostname: ""
+  hardwareidentifier: ""
   kind: camera
   capability1:
     - name: WideAngleCamera
@@ -17,7 +18,6 @@ spec:
       api:
         - Getxiaomicamera1
         - Setxiaomicamera1
- 
   properties:
     vendor: oppo
     resolution: "720"

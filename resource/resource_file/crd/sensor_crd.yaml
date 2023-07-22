@@ -28,6 +28,9 @@ spec:
                   type: string
                 version:
                   type: string
+                hardwareidentifier:
+                  type: string
+                  description: to combine with the hardware info , this property describe a indentify to find the matching hardware
                 hostname:
                   type: string
                 capability1:
