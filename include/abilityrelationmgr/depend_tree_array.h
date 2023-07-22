@@ -1,11 +1,12 @@
-#ifndef DEPEND_TREE_ARRAY_H
-#define DEPEND_TREE_ARRAY_H
+#ifndef _DEPEND_TREE_ARRAY_H
+#define _DEPEND_TREE_ARRAY_H
 
 #include "json/json.h"
 
 #include "ability_instance_info_extract.h"
 
-struct TreeNode {
+struct TreeNode
+{
     AbilityInfoExtract ability;
     std::vector<TreeNode> children;
     int level;
@@ -13,12 +14,13 @@ struct TreeNode {
     Json::Value ToJson() const;
 };
 
-class DependTreeArray {
+class DependTreeArray
+{
 public:
     std::vector<TreeNode> trees;
 
-    bool hasAbility(const std::string& abilityName) const;
+    bool hasAbility(const std::string &abilityName) const;
     Json::Value ToJson() const;
 };
 
-#endif //DEPEND_TREE_ARRAY_H
+#endif // _DEPEND_TREE_ARRAY_H

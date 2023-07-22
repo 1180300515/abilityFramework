@@ -1,5 +1,5 @@
-#ifndef ABILITY_INSTANCE_INFO_EXTRACT_H
-#define ABILITY_INSTANCE_INFO_EXTRACT_H
+#ifndef _ABILITY_INSTANCE_INFO_EXTRACT_H
+#define _ABILITY_INSTANCE_INFO_EXTRACT_H
 
 #include <string>
 #include <vector>
@@ -16,4 +16,4 @@ struct AbilityInfoExtract
     Depends depends;
 };
 
-#endif //ABILITY_INSTANCE_INFO_EXTRACT_H
+#endif // _ABILITY_INSTANCE_INFO_EXTRACT_H

@@ -1,5 +1,5 @@
-#ifndef ABILITY_RELATION_MANAGER_H
-#define ABILITY_RELATION_MANAGER_H
+#ifndef _ABILITY_RELATION_MANAGER_H
+#define _ABILITY_RELATION_MANAGER_H
 
 #include <functional>
 
@@ -66,4 +66,4 @@ private:
     bool fileExists(const std::string &filename);
 };
 
-#endif // ABILITY_RELATION_MANAGER_H
+#endif // _ABILITY_RELATION_MANAGER_H
