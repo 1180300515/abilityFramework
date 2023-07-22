@@ -68,9 +68,9 @@ class DeviceProfile
 {
 public:
     std::vector<CameraHardware> cameraDevices;
-    std::vector<DisplayInfo> displayDevices;
-    std::vector<AudioDevice> micDevices;
-    std::vector<AudioDevice> speakerDevices;
+    std::vector<DisplayHardware> displayDevices;
+    std::vector<AudioHardware> micDevices;
+    std::vector<AudioHardware> speakerDevices;
 
     Json::Value toJson() const
     {
@@ -109,7 +109,7 @@ public:
     }
 }
 
-class DisplayInfo
+class DisplayHardware
 {
 public:
     int screen;
@@ -133,7 +133,7 @@ public:
     }
 }
 
-class AudioDevice
+class AudioHardware
 {
 public:
     std::string name;

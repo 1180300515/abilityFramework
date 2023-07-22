@@ -286,9 +286,9 @@ class MicrophoneInstance extends Instance
 
 class DeviceProfile {
     +std::vector<CameraHardware> cameraDevices
-    +std::vector<DisplayInfo> displayDevices
-    +std::vector<AudioDevice> micDevices
-    +std::vector<AudioDevice> speakerDevices
+    +std::vector<DisplayHardware> displayDevices
+    +std::vector<AudioHardware> micDevices
+    +std::vector<AudioHardware> speakerDevices
     +Json::Value toJson() const
     +void print()
 }
@@ -306,7 +306,7 @@ class CameraHardware {
     +void print()
 }
 
-class DisplayInfo {
+class DisplayHardware {
     +int screen
     +int x
     +int y
@@ -315,11 +315,11 @@ class DisplayInfo {
     +int mmWidth
     +int mmHeight
     +Json::Value toJson() const
-    +static DisplayInfo fromJson(const Json::Value& root)
+    +static DisplayHardware fromJson(const Json::Value& root)
     +void print()
 }
 
-class AudioDevice {
+class AudioHardware {
     +std::string name
     +std::string description
     +uint32_t volume
@@ -327,12 +327,12 @@ class AudioDevice {
     +uint32_t sampleRate
     +uint8_t channels
     +Json::Value toJson() const
-    +static AudioDevice fromJson(const Json::Value& root) 
+    +static AudioHardware fromJson(const Json::Value& root) 
     +void print()
 }
 
-DeviceProfile o-- DisplayInfo : 聚合
-DeviceProfile o-- AudioDevice : 聚合
+DeviceProfile o-- DisplayHardware : 聚合
+DeviceProfile o-- AudioHardware : 聚合
 DeviceProfile o-- CameraHardware : 聚合
 
 @enduml

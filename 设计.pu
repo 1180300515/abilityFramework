@@ -145,9 +145,9 @@ namespace RM {
 
     class DeviceProfile {
         +std::vector<CameraHardware> cameraDevices
-        +std::vector<DisplayInfo> displayDevices
-        +std::vector<AudioDevice> micDevices
-        +std::vector<AudioDevice> speakerDevices
+        +std::vector<DisplayHardware> displayDevices
+        +std::vector<AudioHardware> micDevices
+        +std::vector<AudioHardware> speakerDevices
         +Json::Value toJson() const
         +void print()
     }
@@ -421,7 +421,7 @@ namespace CM {
     }
     enum ConnectionStatus
     {
-        None,
+        Uninitialized,
         Connected,
         Disconnected
     }
