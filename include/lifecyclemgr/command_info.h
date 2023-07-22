@@ -1,5 +1,5 @@
-#ifndef COMMAND_INFO_H
-#define COMMAND_INFO_H
+#ifndef _COMMAND_INFO_H
+#define _COMMAND_INFO_H
 
 #include <string>
 #include <iostream>
@@ -22,4 +22,4 @@ public:
     void print();
 };
 
-#endif //COMMAND_INFO_H
+#endif // _COMMAND_INFO_H

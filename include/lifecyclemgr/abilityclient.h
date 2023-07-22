@@ -1,5 +1,5 @@
-#ifndef ABILITYCLIENT_H
-#define ABILITYCLIENT_H
+#ifndef _ABILITYCLIENT_H
+#define _ABILITYCLIENT_H
 
 #include <grpcpp/grpcpp.h>
 
@@ -17,9 +17,9 @@ public:
         : stub_(abilityUnit::Ability::NewStub(channel)) {}
 
     void Start(const abilityUnit::StartInfo &start_info);
-    
+
     void Connect(const abilityUnit::ConnectInfo &connect_info);
-    
+
     void Disconnect(const abilityUnit::DisconnectInfo &disconnect_info);
 
     void Terminate(const abilityUnit::TerminateInfo &terminate_info);
@@ -28,4 +28,4 @@ private:
     std::unique_ptr<abilityUnit::Ability::Stub> stub_;
 };
 
-#endif // ABILITYCLIENT_H
+#endif // _ABILITYCLIENT_H

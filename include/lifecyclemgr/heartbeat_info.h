@@ -1,5 +1,5 @@
-#ifndef HEARTBEAT_INFO_H
-#define HEARTBEAT_INFO_H
+#ifndef _HEARTBEAT_INFO_H
+#define _HEARTBEAT_INFO_H
 
 #include <string>
 #include <chrono>
@@ -16,4 +16,4 @@ struct HeartbeatInfo
     Json::Value toJson(int port) const;
 };
 
-#endif //HEARTBEAT_INFO_H
+#endif // _HEARTBEAT_INFO_H
