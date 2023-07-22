@@ -1,5 +1,5 @@
-#ifndef HTTP_SERVER_H
-#define HTTP_SERVER_H
+#ifndef _HTTP_SERVER_H
+#define _HTTP_SERVER_H
 
 #include <memory>
 
@@ -14,9 +14,9 @@ class HttpServer
 {
 public:
     void Init(std::shared_ptr<ResourceManager> resource_,
-        std::shared_ptr<LifeCycleManager> lifecycle_,
-        std::shared_ptr<AbilityRelationManager> relation_,
-        std::shared_ptr<ConnectionManager> connection_);
+              std::shared_ptr<LifeCycleManager> lifecycle_,
+              std::shared_ptr<AbilityRelationManager> relation_,
+              std::shared_ptr<ConnectionManager> connection_);
     void Run();
 
 private:
@@ -27,4 +27,4 @@ private:
     std::shared_ptr<ConnectionManager> connection_manager_;
 };
 
-#endif // HTTP_SERVER_H
+#endif // _HTTP_SERVER_H
