@@ -1,5 +1,5 @@
-#ifndef DISCOVERY_DEVICE_INFO_H
-#define DISCOVERY_DEVICE_INFO_H
+#ifndef _DISCOVERY_DEVICE_INFO_H
+#define _DISCOVERY_DEVICE_INFO_H
 
 #include <ctime>
 #include <string>
@@ -14,7 +14,7 @@ struct DiscoveryDeviceInfo
     std::string status;
 
     bool IsOffline(std::time_t current_time) const;
-    void Update(const std::string &new_address,const std::string &new_status, std::time_t new_timestamp);
+    void Update(const std::string &new_address, const std::string &new_status, std::time_t new_timestamp);
 };
 
-#endif // DISCOVERY_DEVICE_INFO_H
+#endif // _DISCOVERY_DEVICE_INFO_H

@@ -1,5 +1,5 @@
-#ifndef LAN_IPV4_DISCOVERY_H
-#define LAN_IPV4_DISCOVERY_H
+#ifndef _LAN_IPV4_DISCOVERY_H
+#define _LAN_IPV4_DISCOVERY_H
 
 #include <string>
 #include <functional>
@@ -16,7 +16,7 @@ private:
     std::function<void(DiscoveryDeviceInfo)> callback; // return the discovery device info to the discovery manager
 
     std::string getHostName();
-   
+
     void udp_broadcast_receiver();
 
     std::string discoverySource = "LAN-IPV4-Discovery";
@@ -26,18 +26,16 @@ private:
 public:
     /**
      * register the discovery manager callback function to store the discovery result
-    */
+     */
     void RegisterCallback(std::function<void(DiscoveryDeviceInfo)> callback);
     /**
      * start a broadcast
-    */
+     */
     void BroadcastSender();
     /**
      * start broadcast receiver thread
-    */
+     */
     void RunBroadcastReceiver();
-
 };
 
-
-#endif //LAN_IPV4_DISCOVERY_H
+#endif // _LAN_IPV4_DISCOVERY_H

@@ -1,5 +1,5 @@
-#ifndef DISCOVERY_MANAGER_H
-#define DISCOVERY_MANAGER_H
+#ifndef _DISCOVERY_MANAGER_H
+#define _DISCOVERY_MANAGER_H
 
 #include <functional>
 #include <map>
@@ -15,7 +15,7 @@
 class DiscoveryManager
 {
 public:
-    void Init(std::function<void(std::map<std::string, ConnectInfo>)> connection_,std::function<void(std::map<std::string, std::string>)> resource_);
+    void Init(std::function<void(std::map<std::string, ConnectInfo>)> connection_, std::function<void(std::map<std::string, std::string>)> resource_);
     void Run();
 
 private:
@@ -30,12 +30,12 @@ private:
     std::shared_ptr<LANIPV4Discovery> lanipv4discovery_;
     std::shared_ptr<BLEDiscovery> blediscovery_;
 
-    std::function<void(std::map<std::string, ConnectInfo>)> connection_callback;//connection manager callback function
-    std::function<void(std::map<std::string, std::string>)> resource_callback;//resource manager callback function
+    std::function<void(std::map<std::string, ConnectInfo>)> connection_callback; // connection manager callback function
+    std::function<void(std::map<std::string, std::string>)> resource_callback;   // resource manager callback function
 
     std::string hostname_;
 
     std::thread discovery_thread;
 };
 
-#endif // DISCOVERY_MANAGER_H
+#endif // _DISCOVERY_MANAGER_H

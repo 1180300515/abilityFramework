@@ -86,6 +86,10 @@ void DiscoveryManager::Run()
             std::map<std::string, std::string> resouce_callback_info;
             for (const auto &iter : devices)
             {
+
+                //print
+                LOG(INFO) << iter.first << " address: " << iter.second.front().address;
+
                 resouce_callback_info[iter.first] = iter.second.front().address;
                 if (iter.first == this->hostname_)
                 {
@@ -95,7 +99,7 @@ void DiscoveryManager::Run()
                 ConnectInfo new_info;
                 new_info.destinationAddress = iter.second.front().address;
                 new_info.protocoltype = ProtocolType::RandomProtocol;
-                new_info.status = ConnectionStatus::None;
+                new_info.status = ConnectionStatus::Uninitialized;
                 new_info.tendency = ProtocolTendency::Random;
                 connection_callback_info[iter.first] = new_info;
             }

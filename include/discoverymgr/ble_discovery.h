@@ -1,12 +1,9 @@
-#ifndef BLE_DISCOVERY_H
-#define BLE_DISCOVERY_H
+#ifndef _BLE_DISCOVERY_H
+#define _BLE_DISCOVERY_H
 
 class BLEDiscovery
 {
 private:
-
 public:
-
 };
-
-#endif //BLE_DISCOVERY_H
+#endif // _BLE_DISCOVERY_H
