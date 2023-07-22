@@ -1,5 +1,5 @@
-#ifndef YAML_JSON_CONVERTER_H
-#define YAML_JSON_CONVERTER_H
+#ifndef _YAML_JSON_CONVERTER_H
+#define _YAML_JSON_CONVERTER_H
 
 #include "yaml-cpp/yaml.h"
 #include "json/json.h"
@@ -35,4 +35,4 @@ std::string GetInstanceKind(const Json::Value &jnode);
 
 std::string StripSlashPrefix(const std::string &str);
 
-#endif // YAML_JSON_CONVERTER_H
+#endif // _YAML_JSON_CONVERTER_H
