@@ -1,6 +1,5 @@
-#ifndef DATABASE_STORE_STRUCT_H
-#define DATABASE_STORE_STRUCT_H
-
+#ifndef _DATABASE_STORE_STRUCT_H
+#define _DATABASE_STORE_STRUCT_H
 
 #include <string>
 
@@ -35,4 +34,4 @@ struct InstanceDBStruct
     std::string version;
 };
 
-#endif
+#endif // _DATABASE_STORE_STRUCT_H

@@ -1,5 +1,5 @@
-#ifndef DATABASE_MANAGER_H
-#define DATABASE_MANAGER_H
+#ifndef _DATABASE_MANAGER_H
+#define _DATABASE_MANAGER_H
 
 #include <string>
 #include <map>
@@ -16,13 +16,17 @@ class DatabaseManager
 public:
     static DatabaseManager &getInstance()
     {
-        LOG(INFO) << "init database manager";
         static DatabaseManager manager;
         return manager;
     }
     ~DatabaseManager() = default;
     DatabaseManager(const DatabaseManager &) = delete;
     DatabaseManager &operator=(const DatabaseManager) = delete;
+    /**
+     * @brief judge the database data whether match with local hostname
+     * @param hostname the local hostname
+     */
+    void Init(std::string hostname);
     /**
      * read file into the crd table.
      *
@@ -90,6 +94,7 @@ private:
     static std::vector<InstanceDBStruct> devicestructs;
     static std::vector<InstanceDBStruct> abilitystructs;
     static std::string cloud_address;
+    static std::string host_name;
 
     // the database
     sqlite3 *db;
@@ -99,8 +104,9 @@ private:
     static int device_callback(void *unused, int columenCount, char **columnValue, char **columnName);
     static int ability_callback(void *unused, int columenCount, char **columnValue, char **columnName);
     static int cloudaddress_callback(void *unused, int columenCount, char **columnValue, char **columnName);
+    static int hostname_callback(void *unused, int columenCount, char **columnValue, char **columnName);
 
     DatabaseManager();
 };
 
-#endif // DATABASE_MANAGER_H
+#endif // _DATABASE_MANAGER_H

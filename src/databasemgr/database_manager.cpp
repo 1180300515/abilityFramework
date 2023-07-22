@@ -9,7 +9,35 @@ std::vector<CrdDBStruct> DatabaseManager::crdstructs;
 std::vector<InstanceDBStruct> DatabaseManager::devicestructs;
 std::vector<InstanceDBStruct> DatabaseManager::abilitystructs;
 std::string DatabaseManager::cloud_address;
+std::string DatabaseManager::host_name;
 
+void DatabaseManager::Init(std::string hostname)
+{
+    host_name = "";
+    int rc;
+    char *erroms = 0;
+    std::string search_sql = "select * from HOSTNAME;";
+    rc = sqlite3_exec(db, search_sql.c_str(), hostname_callback, 0, &erroms);
+    if (rc)
+    {
+        LOG(ERROR) << "sql excute error: " << erroms;
+        return;
+    }
+    if (hostname != host_name)
+    {
+        LOG(WARNING) << "The database data does not match with the local hostname and will be cleared";
+        DBCleanCRD();
+        DBCleanAbility();
+        DBCleanDevice();
+        std::string insert_sql = "insert into HOSTNAME (NAME) VALUES (\'" + hostname + "\');";
+        rc = sqlite3_exec(db, insert_sql.c_str(), hostname_callback, 0, &erroms);
+        if (rc)
+        {
+            LOG(ERROR) << "sql excute error: " << erroms;
+            return;
+        }
+    }
+}
 
 bool DatabaseManager::RegistCrdFromFile(const std::string &filepath)
 {
@@ -345,7 +373,7 @@ bool DatabaseManager::DBStoreAbilityInstance(Json::Value &instance_json)
     std::string instance_kind = instance_json["kind"].asString();
     // check crd exist or not
     crdstructs.clear();
-    std::string search_sql = "SELECt * FROM CRD WHERE APIGROUP = \'" + instance_group + "\' AND KIND = \'" + instance_kind + "\' ;";
+    std::string search_sql = "SELECT * FROM CRD WHERE APIGROUP = \'" + instance_group + "\' AND KIND = \'" + instance_kind + "\' ;";
     int rc;
     char *erroms = 0;
     rc = sqlite3_exec(db, search_sql.c_str(), crd_callback, 0, &erroms);
@@ -473,7 +501,7 @@ bool DatabaseManager::DBStoreDeviceInstance(Json::Value &instance_json)
         LOG(ERROR) << "sql excute error with: " << erroms2;
         return false;
     }
-    LOG(INFO) << "DB add device instance: " << instance_namespace + "/" + instance_key << " success";
+    LOG(INFO) << "DB add device instance: " << instance_key << " success";
 
     return true;
 }
@@ -554,7 +582,6 @@ bool DatabaseManager::DBUpdateAbilityInstance(const Json::Value &instance_json)
     LOG(INFO) << "DB update ability: " << instance_key << " success";
     return true;
 }
-
 
 bool DatabaseManager::DBDelteDeviceInstance(const std::string &key)
 {
@@ -737,6 +764,11 @@ int DatabaseManager::cloudaddress_callback(void *unused, int columenCount, char 
     return SQLITE_OK;
 }
 
+int DatabaseManager::hostname_callback(void *unused, int columenCount, char **columnValue, char **columnName)
+{
+    host_name = columnValue[0];
+    return 0;
+}
 
 DatabaseManager::DatabaseManager()
 {
@@ -760,10 +792,13 @@ DatabaseManager::DatabaseManager()
         }
     }
     // create related table
+    const char *hostname_table_sql;
     const char *crd_table_sql;
     const char *device_table_sql;
     const char *ability_table_sql;
     const char *cloud_address_table_sql;
+
+    hostname_table_sql = "CREATE TABLE IF NOT EXISTS HOSTNAME ( NAME TEXT PRIMARY KEY   NOT NULL );";
 
     crd_table_sql = "CREATE TABLE IF NOT EXISTS CRD ( "
                     "KEY TEXT PRIMARY KEY NOT NULL, "
@@ -784,7 +819,12 @@ DatabaseManager::DatabaseManager()
                         "KIND  TEXT   NOT NULL,"
                         "VERSION TEXT NOT NULL);";
     cloud_address_table_sql = "CREATE TABLE IF NOT EXISTS CLOUDADDRESS ( ADDRESS TEXT PRIMARY KEY   NOT NULL );";
-
+    rc = sqlite3_exec(db, hostname_table_sql, hostname_callback, 0, &errormes);
+    if (rc)
+    {
+        LOG(ERROR) << "create table HOSTNAME fail with sql command: " << hostname_table_sql << "\nerror message : " << errormes;
+        exit(0);
+    }
     rc = sqlite3_exec(db, crd_table_sql, crd_callback, 0, &errormes);
     if (rc)
     {
@@ -809,5 +849,5 @@ DatabaseManager::DatabaseManager()
         LOG(ERROR) << "create table CLOUDADDRESS failed with: " << errormes;
         exit(0);
     }
-    LOG(INFO) << "create table CRD,DEVICE,ABILITY,CLOUDADDRESS success";
+    LOG(INFO) << "create table HOSTNAME,CRD,DEVICE,ABILITY,CLOUDADDRESS success";
 }
