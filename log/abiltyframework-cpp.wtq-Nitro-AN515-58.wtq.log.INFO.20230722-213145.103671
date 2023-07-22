@@ -1,0 +1,117 @@
+Log file created at: 2023/07/22 21:31:45
+Running on machine: wtq-Nitro-AN515-58
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0722 21:31:45.871598 103671 database_manager.cpp:787] db exist,open success
+I0722 21:31:45.872030 103671 database_manager.cpp:852] create table HOSTNAME,CRD,DEVICE,ABILITY,CLOUDADDRESS success
+I0722 21:31:45.872191 103671 main.cpp:51] camera_crd.yaml
+I0722 21:31:45.872203 103671 main.cpp:51] sensor_crd.yaml
+I0722 21:31:45.872208 103671 main.cpp:51] microphone_crd.yaml
+I0722 21:31:45.872212 103671 main.cpp:51] ability_crd.yaml
+I0722 21:31:45.872218 103671 main.cpp:51] loudspeaker_crd.yaml
+I0722 21:31:45.883610 103671 database_manager.cpp:82] register success with crd name: cameradevices.stable.example.com in file: ../resource/resource_file/crd/camera_crd.yaml
+I0722 21:31:45.891012 103671 database_manager.cpp:82] register success with crd name: sensordevices.stable.example.com in file: ../resource/resource_file/crd/sensor_crd.yaml
+I0722 21:31:45.896939 103671 database_manager.cpp:82] register success with crd name: microphonedevices.stable.example.com in file: ../resource/resource_file/crd/microphone_crd.yaml
+I0722 21:31:45.904943 103671 database_manager.cpp:82] register success with crd name: abilities.stable.example.com in file: ../resource/resource_file/crd/ability_crd.yaml
+I0722 21:31:45.912927 103671 database_manager.cpp:82] register success with crd name: loudspeakerdevices.stable.example.com in file: ../resource/resource_file/crd/loudspeaker_crd.yaml
+I0722 21:31:45.913305 103671 database_manager.cpp:695] crdcallback: find matched crd struct with key: sensordevices.stable.example.com
+I0722 21:31:45.913317 103671 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: SensorDevice
+I0722 21:31:45.913424 103671 yaml_json_converter.cpp:155] can't pass the validate, please check the instance file
+I0722 21:31:45.913427 103671 yaml_json_converter.cpp:158] Invalid schema: #/properties/status/properties/occupancy
+I0722 21:31:45.913429 103671 yaml_json_converter.cpp:159] Invalid keyword: type
+I0722 21:31:45.913431 103671 yaml_json_converter.cpp:162] Invalid document: #/status/occupancy
+I0722 21:31:45.913436 103671 database_manager.cpp:462] validate fail about the device instance
+E0722 21:31:45.913440 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.913569 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/FPM-383D.yaml
+I0722 21:31:45.913777 103671 database_manager.cpp:695] crdcallback: find matched crd struct with key: loudspeakerdevices.stable.example.com
+I0722 21:31:45.913782 103671 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: LoudspeakerDevice
+I0722 21:31:45.913856 103671 yaml_json_converter.cpp:155] can't pass the validate, please check the instance file
+I0722 21:31:45.913859 103671 yaml_json_converter.cpp:158] Invalid schema: #/properties/spec/properties/properties/properties/bitWidth
+I0722 21:31:45.913861 103671 yaml_json_converter.cpp:159] Invalid keyword: type
+I0722 21:31:45.913863 103671 yaml_json_converter.cpp:162] Invalid document: #/spec/properties/bitWidth
+I0722 21:31:45.913869 103671 database_manager.cpp:462] validate fail about the device instance
+E0722 21:31:45.913872 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.913885 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/loudspeaker_instance1.yaml
+I0722 21:31:45.914047 103671 database_manager.cpp:695] crdcallback: find matched crd struct with key: sensordevices.stable.example.com
+I0722 21:31:45.914052 103671 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: SensorDevice
+I0722 21:31:45.914116 103671 yaml_json_converter.cpp:155] can't pass the validate, please check the instance file
+I0722 21:31:45.914119 103671 yaml_json_converter.cpp:158] Invalid schema: #/properties/status/properties/occupancy
+I0722 21:31:45.914121 103671 yaml_json_converter.cpp:159] Invalid keyword: type
+I0722 21:31:45.914122 103671 yaml_json_converter.cpp:162] Invalid document: #/status/occupancy
+I0722 21:31:45.914127 103671 database_manager.cpp:462] validate fail about the device instance
+E0722 21:31:45.914129 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.914149 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/DS18B20.yaml
+I0722 21:31:45.914325 103671 database_manager.cpp:695] crdcallback: find matched crd struct with key: sensordevices.stable.example.com
+I0722 21:31:45.914330 103671 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: SensorDevice
+I0722 21:31:45.914391 103671 yaml_json_converter.cpp:155] can't pass the validate, please check the instance file
+I0722 21:31:45.914393 103671 yaml_json_converter.cpp:158] Invalid schema: #/properties/status/properties/occupancy
+I0722 21:31:45.914394 103671 yaml_json_converter.cpp:159] Invalid keyword: type
+I0722 21:31:45.914397 103671 yaml_json_converter.cpp:162] Invalid document: #/status/occupancy
+I0722 21:31:45.914402 103671 database_manager.cpp:462] validate fail about the device instance
+E0722 21:31:45.914403 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.914417 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/sensor_instance1.yaml
+I0722 21:31:45.914686 103671 database_manager.cpp:695] crdcallback: find matched crd struct with key: cameradevices.stable.example.com
+I0722 21:31:45.914692 103671 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: CameraDevice
+I0722 21:31:45.914777 103671 yaml_json_converter.cpp:155] can't pass the validate, please check the instance file
+I0722 21:31:45.914779 103671 yaml_json_converter.cpp:158] Invalid schema: #/properties/spec/properties/properties/properties/telephoto
+I0722 21:31:45.914781 103671 yaml_json_converter.cpp:159] Invalid keyword: type
+I0722 21:31:45.914783 103671 yaml_json_converter.cpp:162] Invalid document: #/spec/properties/telephoto
+I0722 21:31:45.914788 103671 database_manager.cpp:462] validate fail about the device instance
+E0722 21:31:45.914790 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.914810 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/camera_instance1.yaml
+I0722 21:31:45.915094 103671 database_manager.cpp:695] crdcallback: find matched crd struct with key: cameradevices.stable.example.com
+I0722 21:31:45.915099 103671 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: CameraDevice
+I0722 21:31:45.915182 103671 yaml_json_converter.cpp:155] can't pass the validate, please check the instance file
+I0722 21:31:45.915184 103671 yaml_json_converter.cpp:158] Invalid schema: #/properties/spec/properties/properties/properties/telephoto
+I0722 21:31:45.915186 103671 yaml_json_converter.cpp:159] Invalid keyword: type
+I0722 21:31:45.915189 103671 yaml_json_converter.cpp:162] Invalid document: #/spec/properties/telephoto
+I0722 21:31:45.915194 103671 database_manager.cpp:462] validate fail about the device instance
+E0722 21:31:45.915196 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.915216 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/raspberry_camera.yaml
+I0722 21:31:45.915354 103671 database_manager.cpp:695] crdcallback: find matched crd struct with key: sensordevices.stable.example.com
+I0722 21:31:45.915359 103671 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: SensorDevice
+I0722 21:31:45.915418 103671 yaml_json_converter.cpp:155] can't pass the validate, please check the instance file
+I0722 21:31:45.915421 103671 yaml_json_converter.cpp:158] Invalid schema: #/properties/status/properties/occupancy
+I0722 21:31:45.915422 103671 yaml_json_converter.cpp:159] Invalid keyword: type
+I0722 21:31:45.915424 103671 yaml_json_converter.cpp:162] Invalid document: #/status/occupancy
+I0722 21:31:45.915431 103671 database_manager.cpp:462] validate fail about the device instance
+E0722 21:31:45.915434 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.915447 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/LD2410B.yaml
+I0722 21:31:45.915721 103671 database_manager.cpp:695] crdcallback: find matched crd struct with key: cameradevices.stable.example.com
+I0722 21:31:45.915727 103671 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: CameraDevice
+I0722 21:31:45.915812 103671 yaml_json_converter.cpp:155] can't pass the validate, please check the instance file
+I0722 21:31:45.915815 103671 yaml_json_converter.cpp:158] Invalid schema: #/properties/spec/properties/properties/properties/telephoto
+I0722 21:31:45.915817 103671 yaml_json_converter.cpp:159] Invalid keyword: type
+I0722 21:31:45.915820 103671 yaml_json_converter.cpp:162] Invalid document: #/spec/properties/telephoto
+I0722 21:31:45.915827 103671 database_manager.cpp:462] validate fail about the device instance
+E0722 21:31:45.915829 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.915854 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/camera_instance2.yaml
+I0722 21:31:45.916049 103671 database_manager.cpp:695] crdcallback: find matched crd struct with key: abilities.stable.example.com
+I0722 21:31:45.916055 103671 database_manager.cpp:390] find matched crd with group: stable.example.com, kind: Ability
+I0722 21:31:45.916121 103671 yaml_json_converter.cpp:155] can't pass the validate, please check the instance file
+I0722 21:31:45.916123 103671 yaml_json_converter.cpp:158] Invalid schema: #
+I0722 21:31:45.916126 103671 yaml_json_converter.cpp:159] Invalid keyword: required
+I0722 21:31:45.916128 103671 yaml_json_converter.cpp:162] Invalid document: #
+I0722 21:31:45.916134 103671 database_manager.cpp:401] validate fail about the ability
+E0722 21:31:45.916136 103671 resource_manager.cpp:77] resource manager add ability instance fail
+E0722 21:31:45.916152 103671 main.cpp:111] add ability fail from file : ../resource/resource_file/ability/tem_ability.yaml
+I0722 21:31:45.916326 103671 database_manager.cpp:695] crdcallback: find matched crd struct with key: abilities.stable.example.com
+I0722 21:31:45.916332 103671 database_manager.cpp:390] find matched crd with group: stable.example.com, kind: Ability
+I0722 21:31:45.916400 103671 yaml_json_converter.cpp:155] can't pass the validate, please check the instance file
+I0722 21:31:45.916402 103671 yaml_json_converter.cpp:158] Invalid schema: #
+I0722 21:31:45.916404 103671 yaml_json_converter.cpp:159] Invalid keyword: required
+I0722 21:31:45.916407 103671 yaml_json_converter.cpp:162] Invalid document: #
+I0722 21:31:45.916412 103671 database_manager.cpp:401] validate fail about the ability
+E0722 21:31:45.916414 103671 resource_manager.cpp:77] resource manager add ability instance fail
+E0722 21:31:45.916430 103671 main.cpp:111] add ability fail from file : ../resource/resource_file/ability/distribute_camera_ability.yaml
+I0722 21:31:45.916697 103671 database_manager.cpp:695] crdcallback: find matched crd struct with key: abilities.stable.example.com
+I0722 21:31:45.916702 103671 database_manager.cpp:390] find matched crd with group: stable.example.com, kind: Ability
+I0722 21:31:45.916779 103671 yaml_json_converter.cpp:155] can't pass the validate, please check the instance file
+I0722 21:31:45.916781 103671 yaml_json_converter.cpp:158] Invalid schema: #
+I0722 21:31:45.916785 103671 yaml_json_converter.cpp:159] Invalid keyword: required
+I0722 21:31:45.916787 103671 yaml_json_converter.cpp:162] Invalid document: #
+I0722 21:31:45.916793 103671 database_manager.cpp:401] validate fail about the ability
+E0722 21:31:45.916795 103671 resource_manager.cpp:77] resource manager add ability instance fail
+E0722 21:31:45.916817 103671 main.cpp:111] add ability fail from file : ../resource/resource_file/ability/loudspeaker_ability.yaml
+I0722 21:31:45.917003 103671 database_manager.cpp:695] crdcallback: find matched crd struct with key: abilities.stable.example.com
+I0722 21:31:45.917008 103671 database_manager.cpp:390] find matched crd with group: stable.example.com, kind: Ability
+I0722 21:31:45.917070 103671 yaml_json_c

@@ -1,0 +1,4 @@
+Log file created at: 2023/07/22 21:47:07
+Running on machine: wtq-Nitro-AN515-58
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+W0722 21:47:07.707576 105213 database_manager.cpp:28] The database data does not match with the local hostname and will be cleared

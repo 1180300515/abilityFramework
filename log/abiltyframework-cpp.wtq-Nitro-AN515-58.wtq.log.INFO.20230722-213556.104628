@@ -1,0 +1,77 @@
+Log file created at: 2023/07/22 21:35:56
+Running on machine: wtq-Nitro-AN515-58
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0722 21:35:56.686584 104628 database_manager.cpp:787] db exist,open success
+I0722 21:35:56.687045 104628 database_manager.cpp:852] create table HOSTNAME,CRD,DEVICE,ABILITY,CLOUDADDRESS success
+I0722 21:35:56.687229 104628 main.cpp:51] camera_crd.yaml
+I0722 21:35:56.687242 104628 main.cpp:51] sensor_crd.yaml
+I0722 21:35:56.687248 104628 main.cpp:51] microphone_crd.yaml
+I0722 21:35:56.687252 104628 main.cpp:51] ability_crd.yaml
+I0722 21:35:56.687256 104628 main.cpp:51] loudspeaker_crd.yaml
+I0722 21:35:56.688793 104628 database_manager.cpp:82] register success with crd name: cameradevices.stable.example.com in file: ../resource/resource_file/crd/camera_crd.yaml
+I0722 21:35:56.689961 104628 database_manager.cpp:82] register success with crd name: sensordevices.stable.example.com in file: ../resource/resource_file/crd/sensor_crd.yaml
+I0722 21:35:56.691174 104628 database_manager.cpp:82] register success with crd name: microphonedevices.stable.example.com in file: ../resource/resource_file/crd/microphone_crd.yaml
+I0722 21:35:56.692386 104628 database_manager.cpp:82] register success with crd name: abilities.stable.example.com in file: ../resource/resource_file/crd/ability_crd.yaml
+I0722 21:35:56.693557 104628 database_manager.cpp:82] register success with crd name: loudspeakerdevices.stable.example.com in file: ../resource/resource_file/crd/loudspeaker_crd.yaml
+I0722 21:35:56.694010 104628 database_manager.cpp:695] crdcallback: find matched crd struct with key: sensordevices.stable.example.com
+I0722 21:35:56.694036 104628 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: SensorDevice
+I0722 21:35:56.694187 104628 yaml_json_converter.cpp:167] validate success
+I0722 21:35:56.694204 104628 database_manager.cpp:458] the device instance pass the validate 
+I0722 21:35:56.701346 104628 database_manager.cpp:504] DB add device instance: default/default/FPM-383D-fingerprint-sensor success
+I0722 21:35:56.701602 104628 resource_manager.cpp:218] resource manager add device instance : default/FPM-383D-fingerprint-sensor type: SensorDevice
+I0722 21:35:56.702353 104628 database_manager.cpp:695] crdcallback: find matched crd struct with key: loudspeakerdevices.stable.example.com
+I0722 21:35:56.702380 104628 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: LoudspeakerDevice
+I0722 21:35:56.702534 104628 yaml_json_converter.cpp:167] validate success
+I0722 21:35:56.702553 104628 database_manager.cpp:458] the device instance pass the validate 
+I0722 21:35:56.709336 104628 database_manager.cpp:504] DB add device instance: default/default/loudspeaker1 success
+I0722 21:35:56.709403 104628 resource_manager.cpp:200] resource manager add device instance : default/loudspeaker1 type: LoudspeakerDevice
+I0722 21:35:56.709790 104628 database_manager.cpp:695] crdcallback: find matched crd struct with key: sensordevices.stable.example.com
+I0722 21:35:56.709813 104628 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: SensorDevice
+I0722 21:35:56.709944 104628 yaml_json_converter.cpp:167] validate success
+I0722 21:35:56.709957 104628 database_manager.cpp:458] the device instance pass the validate 
+I0722 21:35:56.715349 104628 database_manager.cpp:504] DB add device instance: default/default/DS18B20-temperature-sensor success
+I0722 21:35:56.715420 104628 resource_manager.cpp:218] resource manager add device instance : default/DS18B20-temperature-sensor type: SensorDevice
+I0722 21:35:56.715950 104628 database_manager.cpp:695] crdcallback: find matched crd struct with key: sensordevices.stable.example.com
+I0722 21:35:56.715978 104628 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: SensorDevice
+I0722 21:35:56.716074 104628 yaml_json_converter.cpp:167] validate success
+I0722 21:35:56.716084 104628 database_manager.cpp:458] the device instance pass the validate 
+I0722 21:35:56.721298 104628 database_manager.cpp:504] DB add device instance: default/default/sensor1 success
+I0722 21:35:56.721345 104628 resource_manager.cpp:218] resource manager add device instance : default/sensor1 type: SensorDevice
+I0722 21:35:56.721813 104628 database_manager.cpp:695] crdcallback: find matched crd struct with key: cameradevices.stable.example.com
+I0722 21:35:56.721858 104628 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: CameraDevice
+I0722 21:35:56.722010 104628 yaml_json_converter.cpp:167] validate success
+I0722 21:35:56.722023 104628 database_manager.cpp:458] the device instance pass the validate 
+I0722 21:35:56.727352 104628 database_manager.cpp:504] DB add device instance: default/default/camera1 success
+I0722 21:35:56.727427 104628 resource_manager.cpp:191] resource manager add device instance : default/camera1 type: CameraDevice
+I0722 21:35:56.727973 104628 database_manager.cpp:695] crdcallback: find matched crd struct with key: cameradevices.stable.example.com
+I0722 21:35:56.727993 104628 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: CameraDevice
+I0722 21:35:56.728124 104628 yaml_json_converter.cpp:167] validate success
+I0722 21:35:56.728133 104628 database_manager.cpp:458] the device instance pass the validate 
+I0722 21:35:56.733403 104628 database_manager.cpp:504] DB add device instance: default/default/RaspberryCamera success
+I0722 21:35:56.733500 104628 resource_manager.cpp:191] resource manager add device instance : default/RaspberryCamera type: CameraDevice
+I0722 21:35:56.733911 104628 database_manager.cpp:695] crdcallback: find matched crd struct with key: sensordevices.stable.example.com
+I0722 21:35:56.733930 104628 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: SensorDevice
+I0722 21:35:56.734061 104628 yaml_json_converter.cpp:167] validate success
+I0722 21:35:56.734073 104628 database_manager.cpp:458] the device instance pass the validate 
+I0722 21:35:56.739362 104628 database_manager.cpp:504] DB add device instance: default/default/LD2410B-presence-sensor success
+I0722 21:35:56.739409 104628 resource_manager.cpp:218] resource manager add device instance : default/LD2410B-presence-sensor type: SensorDevice
+I0722 21:35:56.739976 104628 database_manager.cpp:695] crdcallback: find matched crd struct with key: cameradevices.stable.example.com
+I0722 21:35:56.739996 104628 database_manager.cpp:451] find matched crd with group: stable.example.com, kind: CameraDevice
+I0722 21:35:56.740150 104628 yaml_json_converter.cpp:167] validate success
+I0722 21:35:56.740164 104628 database_manager.cpp:458] the device instance pass the validate 
+I0722 21:35:56.745797 104628 database_manager.cpp:504] DB add device instance: default/default/camera2 success
+I0722 21:35:56.745868 104628 resource_manager.cpp:191] resource manager add device instance : default/camera2 type: CameraDevice
+I0722 21:35:56.746316 104628 database_manager.cpp:695] crdcallback: find matched crd struct with key: abilities.stable.example.com
+I0722 21:35:56.746335 104628 database_manager.cpp:390] find matched crd with group: stable.example.com, kind: Ability
+I0722 21:35:56.746445 104628 yaml_json_converter.cpp:155] can't pass the validate, please check the instance file
+I0722 21:35:56.746451 104628 yaml_json_converter.cpp:158] Invalid schema: #
+I0722 21:35:56.746455 104628 yaml_json_converter.cpp:159] Invalid keyword: required
+I0722 21:35:56.746459 104628 yaml_json_converter.cpp:162] Invalid document: #
+I0722 21:35:56.746469 104628 database_manager.cpp:401] validate fail about the ability
+E0722 21:35:56.746476 104628 resource_manager.cpp:77] resource manager add ability instance fail
+E0722 21:35:56.746675 104628 main.cpp:111] add ability fail from file : ../resource/resource_file/ability/tem_ability.yaml
+I0722 21:35:56.747020 104628 database_manager.cpp:695] crdcallback: find matched crd struct with key: abilities.stable.example.com
+I0722 21:35:56.747036 104628 database_manager.cpp:390] find matched crd with group: stable.example.com, kind: Ability
+I0722 21:35:56.747144 104628 yaml_json_converter.cpp:155] can't pass the validate, please check the instance file
+I0722 21:35:56.747150 104628 yaml_json_converter.cpp:158] Invalid schema: #
+I0722 21:35:56.747154 104628 yaml_json_converter.cpp:159

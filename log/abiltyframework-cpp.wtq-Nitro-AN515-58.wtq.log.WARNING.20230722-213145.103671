@@ -1,0 +1,30 @@
+Log file created at: 2023/07/22 21:31:45
+Running on machine: wtq-Nitro-AN515-58
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E0722 21:31:45.913440 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.913569 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/FPM-383D.yaml
+E0722 21:31:45.913872 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.913885 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/loudspeaker_instance1.yaml
+E0722 21:31:45.914129 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.914149 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/DS18B20.yaml
+E0722 21:31:45.914403 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.914417 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/sensor_instance1.yaml
+E0722 21:31:45.914790 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.914810 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/camera_instance1.yaml
+E0722 21:31:45.915196 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.915216 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/raspberry_camera.yaml
+E0722 21:31:45.915434 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.915447 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/LD2410B.yaml
+E0722 21:31:45.915829 103671 resource_manager.cpp:229] resource manager add device instance fail
+E0722 21:31:45.915854 103671 main.cpp:86] add instance fail from file : ../resource/resource_file/device/camera_instance2.yaml
+E0722 21:31:45.916136 103671 resource_manager.cpp:77] resource manager add ability instance fail
+E0722 21:31:45.916152 103671 main.cpp:111] add ability fail from file : ../resource/resource_file/ability/tem_ability.yaml
+E0722 21:31:45.916414 103671 resource_manager.cpp:77] resource manager add ability instance fail
+E0722 21:31:45.916430 103671 main.cpp:111] add ability fail from file : ../resource/resource_file/ability/distribute_camera_ability.yaml
+E0722 21:31:45.916795 103671 resource_manager.cpp:77] resource manager add ability instance fail
+E0722 21:31:45.916817 103671 main.cpp:111] add ability fail from file : ../resource/resource_file/ability/loudspeaker_ability.yaml
+E0722 21:31:45.917110 103671 database_manager.cpp:422] sql excute error with: table ABILITY has no column named KEY
+E0722 21:31:45.917114 103671 resource_manager.cpp:77] resource manager add ability instance fail
+E0722 21:31:45.917129 103671 main.cpp:111] add ability fail from file : ../resource/resource_file/ability/camera_ability.yaml
+E0722 21:31:45.917371 103671 resource_manager.cpp:77] resource manager add ability instance fail
+E0722 21:31:45.917385 103671 main.cpp:111] add ability fail from file : ../resource/resource_file/ability/display_ability.yaml
