@@ -1,8 +1,8 @@
-#include "display_hardware.h"
+#include "hardware_display.h"
 
 #include <iostream>
 
-Json::Value DisplayInfo::toJson() const
+Json::Value DisplayHardware::toJson() const
 {
     Json::Value root;
     root["screen"] = screen;
@@ -15,9 +15,9 @@ Json::Value DisplayInfo::toJson() const
     return root;
 }
 
-DisplayInfo DisplayInfo::fromJson(const Json::Value &root)
+DisplayHardware DisplayHardware::fromJson(const Json::Value &root)
 {
-    DisplayInfo disp;
+    DisplayHardware disp;
     disp.screen = root["screen"].asInt();
     disp.x = root["x"].asInt();
     disp.y = root["y"].asInt();
@@ -28,7 +28,7 @@ DisplayInfo DisplayInfo::fromJson(const Json::Value &root)
     return disp;
 }
 
-std::string DisplayInfo::ToKeyValue(std::string hostname) const
+std::string DisplayHardware::ToKeyValue(std::string hostname) const
 {
     std::stringstream ss;
     ss << "hostname:" << hostname << ",";
@@ -42,7 +42,7 @@ std::string DisplayInfo::ToKeyValue(std::string hostname) const
     return ss.str();
 }
 
-void DisplayInfo::print()
+void DisplayHardware::print()
 {
     std::cout << "screen: " << screen << std::endl;
     std::cout << "x: " << x << std::endl;

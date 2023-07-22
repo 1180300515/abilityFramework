@@ -1,5 +1,5 @@
-#ifndef CAMERA_HARDWARE_H
-#define CAMERA_HARDWARE_H
+#ifndef _HARDWARE_CAMERA_H
+#define _HARDWARE_CAMERA_H
 
 #include <string>
 #include <vector>
@@ -23,4 +23,4 @@ public:
     void print();
 };
 
-#endif // CAMERA_HARDWARE_H
+#endif // _HARDWARE_CAMERA_H

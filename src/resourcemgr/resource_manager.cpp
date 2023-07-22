@@ -8,10 +8,10 @@
 #include "database_manager.h"
 #include "yaml_json_converter.h"
 #include "global_var.h"
-#include "cameradevice_instance.h"
-#include "louspeakerdevice_instance.h"
-#include "sensordevice_instance.h"
-#include "microphonedevice_instance.h"
+#include "device_instance_camera.h"
+#include "device_instance_loudspeaker.h"
+#include "device_instance_sensor.h"
+#include "device_instance_microphone.h"
 #include "message_package_struct.h"
 
 ResourceManager::ResourceManager()
@@ -66,7 +66,7 @@ bool ResourceManager::AddAbilityInstance(const std::string &data, bool from_file
         {
             std::lock_guard<std::mutex> locker(abilities_lock_);
             auto resource = std::make_shared<AbilityInstanceInfo>();
-            resource->UnMarshal(instance_json);
+            resource->FromJson(instance_json);
             std::string key = GetInstanceKey(instance_json);
             abilities_[key] = resource;
             LOG(INFO) << "resource manager add ability instance : " << key;
@@ -86,7 +86,7 @@ bool ResourceManager::AddAbilityInstance(const std::string &data, bool from_file
         {
             std::lock_guard<std::mutex> locker(abilities_lock_);
             auto resource = std::make_shared<AbilityInstanceInfo>();
-            resource->UnMarshal(instance_json);
+            resource->FromJson(instance_json);
             std::string key = GetInstanceKey(instance_json);
             abilities_[key] = resource;
             LOG(INFO) << "resource manager add ability instance : " << key;
@@ -173,7 +173,7 @@ bool ResourceManager::AddDeviceInstance(const std::string &data, bool from_file)
             LOG(ERROR) << "file can't be load";
             return false;
         }
-        if (!YamlToJson(instance_yaml, instance_json))
+        if (!YamlToJsonForInstance(instance_yaml, instance_json))
         {
             LOG(ERROR) << "convert the yaml file in: " << data << " to json format fail";
             return false;
@@ -185,7 +185,7 @@ bool ResourceManager::AddDeviceInstance(const std::string &data, bool from_file)
             if (device_kind == CameraDeviceResourcetype)
             {
                 auto new_device = std::make_shared<CameraInstance>();
-                new_device->UnMarshal(instance_json);
+                new_device->FromJson(instance_json);
                 auto key = GetInstanceKey(instance_json);
                 devices_[key] = new_device;
                 LOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
@@ -194,7 +194,7 @@ bool ResourceManager::AddDeviceInstance(const std::string &data, bool from_file)
             else if (device_kind == LoudspeakerDeviceResourcetype)
             {
                 auto new_device = std::make_shared<LoudspeakerInstance>();
-                new_device->UnMarshal(instance_json);
+                new_device->FromJson(instance_json);
                 auto key = GetInstanceKey(instance_json);
                 devices_[key] = new_device;
                 LOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
@@ -203,7 +203,7 @@ bool ResourceManager::AddDeviceInstance(const std::string &data, bool from_file)
             else if (device_kind == MicrophoneDeviceResourcetype)
             {
                 auto new_device = std::make_shared<MicrophoneInstance>();
-                new_device->UnMarshal(instance_json);
+                new_device->FromJson(instance_json);
                 auto key = GetInstanceKey(instance_json);
                 devices_[key] = new_device;
                 LOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
@@ -212,7 +212,7 @@ bool ResourceManager::AddDeviceInstance(const std::string &data, bool from_file)
             else if (device_kind == SensorDeviceResourcetype)
             {
                 auto new_device = std::make_shared<SensorInstance>();
-                new_device->UnMarshal(instance_json);
+                new_device->FromJson(instance_json);
                 auto key = GetInstanceKey(instance_json);
                 devices_[key] = new_device;
                 LOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
@@ -241,7 +241,7 @@ bool ResourceManager::AddDeviceInstance(const std::string &data, bool from_file)
             if (device_kind == CameraDeviceResourcetype)
             {
                 auto new_device = std::make_shared<CameraInstance>();
-                new_device->UnMarshal(instance_json);
+                new_device->FromJson(instance_json);
                 auto key = GetInstanceKey(instance_json);
                 devices_[key] = new_device;
                 LOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
@@ -250,7 +250,7 @@ bool ResourceManager::AddDeviceInstance(const std::string &data, bool from_file)
             else if (device_kind == LoudspeakerDeviceResourcetype)
             {
                 auto new_device = std::make_shared<LoudspeakerInstance>();
-                new_device->UnMarshal(instance_json);
+                new_device->FromJson(instance_json);
                 auto key = GetInstanceKey(instance_json);
                 devices_[key] = new_device;
                 LOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
@@ -259,7 +259,7 @@ bool ResourceManager::AddDeviceInstance(const std::string &data, bool from_file)
             else if (device_kind == MicrophoneDeviceResourcetype)
             {
                 auto new_device = std::make_shared<MicrophoneInstance>();
-                new_device->UnMarshal(instance_json);
+                new_device->FromJson(instance_json);
                 auto key = GetInstanceKey(instance_json);
                 devices_[key] = new_device;
                 LOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
@@ -268,7 +268,7 @@ bool ResourceManager::AddDeviceInstance(const std::string &data, bool from_file)
             else if (device_kind == SensorDeviceResourcetype)
             {
                 auto new_device = std::make_shared<SensorInstance>();
-                new_device->UnMarshal(instance_json);
+                new_device->FromJson(instance_json);
                 auto key = GetInstanceKey(instance_json);
                 devices_[key] = new_device;
                 LOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
@@ -402,22 +402,82 @@ bool ResourceManager::AbilityExistJudge(const std::string &key)
     return false;
 }
 
-void ResourceManager::EndAddressDiscoveryResult(std::map<std::string, std::string> &result)
+void ResourceManager::EndAddressDiscoveryResult(const std::map<std::string, std::string> &result)
 {
     this->hardware_manager_->EndAddressResult(result);
 }
 
 void ResourceManager::LoadLocalResource()
 {
+    std::map<std::string,std::string> data;
+    DatabaseManager::getInstance().DBGetAbilityInstances(data);
+    if (data.size() != 0)
+    {
+        for (const auto &iter : data)
+        {
+            LOG(INFO) << "add resource : " << iter.first ;
+            auto new_ability = std::make_shared<AbilityInstanceInfo>();
+            new_ability->UnMarshal(iter.second);
+            this->abilities_[iter.first] = new_ability;
+        }
+    }
+    data.clear();
+    DatabaseManager::getInstance().DBGetDeviceInstances(CameraDeviceResourcetype, data);
+    if (data.size() != 0)
+    {
+        for (const auto &iter : data)
+        {
+            auto new_device = std::make_shared<CameraInstance>();
+            new_device->UnMarshal(iter.second);
+            this->devices_[iter.first] = new_device;
+        }
+    }
+    data.clear();
+    DatabaseManager::getInstance().DBGetDeviceInstances(MicrophoneDeviceResourcetype, data);
+    if (data.size() != 0)
+    {
+        for (const auto &iter : data)
+        {
+            auto new_device = std::make_shared<MicrophoneInstance>();
+            new_device->UnMarshal(iter.second);
+            this->devices_[iter.first] = new_device;
+        }
+    }
+    data.clear();
+    DatabaseManager::getInstance().DBGetDeviceInstances(LoudspeakerDeviceResourcetype, data);
+    if (data.size() != 0)
+    {
+        for (const auto &iter : data)
+        {
+            auto new_device = std::make_shared<LoudspeakerInstance>();
+            new_device->UnMarshal(iter.second);
+            this->devices_[iter.first] = new_device;
+        }
+    }
+    data.clear();
+    DatabaseManager::getInstance().DBGetDeviceInstances(SensorDeviceResourcetype, data);
+    if (data.size() != 0)
+    {
+        for (const auto &iter : data)
+        {
+            auto new_device = std::make_shared<SensorInstance>();
+            new_device->UnMarshal(iter.second);
+            this->devices_[iter.first] = new_device;
+        }
+    }
 }
 
 void ResourceManager::Init(std::shared_ptr<ConnectionManager> connect)
 {
     getHostName();
+    DatabaseManager::getInstance().Init(this->hostname_);
+    LoadLocalResource();
+
     this->connection_ = connect;
     connection_->Init(std::bind(&ResourceManager::RecvMessageHandle, this, std::placeholders::_1));
     this->hardware_ = std::make_shared<HardwareScan>();
-    this->hardware_->Init(std::bind(&ResourceManager::AddDeviceInstance, this, std::placeholders::_1, std::placeholders::_2), this->hostname_);
+    std::shared_ptr<ResourceManager> p(this);
+    this->hardware_->Init(p, this->hostname_);
     this->hardware_manager_ = std::make_shared<HardwareResourceManager>();
     this->hardware_manager_->Init(this->hostname_);
 }
@@ -432,6 +492,7 @@ void ResourceManager::Run(bool startcloudsync, bool startendsync)
     {
         this->endsyncThread_ = std::thread(&ResourceManager::endSyncThread, this);
     }
+    this->hardware_->Run();
 }
 
 void ResourceManager::RefreshKVRecord()
@@ -756,6 +817,61 @@ void ResourceManager::RecvMessageHandle(const std::string &message)
     else
     {
         LOG(ERROR) << "message unmarshal error";
+    }
+}
+
+void ResourceManager::InsertHardwareInfo(std::map<std::string, CameraHardware> &camera,
+                                         std::map<std::string, AudioHardware> &mic,
+                                         std::map<std::string, AudioHardware> &speaker)
+{
+    std::lock_guard<std::mutex> locker(devices_lock_);
+    for (auto &iter : devices_)
+    {
+        if (iter.second->kind == CameraDeviceResourcetype)
+        {
+            if (camera.count(iter.second->GetHardwareIdentifier()) != 0)
+            {
+                auto change = iter.second->UpdateHardwareInfo(camera[iter.second->GetHardwareIdentifier()].toJson());
+                if (change)
+                {
+                    Json::Value data;
+                    StringToJson(iter.second->Marshal(), data);
+                    DatabaseManager::getInstance().DBUpdateDeviceInstance(data);
+                }
+                camera.erase(iter.second->GetHardwareIdentifier());
+            }
+        }
+        else if (iter.second->kind == MicrophoneDeviceResourcetype)
+        {
+            if (mic.count(iter.second->GetHardwareIdentifier()) != 0)
+            {
+                auto change = iter.second->UpdateHardwareInfo(mic[iter.second->GetHardwareIdentifier()].toJson());
+                if (change)
+                {
+                    Json::Value data;
+                    StringToJson(iter.second->Marshal(), data);
+                    DatabaseManager::getInstance().DBUpdateDeviceInstance(data);
+                }
+                mic.erase(iter.second->GetHardwareIdentifier());
+            }
+        }
+        else if (iter.second->kind == LoudspeakerDeviceResourcetype)
+        {
+            if (speaker.count(iter.second->GetHardwareIdentifier()) != 0)
+            {
+                auto change = iter.second->UpdateHardwareInfo(speaker[iter.second->GetHardwareIdentifier()].toJson());
+                if (change)
+                {
+                    Json::Value data;
+                    StringToJson(iter.second->Marshal(), data);
+                    DatabaseManager::getInstance().DBUpdateDeviceInstance(data);
+                }
+                speaker.erase(iter.second->GetHardwareIdentifier());
+            }
+        }
+    }
+    for (auto iter = camera.begin(); iter != camera.end();)
+    {
     }
 }
 

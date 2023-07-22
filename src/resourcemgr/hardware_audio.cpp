@@ -1,8 +1,8 @@
-#include "audio_hardware.h"
+#include "hardware_audio.h"
 
 #include "iostream"
 
-Json::Value AudioDevice::toJson() const
+Json::Value AudioHardware::toJson() const
 {
 
     Json::Value root;
@@ -15,7 +15,7 @@ Json::Value AudioDevice::toJson() const
     return root;
 }
 
-std::string AudioDevice::ToKeyValue(const std::string &hostname) const
+std::string AudioHardware::ToKeyValue(const std::string &hostname) const
 {
     std::stringstream ss;
     ss << "hostname:" << hostname << ",";
@@ -28,10 +28,10 @@ std::string AudioDevice::ToKeyValue(const std::string &hostname) const
     return ss.str();
 }
 
-AudioDevice AudioDevice::fromJson(const Json::Value &root)
+AudioHardware AudioHardware::fromJson(const Json::Value &root)
 {
 
-    return AudioDevice(
+    return AudioHardware(
         root["name"].asString(),
         root["description"].asString(),
         root["volume"].asUInt(),
@@ -40,7 +40,7 @@ AudioDevice AudioDevice::fromJson(const Json::Value &root)
         root["channels"].asUInt());
 }
 
-void AudioDevice::print()
+void AudioHardware::print()
 {
     std::cout << "name: " << name << std::endl;
     std::cout << "description: " << description << std::endl;

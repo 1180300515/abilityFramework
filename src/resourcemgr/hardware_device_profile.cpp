@@ -1,4 +1,4 @@
-#include "device_profile.h"
+#include "hardware_device_profile.h"
 
 Json::Value DeviceProfile::toJson() const
 {
@@ -36,9 +36,9 @@ void DeviceProfile::FromJson2Profile(const Json::Value &root)
     for (const auto &cam : root["cameraDevices"])
         cameraDevices.push_back(CameraHardware::fromJson(cam));
     for (const auto &disp : root["displayDevices"])
-        displayDevices.push_back(DisplayInfo::fromJson(disp));
+        displayDevices.push_back(DisplayHardware::fromJson(disp));
     for (const auto &mic : root["micDevices"])
-        micDevices.push_back(AudioDevice::fromJson(mic));
+        micDevices.push_back(AudioHardware::fromJson(mic));
     for (const auto &speaker : root["speakerDevices"])
-        speakerDevices.push_back(AudioDevice::fromJson(speaker));
+        speakerDevices.push_back(AudioHardware::fromJson(speaker));
 }

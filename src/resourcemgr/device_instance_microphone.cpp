@@ -1,10 +1,57 @@
-#include "microphonedevice_instance.h"
+#include "device_instance_microphone.h"
 
 #include "json/json.h"
+#include "glog/logging.h"
+
+#include "hardware_audio.h"
+
+std::string MicrophoneInstance::GetHardwareIdentifier()
+{
+    return spec.hardwareidentifier;
+}
+
+bool MicrophoneInstance::UpdateHardwareInfo(const Json::Value &info)
+{
+    bool changeornot = false;
+    AudioHardware hardware;
+    hardware.fromJson(info);
+    if (hardware.name == spec.properties.hardwareName)
+    {
+        if (std::to_string(hardware.sampleRate) != spec.properties.sampleRates)
+        {
+            spec.properties.sampleRates = std::to_string(hardware.sampleRate);
+            changeornot = true;
+        }
+        if (static_cast<int>(hardware.volume) != spec.properties.volume)
+        {
+            spec.properties.volume = static_cast<int>(hardware.volume);
+            changeornot = true;
+        }
+        if (hardware.mute != spec.properties.mute)
+        {
+            spec.properties.mute = hardware.mute;
+            changeornot = true;
+        }
+        if (hardware.description != spec.properties.description)
+        {
+            spec.properties.description = hardware.description;
+            changeornot = true;
+        }
+        if (static_cast<int>(hardware.channels) != spec.properties.channelNumber)
+        {
+            spec.properties.channelNumber = static_cast<int>(hardware.channels);
+            changeornot = true;
+        }
+    }
+    else
+    {
+        LOG(ERROR) << "this hardware info don't match this instance";
+    }
+    return changeornot;
+}
 
 std::string MicrophoneInstance::Marshal()
 {
-    std::lock_guard<std::mutex> locker(resourcelock_);
     Json::Value jnode;
     jnode["apiVersion"] = apiVersion;
     jnode["kind"] = kind;
@@ -13,6 +60,7 @@ std::string MicrophoneInstance::Marshal()
     jnode["status"]["occupancy"] = status.occupancy;
     // spec part
     jnode["spec"]["kind"] = spec.kind;
+    jnode["spec"]["hardwareidentifier"] = spec.hardwareidentifier;
     jnode["spec"]["version"] = spec.version;
     jnode["spec"]["hostname"] = spec.hostname;
     jnode["spec"]["properties"]["sampleRates"] = spec.properties.sampleRates;
@@ -96,11 +144,11 @@ std::string MicrophoneInstance::Marshal()
     return writer.write(jnode);
 }
 
-bool MicrophoneInstance::UnMarshal(const Json::Value &jnode)
+bool MicrophoneInstance::FromJson(const Json::Value &jnode)
 {
-    std::lock_guard<std::mutex> locker(resourcelock_);
-    DeviceInstanceInfo::UnMarshal(jnode);
+    DeviceInstanceInfo::FromJson(jnode);
     spec.kind = jnode["spec"]["kind"].asString();
+    spec.hardwareidentifier = jnode["spec"]["hardwareidentifier"].asString();
     spec.version = jnode["spec"]["version"].asString();
     spec.hostname = jnode["spec"]["hostname"].asString();
     if (jnode["spec"].isMember("capability1"))
@@ -149,9 +197,19 @@ bool MicrophoneInstance::UnMarshal(const Json::Value &jnode)
     return true;
 }
 
+bool MicrophoneInstance::UnMarshal(const std::string &data)
+{
+    Json::Value jnode;
+    Json::Reader reader;
+    reader.parse(data, jnode);
+    FromJson(jnode);
+    return true;
+}
+
+
 bool MicrophoneInstance::updateInstance(const Json::Value &jnode)
 {
-    return UnMarshal(jnode);
+    return FromJson(jnode);
 }
 
 std::string MicrophoneInstance::getInstanceVersion()

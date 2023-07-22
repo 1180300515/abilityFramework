@@ -1,5 +1,5 @@
-#ifndef RESOURCE_MANAGER_H
-#define RESOURCE_MANAGER_H
+#ifndef _RESOURCE_MANAGER_H
+#define _RESOURCE_MANAGER_H
 
 #include <mutex>
 #include <memory>
@@ -53,10 +53,9 @@ public:
     bool UpdateDeviceInstance(const std::string &data, bool from_file = false);
     bool DeleteDeviceInstance(const std::string &key);
     /**
-     * @brief
+     * @brief load data from the database
      */
     void LoadLocalResource();
-
     /**
      * @brief judge the key resource type
      * @param key
@@ -68,8 +67,15 @@ public:
      * @brief init the resource manager
      */
     void Init(std::shared_ptr<ConnectionManager> connect);
-
-    void Run(bool startcloudsync,bool startendsync);
+    /**
+     * @brief start the resource manager module
+     * @param startcloudsync
+     * @param startendsync
+     */
+    void Run(bool startcloudsync, bool startendsync);
+    /**
+     * @brief refresh the key and version record
+     */
     void RefreshKVRecord();
     /**
      * @brief get the local hardware device json string
@@ -89,7 +95,7 @@ public:
      * @brief called by discovery manager, tell the discovery result
      * @param result
      */
-    void EndAddressDiscoveryResult(std::map<std::string, std::string> &result);
+    void EndAddressDiscoveryResult(const std::map<std::string, std::string> &result);
     /**
      * @brief called by ability relation manager, get the abilityinfo extract , the namespace/name will only keep name
      * @return
@@ -98,7 +104,7 @@ public:
     /**
      * @brief called by ability relation manager, get the hardware
      * @param type the hardware type
-     * @return 
+     * @return
      */
     std::vector<std::string> GetHardWareResourceList(std::string type);
     /**
@@ -106,6 +112,12 @@ public:
      * @param message data
      */
     void RecvMessageHandle(const std::string &message);
+    /**
+     * @brief insert the hardware info into the matching instance
+     */
+    void InsertHardwareInfo(std::map<std::string, CameraHardware> &camera,
+                            std::map<std::string, AudioHardware> &mic,
+                            std::map<std::string, AudioHardware> &speaker);
 
 private:
     /**
@@ -114,7 +126,7 @@ private:
      */
     void addNonLocalResource(const std::string &data);
     /**
-     * @brief  handle the end message
+     * @brief  handle the cloud message
      * @param message  the cloud message
      */
     void cloudMessageHandle(const KeyAndDataPackages &data);
@@ -130,7 +142,7 @@ private:
     std::string generateNonLocalFormat();
     /**
      * @brief generate key-value format data
-     * @return 
+     * @return
      */
     std::string generateKVFormat();
     /**
@@ -165,4 +177,4 @@ private:
     std::thread cloudsyncThread_;
 };
 
-#endif // RESOURCE_MANAGER_H
+#endif // _RESOURCE_MANAGER_H

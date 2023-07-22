@@ -1,10 +1,20 @@
 #include "ability_instance_info.h"
 
+#include <iostream>
+
 #include "json/json.h"
 
-bool AbilityInstanceInfo::UnMarshal(const Json::Value &jnode)
+bool AbilityInstanceInfo::UnMarshal(const std::string &data)
 {
-    std::lock_guard<std::mutex> locker(abilitylock_);
+    Json::Value jnode;
+    Json::Reader reader;
+    reader.parse(data, jnode);
+    FromJson(jnode);
+    return true;
+}
+
+bool AbilityInstanceInfo::FromJson(const Json::Value &jnode)
+{
     apiVersion = jnode["apiVersion"].asString();
     kind = jnode["kind"].asString();
     metadata.name = jnode["metadata"]["name"].asString();
@@ -38,14 +48,14 @@ bool AbilityInstanceInfo::UnMarshal(const Json::Value &jnode)
 
     if (jnode.isMember("depends"))
     {
-        if (jnode["depends"].isMember("abilities"))
+        if (jnode["depends"]["abilities"].isArray())
         {
             for (int i = 0; i < jnode["depends"]["abilities"].size(); i++)
             {
                 depends.abilities.emplace_back(jnode["depends"]["abilities"][i].asString());
             }
         }
-        if (jnode["depends"].isMember("devices"))
+        if (jnode["depends"]["devices"].isArray())
         {
             for (int i = 0; i < jnode["depends"]["devices"].size(); i++)
             {
@@ -59,7 +69,6 @@ bool AbilityInstanceInfo::UnMarshal(const Json::Value &jnode)
     {
         spec[*it] = jnode["spec"][*it].asString();
     }
-
     for (int i = 0; i < jnode["ApiList"].size(); i++)
     {
         Aapi api;
@@ -83,7 +92,6 @@ bool AbilityInstanceInfo::UnMarshal(const Json::Value &jnode)
         }
         ApiList.emplace_back(api);
     }
-
     for (int i = 0; i < jnode["abilityinstancelist"].size(); i++)
     {
         Aabilityinstance instance;
@@ -99,7 +107,6 @@ bool AbilityInstanceInfo::UnMarshal(const Json::Value &jnode)
 
 std::string AbilityInstanceInfo::Marshal()
 {
-    std::lock_guard<std::mutex> locker(abilitylock_);
     Json::Value jnode;
     jnode["apiVersion"] = apiVersion;
     jnode["kind"] = kind;
@@ -170,5 +177,5 @@ std::string AbilityInstanceInfo::Marshal()
 
 bool AbilityInstanceInfo::updateAbility(const Json::Value &jnode)
 {
-    return UnMarshal(jnode);
+    return FromJson(jnode);
 }

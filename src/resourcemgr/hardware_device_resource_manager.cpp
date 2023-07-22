@@ -12,6 +12,7 @@ void HardwareResourceManager::Init(std::string hostname)
 void HardwareResourceManager::EndAddressResult(std::map<std::string, std::string> result)
 {
     compareOldAndNew(result);
+    //get the new host device profile
     for (const auto &iter : result)
     {
         if (this->hardware_resources.count(iter.first) == 0)
@@ -21,6 +22,7 @@ void HardwareResourceManager::EndAddressResult(std::map<std::string, std::string
             change = true;
         }
     }
+    // regenerate records
     if (change)
     {
         std::lock_guard<std::mutex> locker(locker_);

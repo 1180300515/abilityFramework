@@ -9,10 +9,11 @@
 
 #include "glog/logging.h"
 
-#include "cameradevice_instance.h"
-#include "louspeakerdevice_instance.h"
-#include "microphonedevice_instance.h"
+#include "device_instance_camera.h"
+#include "device_instance_loudspeaker.h"
+#include "device_instance_microphone.h"
 #include "global_var.h"
+#include "resource_manager.h"
 
 void HardwareScan::insertCameraInfo(Json::Value &jnode)
 {
@@ -28,8 +29,10 @@ void HardwareScan::insertLoudspeakerInfo(Json::Value &jnode)
 
 void HardwareScan::getCameraInfo()
 {
-    glob_t glob_result;
+    std::lock_guard<std::mutex> locker(camer_hardware_lock_);
+    this->profile.cameraDevices.clear();
 
+    glob_t glob_result;
     // 找到所有的V4L设备
     glob("/dev/video*", GLOB_TILDE, nullptr, &glob_result);
     for (unsigned int i = 0; i < glob_result.gl_pathc; ++i)
@@ -114,8 +117,10 @@ void HardwareScan::getCameraInfo()
     // }
 }
 
-void HardwareScan::getDisplayInfo()
+void HardwareScan::getDisplayHardware()
 {
+    std::lock_guard<std::mutex> locker(display_hardware_lock_);
+    this->profile.displayDevices.clear();
 
     const char *displayEnv = getenv("DISPLAY");
     if (!displayEnv)
@@ -145,7 +150,7 @@ void HardwareScan::getDisplayInfo()
 
         if (crtcInfo->mode != None)
         {
-            DisplayInfo display;
+            DisplayHardware display;
             display.screen = screen;
             display.x = crtcInfo->x;
             display.y = crtcInfo->y;
@@ -172,6 +177,7 @@ void HardwareScan::getDisplayInfo()
 
 void HardwareScan::getAudioInfo()
 {
+    std::lock_guard<std::mutex> locker(audio_hardware_lock_);
     this->loudspeakerdevices.clear();
     this->microphonedevices.clear();
 
@@ -222,6 +228,83 @@ void HardwareScan::getAudioInfo()
     this->profile.micDevices = microphonedevices;
 }
 
+void HardwareScan::periodicHardwareScanThread()
+{
+    // delay 30 seconds to start first scan to make sure all the instannce have add into the resource manager
+    std::this_thread::sleep_for(std::chrono::seconds(30));
+
+    LOG(INFO) << "local hardware scan begin";
+    localHardwareScan();
+    std::map<std::string, CameraHardware> camera_;
+    std::map<std::string, AudioHardware> mic_;
+    std::map<std::string, AudioHardware> speaker_;
+    generateIndentifyKeyValue(camera_, mic_, speaker_);
+    this->resource_manager->InsertHardwareInfo(camera_, mic_, speaker_);
+    this->AutoGenerateCR(camera_, mic_, speaker_);
+    while (true)
+    {
+        // sleep 10 minute;
+        std::this_thread::sleep_for(std::chrono::minutes(10));
+
+        LOG(INFO) << "local hardware scan begin";
+        localHardwareScan();
+        std::map<std::string, CameraHardware> camera_;
+        std::map<std::string, AudioHardware> mic_;
+        std::map<std::string, AudioHardware> speaker_;
+        generateIndentifyKeyValue(camera_, mic_, speaker_);
+        this->resource_manager->InsertHardwareInfo(camera_, mic_, speaker_);
+        // delete the autogen instance which have combined with instance
+        for (auto iter = this->hardware_autogen_record.begin(); iter != this->hardware_autogen_record.end();)
+        {
+            if (camera_.count(iter->first) == 0 && mic_.count(iter->first) == 0 && speaker_.count(iter->first) == 0)
+            {
+                //the hardware has been combined,or is not exist, should delete the autogen instance
+                this->resource_manager->DeleteDeviceInstance(iter->second);
+                this->hardware_autogen_record.erase(iter);
+                ++iter;
+            }
+            else if (camera_.count(iter->first) != 0)
+            {
+                //not yet combine,but the instance has been automatically generated
+                camera_.erase(iter->first);
+            }
+            else if (mic_.count(iter->first) != 0)
+            {
+                //not yet combine,but the instance has been automatically generated
+                mic_.erase(iter->first);
+            }
+            else if (speaker_.count(iter->first) != 0)
+            {
+                //not yet combine,but the instance has been automatically generated
+                speaker_.erase(iter->first);
+            }
+        }
+        this->AutoGenerateCR(camera_, mic_, speaker_);
+    }
+}
+
+void HardwareScan::generateIndentifyKeyValue(std::map<std::string, CameraHardware> &camera, std::map<std::string, AudioHardware> &mic, std::map<std::string, AudioHardware> &speaker)
+{
+    {
+        std::lock_guard<std::mutex> locker(audio_hardware_lock_);
+        for (const auto &iter : profile.micDevices)
+        {
+            mic[iter.name] = iter;
+        }
+        for (const auto &iter : profile.speakerDevices)
+        {
+            speaker[iter.name] = iter;
+        }
+    }
+    {
+        std::lock_guard<std::mutex> locker(camer_hardware_lock_);
+        for (const auto &iter : profile.cameraDevices)
+        {
+            camera[iter.card] = iter;
+        }
+    }
+}
+
 void HardwareScan::context_state_callback(pa_context *c, void *userdata)
 {
     if (pa_context_get_state(c) == PA_CONTEXT_READY)
@@ -255,8 +338,8 @@ void HardwareScan::context_state_callback(pa_context *c, void *userdata)
     // #define PA_CONTEXT_TERMINATED PA_CONTEXT_TERMINATED      6
 }
 
-std::vector<AudioDevice> HardwareScan::loudspeakerdevices;
-std::vector<AudioDevice> HardwareScan::microphonedevices;
+std::vector<AudioHardware> HardwareScan::loudspeakerdevices;
+std::vector<AudioHardware> HardwareScan::microphonedevices;
 
 void HardwareScan::source_info_callback(pa_context *c, const pa_source_info *info, int eol, void *userdata)
 {
@@ -286,26 +369,32 @@ void HardwareScan::sink_info_callback(pa_context *c, const pa_sink_info *info, i
     }
 }
 
-void HardwareScan::Init(std::function<bool(std::string, bool)> callback, std::string hostname)
+void HardwareScan::Init(std::shared_ptr<ResourceManager> manager_, std::string hostname)
 {
-    this->add_device_callback = callback;
-    this->localHardwareScan();
+    this->resource_manager = manager_;
     this->hostname_ = hostname;
+}
+
+void HardwareScan::Run()
+{
+    this->periodic_scan_thread = std::thread(&HardwareScan::periodicHardwareScanThread, this);
 }
 
 void HardwareScan::localHardwareScan()
 {
     getCameraInfo();
-    getDisplayInfo();
+    getDisplayHardware();
     getAudioInfo();
 }
 
-void HardwareScan::AutoGenerateCR()
+void HardwareScan::AutoGenerateCR(const std::map<std::string, CameraHardware> &camera,
+                                  const std::map<std::string, AudioHardware> &mic,
+                                  const std::map<std::string, AudioHardware> &speaker)
 {
-    if (profile.cameraDevices.size() != 0)
+    if (camera.size() != 0)
     {
         int count = 1;
-        for (auto &iter : profile.cameraDevices)
+        for (auto &iter : camera)
         {
             CameraInstance instance;
             instance.apiVersion = "stable.example.com/v1";
@@ -318,26 +407,26 @@ void HardwareScan::AutoGenerateCR()
             instance.spec.kind = "camera";
             // properties part
             instance.spec.properties.vendor = "unknown";
-            instance.spec.properties.resolution = "720";
+            instance.spec.properties.resolution = "unknown";
             instance.spec.properties.location = "unknown";
-            instance.spec.properties.wideAngle = 90;
+            instance.spec.properties.wideAngle = 0;
             instance.spec.properties.focusMethod = "unknown";
             instance.spec.properties.telephoto = false;
             instance.spec.properties.interface = "unknown";
-            instance.spec.properties.deviceNode = iter.device_path;
-            instance.spec.properties.driverName = iter.driver;
-            instance.spec.properties.cardType = iter.card;
-            instance.spec.properties.busInfo = iter.bus_info;
+            instance.spec.properties.devicePath = iter.second.device_path;
+            instance.spec.properties.driverName = iter.second.driver;
+            instance.spec.properties.card = iter.second.card;
+            instance.spec.properties.busInfo = iter.second.bus_info;
             instance.spec.properties.description = "ignore";
-            for (int i = 0; i < iter.formats.size(); i++)
+            for (int i = 0; i < iter.second.formats.size(); i++)
             {
-                instance.spec.properties.supportFormat.emplace_back(iter.formats[i]);
+                instance.spec.properties.supportFormat.emplace_back(iter.second.formats[i]);
             }
             // status part
             instance.status.occupancy = false;
 
             std::string data = instance.Marshal();
-            if (!add_device_callback(data, false))
+            if (!this->resource_manager->AddDeviceInstance(data))
             {
                 LOG(ERROR) << "add device instance : " << instance.metadata.name << " fail";
             }
@@ -345,12 +434,13 @@ void HardwareScan::AutoGenerateCR()
             {
                 LOG(INFO) << "add device instance : " << instance.metadata.name << " success";
             }
+            this->hardware_autogen_record[instance.spec.properties.card] = instance.metadata.namespace_name + "/" + instance.metadata.name;
         }
     }
-    if (profile.micDevices.size() != 0)
+    if (mic.size() != 0)
     {
         int count = 0;
-        for (auto &iter : profile.micDevices)
+        for (auto &iter : mic)
         {
             MicrophoneInstance instance;
             instance.apiVersion = "stable.example.com/v1";
@@ -365,16 +455,16 @@ void HardwareScan::AutoGenerateCR()
             instance.spec.properties.channelNumber = 0;
             instance.spec.properties.bitWidth = 0;
             instance.spec.properties.interface = "unknown";
-            instance.spec.properties.hardwareName = iter.name;
-            instance.spec.properties.sampleRates = std::to_string(iter.sampleRate);
-            instance.spec.properties.volume = (int)iter.volume;
-            instance.spec.properties.mute = iter.mute;
-            instance.spec.properties.description = iter.description;
+            instance.spec.properties.hardwareName = iter.second.name;
+            instance.spec.properties.sampleRates = std::to_string(iter.second.sampleRate);
+            instance.spec.properties.volume = (int)iter.second.volume;
+            instance.spec.properties.mute = iter.second.mute;
+            instance.spec.properties.description = iter.second.description;
             // status part
             instance.status.occupancy = false;
 
             std::string data = instance.Marshal();
-            if (!add_device_callback(data, false))
+            if (!this->resource_manager->AddDeviceInstance(data))
             {
                 LOG(ERROR) << "add device instance : " << instance.metadata.name << " fail";
             }
@@ -382,12 +472,13 @@ void HardwareScan::AutoGenerateCR()
             {
                 LOG(INFO) << "add device instance : " << instance.metadata.name << " success";
             }
+            this->hardware_autogen_record[instance.spec.properties.hardwareName] = instance.metadata.namespace_name + "/" + instance.metadata.name;
         }
     }
-    if (profile.speakerDevices.size() != 0)
+    if (speaker.size() != 0)
     {
         int count = 0;
-        for (auto &iter : profile.speakerDevices)
+        for (auto &iter : speaker)
         {
             LoudspeakerInstance instance;
             instance.apiVersion = "stable.example.com/v1";
@@ -402,16 +493,16 @@ void HardwareScan::AutoGenerateCR()
             instance.spec.properties.channelNumber = 0;
             instance.spec.properties.bitWidth = 0;
             instance.spec.properties.interface = "unknown";
-            instance.spec.properties.hardwareName = iter.name;
-            instance.spec.properties.sampleRates = std::to_string(iter.sampleRate);
-            instance.spec.properties.volume = (int)iter.volume;
-            instance.spec.properties.mute = iter.mute;
-            instance.spec.properties.description = iter.description;
+            instance.spec.properties.hardwareName = iter.second.name;
+            instance.spec.properties.sampleRates = std::to_string(iter.second.sampleRate);
+            instance.spec.properties.volume = (int)iter.second.volume;
+            instance.spec.properties.mute = iter.second.mute;
+            instance.spec.properties.description = iter.second.description;
             // status part
             instance.status.occupancy = false;
 
             std::string data = instance.Marshal();
-            if (!add_device_callback(data, false))
+            if (!this->resource_manager->AddDeviceInstance(data))
             {
                 LOG(ERROR) << "add device instance : " << instance.metadata.name << " fail";
             }
@@ -419,12 +510,16 @@ void HardwareScan::AutoGenerateCR()
             {
                 LOG(INFO) << "add device instance : " << instance.metadata.name << " success";
             }
+            this->hardware_autogen_record[instance.spec.properties.hardwareName] = instance.metadata.namespace_name + "/" + instance.metadata.name;
         }
     }
 }
 
 std::string HardwareScan::GetHardwareDeviceInfo(bool format)
 {
+    std::lock_guard<std::mutex> locker1(camer_hardware_lock_);
+    std::lock_guard<std::mutex> locker2(audio_hardware_lock_);
+    std::lock_guard<std::mutex> locker3(display_hardware_lock_);
     if (format)
     {
         return this->profile.toJson().toStyledString();

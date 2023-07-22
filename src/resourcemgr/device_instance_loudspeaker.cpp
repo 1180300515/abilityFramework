@@ -1,10 +1,57 @@
-#include "cameradevice_instance.h"
+#include "device_instance_loudspeaker.h"
 
 #include "json/json.h"
+#include "glog/logging.h"
 
-std::string CameraInstance::Marshal()
+#include "hardware_audio.h"
+
+std::string LoudspeakerInstance::GetHardwareIdentifier()
 {
-    std::lock_guard<std::mutex> locker(resourcelock_);
+    return spec.hardwareidentifier;
+}
+
+bool LoudspeakerInstance::UpdateHardwareInfo(const Json::Value &info)
+{
+    bool changeornot = false;
+    AudioHardware hardware;
+    hardware.fromJson(info);
+    if (hardware.name == spec.properties.hardwareName)
+    {
+        if (std::to_string(hardware.sampleRate) != spec.properties.sampleRates)
+        {
+            spec.properties.sampleRates = std::to_string(hardware.sampleRate);
+            changeornot = true;
+        }
+        if (static_cast<int>(hardware.volume) != spec.properties.volume)
+        {
+            spec.properties.volume = static_cast<int>(hardware.volume);
+            changeornot = true;
+        }
+        if (hardware.mute != spec.properties.mute)
+        {
+            spec.properties.mute = hardware.mute;
+            changeornot = true;
+        }
+        if (hardware.description != spec.properties.description)
+        {
+            spec.properties.description = hardware.description;
+            changeornot = true;
+        }
+        if (static_cast<int>(hardware.channels) != spec.properties.channelNumber)
+        {
+            spec.properties.channelNumber = static_cast<int>(hardware.channels);
+            changeornot = true;
+        }
+    }
+    else
+    {
+        LOG(ERROR) << "this hardware info don't match this instance";
+    }
+    return changeornot;
+}
+
+std::string LoudspeakerInstance::Marshal()
+{
     Json::Value jnode;
     jnode["apiVersion"] = apiVersion;
     jnode["kind"] = kind;
@@ -13,23 +60,16 @@ std::string CameraInstance::Marshal()
     jnode["status"]["occupancy"] = status.occupancy;
     // spec part
     jnode["spec"]["kind"] = spec.kind;
+    jnode["spec"]["hardwareidentifier"] = spec.hardwareidentifier;
     jnode["spec"]["version"] = spec.version;
     jnode["spec"]["hostname"] = spec.hostname;
-    jnode["spec"]["properties"]["vendor"] = spec.properties.vendor;
-    jnode["spec"]["properties"]["resolution"] = spec.properties.resolution;
-    jnode["spec"]["properties"]["location"] = spec.properties.location;
-    jnode["spec"]["properties"]["wideAngle"] = spec.properties.wideAngle;
-    jnode["spec"]["properties"]["focusMethod"] = spec.properties.focusMethod;
-    jnode["spec"]["properties"]["telephoto"] = spec.properties.telephoto;
-    jnode["spec"]["properties"]["deviceNode"] = spec.properties.deviceNode;
-    jnode["spec"]["properties"]["driverName"] = spec.properties.driverName;
-    jnode["spec"]["properties"]["cardType"] = spec.properties.cardType;
-    jnode["spec"]["properties"]["busInfo"] = spec.properties.busInfo;
+    jnode["spec"]["properties"]["sampleRates"] = spec.properties.sampleRates;
+    jnode["spec"]["properties"]["channelNumber"] = spec.properties.channelNumber;
+    jnode["spec"]["properties"]["bitWidth"] = spec.properties.bitWidth;
+    jnode["spec"]["properties"]["hardwareName"] = spec.properties.hardwareName;
+    jnode["spec"]["properties"]["volume"] = spec.properties.volume;
+    jnode["spec"]["properties"]["mute"] = spec.properties.mute;
     jnode["spec"]["properties"]["description"] = spec.properties.description;
-    for (int i = 0; i < spec.properties.supportFormat.size(); i++)
-    {
-        jnode["spec"]["properties"]["supportFormat"].append(spec.properties.supportFormat[i]);
-    }
     jnode["spec"]["properties"]["interface"] = spec.properties.interface;
     for (int i = 0; i < spec.capability1.size(); i++)
     {
@@ -93,11 +133,11 @@ std::string CameraInstance::Marshal()
     return writer.write(jnode);
 }
 
-bool CameraInstance::UnMarshal(const Json::Value &jnode)
+bool LoudspeakerInstance::FromJson(const Json::Value &jnode)
 {
-    std::lock_guard<std::mutex> locker(resourcelock_);
-    DeviceInstanceInfo::UnMarshal(jnode);
+    DeviceInstanceInfo::FromJson(jnode);
     spec.kind = jnode["spec"]["kind"].asString();
+    spec.hardwareidentifier = jnode["spec"]["hardwareidentifier"].asString();
     spec.version = jnode["spec"]["version"].asString();
     spec.hostname = jnode["spec"]["hostname"].asString();
 
@@ -108,10 +148,6 @@ bool CameraInstance::UnMarshal(const Json::Value &jnode)
     if (spec.capability2.size() != 0)
     {
         spec.capability2.clear();
-    }
-    if (spec.properties.supportFormat.size() != 0)
-    {
-        spec.properties.supportFormat.clear();
     }
     if (spec.customprops.size() != 0)
     {
@@ -144,21 +180,13 @@ bool CameraInstance::UnMarshal(const Json::Value &jnode)
             spec.capability2.emplace_back(cap);
         }
     }
-    spec.properties.vendor = jnode["spec"]["properties"]["vendor"].asString();
-    spec.properties.resolution = jnode["spec"]["properties"]["resolution"].asString();
-    spec.properties.location = jnode["spec"]["properties"]["location"].asString();
-    spec.properties.wideAngle = std::stoi(jnode["spec"]["properties"]["wideAngle"].asString());
-    spec.properties.focusMethod = jnode["spec"]["properties"]["focusMethod"].asString();
-    spec.properties.telephoto = (jnode["spec"]["properties"]["telephoto"].asString() == "true");
-    spec.properties.deviceNode = jnode["spec"]["properties"]["deviceNode"].asString();
-    spec.properties.driverName = jnode["spec"]["properties"]["driverName"].asString();
-    spec.properties.cardType = jnode["spec"]["properties"]["cardType"].asString();
-    spec.properties.busInfo = jnode["spec"]["properties"]["busInfo"].asString();
+    spec.properties.sampleRates = jnode["spec"]["properties"]["sampleRates"].asString();
+    spec.properties.channelNumber = jnode["spec"]["properties"]["channelNumber"].asInt();
+    spec.properties.bitWidth = jnode["spec"]["properties"]["bitWidth"].asInt();
+    spec.properties.hardwareName = jnode["spec"]["properties"]["hardwareName"].asString();
+    spec.properties.volume = jnode["spec"]["properties"]["volume"].asInt();
+    spec.properties.mute = jnode["spec"]["properties"]["mute"].asBool();
     spec.properties.description = jnode["spec"]["properties"]["description"].asString();
-    for (int i = 0; i < jnode["spec"]["properties"]["supportFormat"].size(); i++)
-    {
-        spec.properties.supportFormat.emplace_back(jnode["spec"]["properties"]["supportFormat"][i].asString());
-    }
     spec.properties.interface = jnode["spec"]["properties"]["interface"].asString();
     if (jnode["spec"].isMember("customprops"))
     {
@@ -172,12 +200,21 @@ bool CameraInstance::UnMarshal(const Json::Value &jnode)
     return true;
 }
 
-bool CameraInstance::updateInstance(const Json::Value &jnode)
+bool LoudspeakerInstance::UnMarshal(const std::string &data)
 {
-    return UnMarshal(jnode);
+    Json::Value jnode;
+    Json::Reader reader;
+    reader.parse(data, jnode);
+    FromJson(jnode);
+    return true;
 }
 
-std::string CameraInstance::getInstanceVersion()
+bool LoudspeakerInstance::updateInstance(const Json::Value &jnode)
+{
+    return FromJson(jnode);
+}
+
+std::string LoudspeakerInstance::getInstanceVersion()
 {
     return spec.version;
 }

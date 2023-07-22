@@ -1,5 +1,5 @@
-#ifndef NONLOCAL_RESOURCE_INFO_H
-#define NONLOCAL_RESOURCE_INFO_H
+#ifndef _NONLOCAL_RESOURCE_INFO_H
+#define _NONLOCAL_RESOURCE_INFO_H
 
 #include <string>
 #include <vector>
@@ -36,4 +36,4 @@ bool UnMarshal(const std::string source, std::shared_ptr<NonLocalResource> des);
  */
 std::string Marshal(std::shared_ptr<NonLocalResource> source);
 
-#endif // NONLOCAL_RESOURCE_INFO_H
+#endif // _NONLOCAL_RESOURCE_INFO_H

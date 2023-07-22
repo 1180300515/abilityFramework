@@ -1,4 +1,4 @@
-#include "camera_hardware.h"
+#include "hardware_camera.h"
 
 #include <iostream>
 

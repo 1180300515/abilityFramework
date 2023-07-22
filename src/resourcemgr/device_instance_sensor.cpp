@@ -1,10 +1,9 @@
-#include "louspeakerdevice_instance.h"
+#include "device_instance_sensor.h"
 
 #include "json/json.h"
 
-std::string LoudspeakerInstance::Marshal()
+std::string SensorInstance::Marshal()
 {
-    std::lock_guard<std::mutex> locker(resourcelock_);
     Json::Value jnode;
     jnode["apiVersion"] = apiVersion;
     jnode["kind"] = kind;
@@ -13,16 +12,26 @@ std::string LoudspeakerInstance::Marshal()
     jnode["status"]["occupancy"] = status.occupancy;
     // spec part
     jnode["spec"]["kind"] = spec.kind;
+    jnode["spec"]["hardwareidentifier"] = spec.hardwareidentifier;
     jnode["spec"]["version"] = spec.version;
     jnode["spec"]["hostname"] = spec.hostname;
-    jnode["spec"]["properties"]["sampleRates"] = spec.properties.sampleRates;
-    jnode["spec"]["properties"]["channelNumber"] = spec.properties.channelNumber;
-    jnode["spec"]["properties"]["bitWidth"] = spec.properties.bitWidth;
-    jnode["spec"]["properties"]["hardwareName"] = spec.properties.hardwareName;
-    jnode["spec"]["properties"]["volume"] = spec.properties.volume;
-    jnode["spec"]["properties"]["mute"] = spec.properties.mute;
-    jnode["spec"]["properties"]["description"] = spec.properties.description;
+    jnode["spec"]["properties"]["vendor"] = spec.properties.vendor;
+    jnode["spec"]["properties"]["location"] = spec.properties.location;
     jnode["spec"]["properties"]["interface"] = spec.properties.interface;
+
+    if (spec.capability1.size() != 0)
+    {
+        spec.capability1.clear();
+    }
+    if (spec.capability2.size() != 0)
+    {
+        spec.capability2.clear();
+    }
+    if (spec.customprops.size() != 0)
+    {
+        spec.customprops.clear();
+    }
+
     for (int i = 0; i < spec.capability1.size(); i++)
     {
         Json::Value cap;
@@ -85,27 +94,25 @@ std::string LoudspeakerInstance::Marshal()
     return writer.write(jnode);
 }
 
-bool LoudspeakerInstance::UnMarshal(const Json::Value &jnode)
+std::string SensorInstance::GetHardwareIdentifier()
 {
-    std::lock_guard<std::mutex> locker(resourcelock_);
-    DeviceInstanceInfo::UnMarshal(jnode);
+    // no need yet
+    return std::string();
+}
+
+bool SensorInstance::UpdateHardwareInfo(const Json::Value &info)
+{
+    // no need yet
+    return false;
+}
+
+bool SensorInstance::FromJson(const Json::Value &jnode)
+{
+     DeviceInstanceInfo::FromJson(jnode);
     spec.kind = jnode["spec"]["kind"].asString();
+    spec.hardwareidentifier = jnode["spec"]["hardwareidentifier"].asString();
     spec.version = jnode["spec"]["version"].asString();
     spec.hostname = jnode["spec"]["hostname"].asString();
-
-    if (spec.capability1.size() != 0)
-    {
-        spec.capability1.clear();
-    }
-    if (spec.capability2.size() != 0)
-    {
-        spec.capability2.clear();
-    }
-    if (spec.customprops.size() != 0)
-    {
-        spec.customprops.clear();
-    }
-
     if (jnode["spec"].isMember("capability1"))
     {
         for (int i = 0; i < jnode["spec"]["capability1"].size(); i++)
@@ -132,13 +139,8 @@ bool LoudspeakerInstance::UnMarshal(const Json::Value &jnode)
             spec.capability2.emplace_back(cap);
         }
     }
-    spec.properties.sampleRates = jnode["spec"]["properties"]["sampleRates"].asString();
-    spec.properties.channelNumber = jnode["spec"]["properties"]["channelNumber"].asInt();
-    spec.properties.bitWidth = jnode["spec"]["properties"]["bitWidth"].asInt();
-    spec.properties.hardwareName = jnode["spec"]["properties"]["hardwareName"].asString();
-    spec.properties.volume = jnode["spec"]["properties"]["volume"].asInt();
-    spec.properties.mute = jnode["spec"]["properties"]["mute"].asBool();
-    spec.properties.description = jnode["spec"]["properties"]["description"].asString();
+    spec.properties.vendor = jnode["spec"]["properties"]["vendor"].asString();
+    spec.properties.location = jnode["spec"]["properties"]["location"].asString();
     spec.properties.interface = jnode["spec"]["properties"]["interface"].asString();
     if (jnode["spec"].isMember("customprops"))
     {
@@ -152,12 +154,22 @@ bool LoudspeakerInstance::UnMarshal(const Json::Value &jnode)
     return true;
 }
 
-bool LoudspeakerInstance::updateInstance(const Json::Value &jnode)
+bool SensorInstance::UnMarshal(const std::string &data)
 {
-    return UnMarshal(jnode);
+    Json::Value jnode;
+    Json::Reader reader;
+    reader.parse(data, jnode);
+    FromJson(jnode);
+    return true;
 }
 
-std::string LoudspeakerInstance::getInstanceVersion()
+
+bool SensorInstance::updateInstance(const Json::Value &jnode)
+{
+    return FromJson(jnode);
+}
+
+std::string SensorInstance::getInstanceVersion()
 {
     return spec.version;
 }

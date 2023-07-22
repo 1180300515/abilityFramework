@@ -1,5 +1,5 @@
-#ifndef ABILITY_INSTANCE_INFO_H
-#define ABILITY_INSTANCE_INFO_H
+#ifndef _ABILITY_INSTANCE_INFO_H
+#define _ABILITY_INSTANCE_INFO_H
 
 #include <string>
 #include <map>
@@ -57,11 +57,10 @@ public:
     std::vector<Aapi> ApiList;
     std::vector<Aabilityinstance> abilityinstancelist;
 
-    std::mutex abilitylock_;
-
-    bool UnMarshal(const Json::Value &jnode);
+    bool UnMarshal(const std::string &data);
+    bool FromJson(const Json::Value &jnode);
     std::string Marshal();
     bool updateAbility(const Json::Value &jnode);
 };
 
-#endif // ABILITY_INSTANCE_INFO_H
+#endif // _ABILITY_INSTANCE_INFO_H

@@ -2,7 +2,16 @@
 
 #include "json/json.h"
 
-bool DeviceInstanceInfo::UnMarshal(const Json::Value &jnode)
+bool DeviceInstanceInfo::UnMarshal(const std::string &data)
+{
+    Json::Value jnode;
+    Json::Reader reader;
+    reader.parse(data, jnode);
+    FromJson(jnode);
+    return true;
+}
+
+bool DeviceInstanceInfo::FromJson(const Json::Value &jnode)
 {
     apiVersion = jnode["apiVersion"].asString();
     kind = jnode["kind"].asString();

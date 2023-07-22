@@ -1,12 +1,12 @@
-#ifndef AUDIO_HARDWARE_H
-#define AUDIO_HARDWARE_H
+#ifndef _HARDWARE_AUDIO_H
+#define _HARDWARE_AUDIO_H
 
 #include <string>
 #include <unistd.h>
 
 #include "json/json.h"
 
-class AudioDevice
+class AudioHardware
 {
 public:
     std::string name;
@@ -16,12 +16,13 @@ public:
     uint32_t sampleRate;
     uint8_t channels;
 
-    AudioDevice(std::string name, std::string description, uint32_t volume, bool mute, uint32_t sampleRate, uint8_t channels)
+    AudioHardware() = default;
+    AudioHardware(std::string name, std::string description, uint32_t volume, bool mute, uint32_t sampleRate, uint8_t channels)
         : name(name), description(description), volume(volume), mute(mute), sampleRate(sampleRate), channels(channels) {}
-    static AudioDevice fromJson(const Json::Value &root);
+    static AudioHardware fromJson(const Json::Value &root);
     Json::Value toJson() const;
     std::string ToKeyValue(const std::string &hostname) const;
     void print();
 };
 
-#endif // AUDIO_HARDWARE_H
+#endif // _HARDWARE_AUDIO_H

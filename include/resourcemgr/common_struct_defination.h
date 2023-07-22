@@ -1,5 +1,5 @@
-#ifndef COMMON_STRUCT_DEFINATION_H
-#define COMMON_STRUCT_DEFINATION_H
+#ifndef _COMMON_STRUCT_DEFINATION_H
+#define _COMMON_STRUCT_DEFINATION_H
 
 #include <string>
 
@@ -18,4 +18,4 @@ struct Metadata
     std::string namespace_name;
 };
 
-#endif //COMMON_STRUCT_DEFINATION_H
+#endif // _COMMON_STRUCT_DEFINATION_H

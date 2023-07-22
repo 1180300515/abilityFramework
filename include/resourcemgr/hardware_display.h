@@ -1,9 +1,9 @@
-#ifndef DISPLAY_HARDWARE_H
-#define DISPLAY_HARDWARE_H
+#ifndef _HARDWARE_DISPLAY_H
+#define _HARDWARE_DISPLAY_H
 
 #include "json/json.h"
 
-class DisplayInfo
+class DisplayHardware
 {
 public:
     int screen;
@@ -15,9 +15,9 @@ public:
     int mmHeight;
 
     Json::Value toJson() const;
-    static DisplayInfo fromJson(const Json::Value &root);
+    static DisplayHardware fromJson(const Json::Value &root);
     std::string ToKeyValue(std::string hostname) const;
     void print();
 };
 
-#endif // DISPLAY_HARDWARE_H
+#endif // _HARDWARE_DISPLAY_H

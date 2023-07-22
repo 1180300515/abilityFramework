@@ -1,5 +1,5 @@
-#ifndef INSTANCE_INFO_H
-#define INSTANCE_INFO_H
+#ifndef _DEVICE_INSTANCE_INFO_H
+#define _DEVICE_INSTANCE_INFO_H
 
 #include <string>
 #include <mutex>
@@ -39,8 +39,9 @@ struct Acapability
 
 /**
  * the base class of all the device
-*/
-class DeviceInstanceInfo {
+ */
+class DeviceInstanceInfo
+{
 public:
     std::string apiVersion;
     std::string kind;
@@ -49,16 +50,14 @@ public:
     Api api;
     std::vector<DeviceDescribe> devicelist;
 
-    std::mutex resourcelock_ ;
-    
     virtual std::string Marshal() = 0;
-    virtual bool UnMarshal(const Json::Value &jnode);
+    virtual std::string GetHardwareIdentifier() = 0;
+    virtual bool UpdateHardwareInfo(const Json::Value &info) = 0;
+
+    virtual bool FromJson(const Json::Value &jnode);
+    virtual bool UnMarshal(const std::string &data);
     virtual bool updateInstance(const Json::Value &jnode) = 0;
     virtual std::string getInstanceVersion() = 0;
 };
 
-
-
-
-
-#endif //INSTANCE_INFO_H
+#endif // _DEVICE_INSTANCE_INFO_H

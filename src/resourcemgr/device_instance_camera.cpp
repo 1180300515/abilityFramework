@@ -1,10 +1,62 @@
-#include "sensordevice_instance.h"
+#include "device_instance_camera.h"
+
+#include "algorithm"
 
 #include "json/json.h"
+#include "glog/logging.h"
 
-std::string SensorInstance::Marshal()
+#include "hardware_camera.h"
+
+std::string CameraInstance::GetHardwareIdentifier()
 {
-    std::lock_guard<std::mutex> locker(resourcelock_);
+    return spec.hardwareidentifier;
+}
+
+bool CameraInstance::UpdateHardwareInfo(const Json::Value &info)
+{
+    bool changeornot = false;
+    CameraHardware hardware;
+    hardware.fromJson(info);
+    if (hardware.card == spec.properties.card)
+    {
+        if (spec.properties.busInfo != hardware.bus_info)
+        {
+            spec.properties.busInfo = hardware.bus_info;
+            changeornot = true;
+        }
+        if (hardware.device_path != spec.properties.devicePath)
+        {
+            spec.properties.devicePath = hardware.device_path;
+            changeornot = true;
+        }
+        if (hardware.driver != spec.properties.driverName)
+        {
+            spec.properties.driverName = hardware.driver;
+            changeornot = true;
+        }
+        if (hardware.formats.size() == spec.properties.supportFormat.size())
+        {
+            for (const auto &iter : hardware.formats)
+            {
+                auto count = std::count(spec.properties.supportFormat.begin(),spec.properties.supportFormat.end(),iter);
+                if (count == 0)
+                {
+                    spec.properties.supportFormat = hardware.formats;
+                    changeornot = true;
+                    break;
+                }
+            }
+        }
+    }
+    else
+    {
+        LOG(ERROR) << "this hardware info don't match this instance";
+    }
+    return changeornot;
+}
+
+std::string CameraInstance::Marshal()
+{
     Json::Value jnode;
     jnode["apiVersion"] = apiVersion;
     jnode["kind"] = kind;
@@ -13,25 +65,25 @@ std::string SensorInstance::Marshal()
     jnode["status"]["occupancy"] = status.occupancy;
     // spec part
     jnode["spec"]["kind"] = spec.kind;
+    jnode["spec"]["hardwareidentifier"] = spec.hardwareidentifier;
     jnode["spec"]["version"] = spec.version;
     jnode["spec"]["hostname"] = spec.hostname;
     jnode["spec"]["properties"]["vendor"] = spec.properties.vendor;
+    jnode["spec"]["properties"]["resolution"] = spec.properties.resolution;
     jnode["spec"]["properties"]["location"] = spec.properties.location;
+    jnode["spec"]["properties"]["wideAngle"] = spec.properties.wideAngle;
+    jnode["spec"]["properties"]["focusMethod"] = spec.properties.focusMethod;
+    jnode["spec"]["properties"]["telephoto"] = spec.properties.telephoto;
+    jnode["spec"]["properties"]["devicePath"] = spec.properties.devicePath;
+    jnode["spec"]["properties"]["driverName"] = spec.properties.driverName;
+    jnode["spec"]["properties"]["card"] = spec.properties.card;
+    jnode["spec"]["properties"]["busInfo"] = spec.properties.busInfo;
+    jnode["spec"]["properties"]["description"] = spec.properties.description;
+    for (int i = 0; i < spec.properties.supportFormat.size(); i++)
+    {
+        jnode["spec"]["properties"]["supportFormat"].append(spec.properties.supportFormat[i]);
+    }
     jnode["spec"]["properties"]["interface"] = spec.properties.interface;
-
-    if (spec.capability1.size() != 0)
-    {
-        spec.capability1.clear();
-    }
-    if (spec.capability2.size() != 0)
-    {
-        spec.capability2.clear();
-    }
-    if (spec.customprops.size() != 0)
-    {
-        spec.customprops.clear();
-    }
-
     for (int i = 0; i < spec.capability1.size(); i++)
     {
         Json::Value cap;
@@ -94,13 +146,31 @@ std::string SensorInstance::Marshal()
     return writer.write(jnode);
 }
 
-bool SensorInstance::UnMarshal(const Json::Value &jnode)
+bool CameraInstance::FromJson(const Json::Value &jnode)
 {
-    std::lock_guard<std::mutex> locker(resourcelock_);
-    DeviceInstanceInfo::UnMarshal(jnode);
+    DeviceInstanceInfo::FromJson(jnode);
     spec.kind = jnode["spec"]["kind"].asString();
+    spec.hardwareidentifier = jnode["spec"]["hardwareidentifier"].asString();
     spec.version = jnode["spec"]["version"].asString();
     spec.hostname = jnode["spec"]["hostname"].asString();
+
+    if (spec.capability1.size() != 0)
+    {
+        spec.capability1.clear();
+    }
+    if (spec.capability2.size() != 0)
+    {
+        spec.capability2.clear();
+    }
+    if (spec.properties.supportFormat.size() != 0)
+    {
+        spec.properties.supportFormat.clear();
+    }
+    if (spec.customprops.size() != 0)
+    {
+        spec.customprops.clear();
+    }
+
     if (jnode["spec"].isMember("capability1"))
     {
         for (int i = 0; i < jnode["spec"]["capability1"].size(); i++)
@@ -128,7 +198,20 @@ bool SensorInstance::UnMarshal(const Json::Value &jnode)
         }
     }
     spec.properties.vendor = jnode["spec"]["properties"]["vendor"].asString();
+    spec.properties.resolution = jnode["spec"]["properties"]["resolution"].asString();
     spec.properties.location = jnode["spec"]["properties"]["location"].asString();
+    spec.properties.wideAngle = std::stoi(jnode["spec"]["properties"]["wideAngle"].asString());
+    spec.properties.focusMethod = jnode["spec"]["properties"]["focusMethod"].asString();
+    spec.properties.telephoto = (jnode["spec"]["properties"]["telephoto"].asString() == "true");
+    spec.properties.devicePath = jnode["spec"]["properties"]["devicePath"].asString();
+    spec.properties.driverName = jnode["spec"]["properties"]["driverName"].asString();
+    spec.properties.card = jnode["spec"]["properties"]["card"].asString();
+    spec.properties.busInfo = jnode["spec"]["properties"]["busInfo"].asString();
+    spec.properties.description = jnode["spec"]["properties"]["description"].asString();
+    for (int i = 0; i < jnode["spec"]["properties"]["supportFormat"].size(); i++)
+    {
+        spec.properties.supportFormat.emplace_back(jnode["spec"]["properties"]["supportFormat"][i].asString());
+    }
     spec.properties.interface = jnode["spec"]["properties"]["interface"].asString();
     if (jnode["spec"].isMember("customprops"))
     {
@@ -142,12 +225,22 @@ bool SensorInstance::UnMarshal(const Json::Value &jnode)
     return true;
 }
 
-bool SensorInstance::updateInstance(const Json::Value &jnode)
+bool CameraInstance::UnMarshal(const std::string &data)
 {
-    return UnMarshal(jnode);
+    Json::Value jnode;
+    Json::Reader reader;
+    reader.parse(data, jnode);
+    FromJson(jnode);
+    return true;
 }
 
-std::string SensorInstance::getInstanceVersion()
+
+bool CameraInstance::updateInstance(const Json::Value &jnode)
+{
+    return FromJson(jnode);
+}
+
+std::string CameraInstance::getInstanceVersion()
 {
     return spec.version;
 }

@@ -1,5 +1,5 @@
-#ifndef MESSAGE_PACKAGE_STRUCT_H
-#define MESSAGE_PACKAGE_STRUCT_H
+#ifndef _MESSAGE_PACKAGE_STRUCT_H
+#define _MESSAGE_PACKAGE_STRUCT_H
 
 #include <vector>
 #include <string>
@@ -10,7 +10,7 @@ struct KeyDatapack
     std::string version;      // represent the version in json
     std::string eventType;    // represent the eventtype in json
     std::string resourceType; // resource type
-    std::string data;         // the data 
+    std::string data;         // the data
 };
 
 // as the message between server and client
@@ -24,4 +24,4 @@ struct KeyAndDataPackages
 bool UnMarshalMessageStruct(std::string data, KeyAndDataPackages &kdpak);
 std::string MarshalMessageStruct(KeyAndDataPackages &kdpak);
 
-#endif
+#endif // _MESSAGE_PACKAGE_STRUCT_H

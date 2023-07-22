@@ -1,11 +1,11 @@
-#ifndef HARDWARE_DEVICE_RESOURCE_MANAGER_H
-#define HARDWARE_DEVICE_RESOURCE_MANAGER_H
+#ifndef _HARDWARE_DEVICE_RESOURCE_MANAGER_H
+#define _HARDWARE_DEVICE_RESOURCE_MANAGER_H
 
 #include <string>
 #include <map>
 #include <mutex>
 
-#include "device_profile.h"
+#include "hardware_device_profile.h"
 
 /**
  * @brief manager the hardware device resource, include the hardware of the discovered device
@@ -19,7 +19,7 @@ public:
      */
     void Init(std::string hostname);
     /**
-     * @brief when discovery change, update the deviceprofile
+     * @brief base the discovery manager result, get all hostname device profile
      * @param result
      */
     void EndAddressResult(std::map<std::string, std::string> result);
@@ -60,4 +60,4 @@ private:
     std::string hostname_;
 };
 
-#endif // HARDWARE_DEVICE_RESOURCE_MANAGER_H
+#endif // _HARDWARE_DEVICE_RESOURCE_MANAGER_H
