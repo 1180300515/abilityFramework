@@ -63,7 +63,7 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_, std::shared_pt
         {
             des_type = ProtocolType::UDP;
         }
-        auto connect_info = ConnectInfo{address,des_type,ProtocolTendency::Random,ConnectionStatus::None};
+        auto connect_info = ConnectInfo{address,des_type,ProtocolTendency::Random,ConnectionStatus::Uninitialized};
         this->connection_manager_->OnCloudAddressRecordChange(connect_info);
     });
 }
