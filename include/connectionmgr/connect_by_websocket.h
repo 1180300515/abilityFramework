@@ -1,5 +1,5 @@
-#ifndef CONNECT_BY_WEBSOCKET_H
-#define CONNECT_BY_WEBSOCKET_H
+#ifndef _CONNECT_BY_WEBSOCKET_H
+#define _CONNECT_BY_WEBSOCKET_H
 
 #include "Iconnection.h"
 
@@ -14,4 +14,4 @@ public:
 private:
 };
 
-#endif //CONNECT_BY_WEBSOCKET_H
+#endif // _CONNECT_BY_WEBSOCKET_H

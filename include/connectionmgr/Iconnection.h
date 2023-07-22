@@ -1,5 +1,5 @@
-#ifndef ICONNECTION_H
-#define ICONNECTION_H
+#ifndef _ICONNECTION_H
+#define _ICONNECTION_H
 
 #include <optional>
 #include <string>
@@ -15,11 +15,11 @@ public:
      * @brief server to receive message
      * @param callback the receive message callback
      */
-    virtual void StartServerToReceiveMessage(std::function<void(std::string)> callback) = 0;   
+    virtual void StartServerToReceiveMessage(std::function<void(std::string)> callback) = 0;
     /**
      * @brief stop server
      */
     virtual void StopServerToReceiveMessage() = 0;
 };
 
-#endif // ICONNECTION_H
+#endif // _ICONNECTION_H

@@ -1,5 +1,5 @@
-#ifndef CONNECT_BY_TCP_H
-#define CONNECT_BY_TCP_H
+#ifndef _CONNECT_BY_TCP_H
+#define _CONNECT_BY_TCP_H
 
 #include "Iconnection.h"
 
@@ -23,4 +23,4 @@ private:
     std::string address; // the target address must include the port
 };
 
-#endif // CONNECT_BY_TCP_H
+#endif // _CONNECT_BY_TCP_H

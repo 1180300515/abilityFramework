@@ -1,5 +1,5 @@
-#ifndef CONNECTION_MANAGER_H
-#define CONNECTION_MANAGER_H
+#ifndef _CONNECTION_MANAGER_H
+#define _CONNECTION_MANAGER_H
 
 #include <map>
 #include <mutex>
@@ -16,7 +16,7 @@ public:
     /**
      * called by discovery manager, when end address change
      */
-    void OnEndAddressRecordChange(std::map<std::string, ConnectInfo> &address);
+    void OnEndAddressRecordChange(const std::map<std::string, ConnectInfo> &address);
     /**
      * called by httpserver, when cloudaddress change
      */
@@ -41,7 +41,7 @@ public:
     bool ConnectWithCloud();
     /**
      * @brief disconnect with end
-     * @return 
+     * @return
      */
     bool DisconnectWithEnd();
     bool DisconnectWithCloud();
@@ -68,7 +68,8 @@ private:
     bool EndIsConnected = false;
     bool CloudIsConnected = false;
 
-    std::map<std::string, std::thread> serverList; // type(udp,..)and the server thread,don't include the tcp,use host to instead
-    std::map<std::string, std::shared_ptr<IConnection>> temporary_storage;//some protocol like udp need use a new object to start server
+    std::map<std::string, std::thread> serverList;                         // type(udp,..)and the server thread,don't include the tcp,use host to instead
+    std::map<std::string, std::shared_ptr<IConnection>> temporary_storage; // some protocol like udp need use a new object to start server
 };
-#endif // CONNECTION_MANAGER_H
+
+#endif // _CONNECTION_MANAGER_H

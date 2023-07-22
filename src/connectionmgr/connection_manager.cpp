@@ -5,7 +5,7 @@
 #include "connect_by_udp.h"
 #include "connect_by_tcp.h"
 
-void ConnectionManager::OnEndAddressRecordChange(std::map<std::string, ConnectInfo> &address)
+void ConnectionManager::OnEndAddressRecordChange(const std::map<std::string, ConnectInfo> &address)
 {
     {
         std::lock_guard<std::mutex> locker(endlock_);
@@ -199,10 +199,10 @@ void ConnectionManager::EndConnectionHandling()
         }
     }
 
-    // None status handle
+    // Uninitialized status handle
     for (auto &iter : endAddressRecord_)
     {
-        if (iter.second.status == ConnectionStatus::None)
+        if (iter.second.status == ConnectionStatus::Uninitialized)
         {
             if (iter.second.protocoltype == ProtocolType::RandomProtocol)
             {
@@ -306,8 +306,8 @@ void ConnectionManager::CloudConnectionHandling()
         return;
     }
 
-    // None status handle
-    if (cloudAddressRecord_.status == ConnectionStatus::None)
+    // Uninitialized status handle
+    if (cloudAddressRecord_.status == ConnectionStatus::Uninitialized)
     {
         if (cloudAddressRecord_.protocoltype == ProtocolType::RandomProtocol)
         {

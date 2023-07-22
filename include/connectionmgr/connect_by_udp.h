@@ -1,10 +1,10 @@
-#ifndef CONNECT_BY_UDP_H
-#define CONNECT_BY_UDP_H
+#ifndef _CONNECT_BY_UDP_H
+#define _CONNECT_BY_UDP_H
 
 #include "Iconnection.h"
 
-class ConnectByUDP:public IConnection
-{   
+class ConnectByUDP : public IConnection
+{
 public:
     ConnectByUDP(std::string address);
     ~ConnectByUDP();
@@ -19,7 +19,7 @@ private:
     std::string udpport;
     bool alive = true;
 
-    std::string address; //the target address must include the port
+    std::string address; // the target address must include the port
 };
 
-#endif //CONNECT_BY_UDP_H
+#endif // _CONNECT_BY_UDP_H

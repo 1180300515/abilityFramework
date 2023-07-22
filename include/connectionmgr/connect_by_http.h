@@ -1,5 +1,5 @@
-#ifndef CONNECT_BY_HTTP_H
-#define CONNECT_BY_HTTP_H
+#ifndef _CONNECT_BY_HTTP_H
+#define _CONNECT_BY_HTTP_H
 
 #include "Iconnection.h"
 
@@ -12,7 +12,6 @@ public:
     void StartServerToReceiveMessage(std::function<void(std::string)> callback);
 
 private:
-
 };
 
-#endif //CONNECT_BY_HTTP_H
+#endif // _CONNECT_BY_HTTP_H

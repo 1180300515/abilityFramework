@@ -1,5 +1,5 @@
-#ifndef CONNECT_INFO_H
-#define CONNECT_INFO_H
+#ifndef _CONNECT_INFO_H
+#define _CONNECT_INFO_H
 
 #include <string>
 
@@ -22,7 +22,7 @@ enum ProtocolType
 
 enum ConnectionStatus
 {
-    None,
+    Uninitialized,
     Connected,
     Disconnected
 };
@@ -35,7 +35,7 @@ struct ConnectInfo
     ProtocolTendency tendency;
 
     // describe the connect status
-   ConnectionStatus status;
+    ConnectionStatus status;
 };
 
-#endif //CONNECT_INFO_H
+#endif // _CONNECT_INFO_H
