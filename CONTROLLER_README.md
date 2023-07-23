@@ -19,7 +19,7 @@ sudo apt install libx11-dev
 sudo apt install libpulse-dev
 ```
 ```
-apt install sqlite3 libsqlite3-dev libyaml-cpp-dev libunwind-dev libgoogle-glog-dev libjsoncpp-dev rapidjson-dev libyaml-cpp-dev libxrandr-dev libv4l-dev libx11-dev libpulse-dev
+apt install libunwind-dev sqlite3 libsqlite3-dev libyaml-cpp-dev  libgoogle-glog-dev libjsoncpp-dev rapidjson-dev libyaml-cpp-dev libxrandr-dev libv4l-dev libx11-dev libpulse-dev
 ```
 
 ## 目录结构
