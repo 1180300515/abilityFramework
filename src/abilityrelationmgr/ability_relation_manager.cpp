@@ -3,10 +3,14 @@
 #include <sys/stat.h>
 #include <iostream>
 
+#include "glog/logging.h"
+
 #include "yaml_json_converter.h"
+#include "color.h"
 
 void AbilityRelationManager::Init(std::function<std::vector<AbilityInfoExtract>()> callback_1, std::function<std::vector<std::string>(std::string)> callback_2)
 {
+    LOG(INFO) << L_GREEN << "init abilityrelation manager" << NONE;
     this->abilityinfoextract_callback_ = callback_1;
     this->hardwaredevicelist_callback_ = callback_2;
 }
@@ -14,6 +18,10 @@ void AbilityRelationManager::Init(std::function<std::vector<AbilityInfoExtract>(
 std::string AbilityRelationManager::GetAbilitySupport()
 {
     auto list = this->abilityinfoextract_callback_();
+    for (const auto & iter : list)
+    {
+        LOG(INFO) << iter.name;
+    }
     auto treearray = this->generateDependTreeArray(list);
     auto treearraywithdevice = this->generateDependTreeArrayWithDevices(treearray);
 

@@ -26,7 +26,7 @@ std::string LANIPV4Discovery::getHostName()
 void LANIPV4Discovery::RunBroadcastReceiver()
 {
     this->receiver_thread = std::thread(&LANIPV4Discovery::udp_broadcast_receiver, this);
-    LOG(INFO) << "start lan-ipv4-discovery broadcast receiver success";
+    LOG(INFO) << L_GREEN << "start lan-ipv4-discovery broadcast receiver success" << NONE;
 }
 
 void LANIPV4Discovery::udp_broadcast_receiver()
@@ -117,7 +117,7 @@ void LANIPV4Discovery::BroadcastSender()
     std::string loadavg = get_system_status();
     std::string message = std::string(hostname) + "+" + loadavg + "+" + std::to_string(std::time(nullptr));
 
-    LOG(INFO) << L_PURPLE << "Broadcasting: " << message << NONE;
+    //LOG(INFO) << L_PURPLE << "Broadcasting: " << message << NONE;
 
     if (sendto(sock, message.c_str(), message.size(), 0, (struct sockaddr *)&addr, sizeof(addr)) < 0)
     {

@@ -2,6 +2,8 @@
 
 #include "glog/logging.h"
 
+#include "color.h"
+
 void DiscoveryManager::ReceiveDeviceInfo(DiscoveryDeviceInfo info)
 {
     std::lock_guard<std::mutex> locker(lock_);
@@ -10,7 +12,7 @@ void DiscoveryManager::ReceiveDeviceInfo(DiscoveryDeviceInfo info)
     if (iter == devices.end())
     {
         devices[info.hostname].emplace_back(info);
-        LOG(INFO) << "new device : " << info.hostname;
+        LOG(INFO) << L_BLUE <<"new device : " << info.hostname << NONE;
     }
     else
     {
@@ -49,11 +51,12 @@ void DiscoveryManager::ReceiveDeviceInfo(DiscoveryDeviceInfo info)
 
 void DiscoveryManager::Init(std::function<void(std::map<std::string, ConnectInfo>)> connection_, std::function<void(std::map<std::string, std::string>)> resource_)
 {
+    LOG(INFO) << L_GREEN << "init discovery manager" << NONE;
     char hostname[256];
     if (gethostname(hostname, sizeof(hostname)) != 0)
     {
         // 获取主机名失败
-        LOG(ERROR) << "get hostname fail";
+        LOG(ERROR) << RED << "get hostname fail" << NONE;
     }
     hostname[sizeof(hostname) - 1] = '\0';
     this->hostname_ = std::string(hostname);
@@ -83,14 +86,12 @@ void DiscoveryManager::Run()
             sleep(4);
             // deal the device and send to callbak func
             std::map<std::string, ConnectInfo> connection_callback_info;
-            std::map<std::string, std::string> resouce_callback_info;
+            std::map<std::string, std::string> resource_callback_info;
             for (const auto &iter : devices)
             {
-
                 //print
-                LOG(INFO) << iter.first << " address: " << iter.second.front().address;
-
-                resouce_callback_info[iter.first] = iter.second.front().address;
+                LOG(INFO) << RED << "the device :" << iter.first << " address: " << iter.second.front().address << NONE;
+                resource_callback_info[iter.first] = iter.second.front().address;
                 if (iter.first == this->hostname_)
                 {
                     //skip localhost
@@ -105,6 +106,7 @@ void DiscoveryManager::Run()
             }
             // tell the connection manager the discovery result
             connection_callback(connection_callback_info);
+            resource_callback(resource_callback_info);
         } 
     });
 }

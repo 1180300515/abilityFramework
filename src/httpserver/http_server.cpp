@@ -6,6 +6,7 @@
 
 void HttpServer::Init(std::shared_ptr<ResourceManager> resource_, std::shared_ptr<LifeCycleManager> lifecycle_,std::shared_ptr<AbilityRelationManager> relation_,std::shared_ptr<ConnectionManager> connection_)
 {
+    LOG(INFO) << L_GREEN << "init http server" << NONE;
     this->server = std::make_shared<httplib::Server>();
     this->resource_manager_ = resource_;
     this->lifecycle_manager_ = lifecycle_;
@@ -70,6 +71,6 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_, std::shared_pt
 
 void HttpServer::Run()
 {
-    LOG(INFO) << "http server start";
+    LOG(INFO) << L_GREEN << "http server start" << NONE;
     this->server->listen("0.0.0.0", 8080);
 }

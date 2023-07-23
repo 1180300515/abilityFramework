@@ -118,7 +118,7 @@ int main(int argc, char **argv)
     }
 
     resource_manager->Run(false,false);
-    http_server->Run();
     discovery_manager->Run();
+    http_server->Run();
     return 0;
 }

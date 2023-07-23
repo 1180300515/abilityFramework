@@ -69,6 +69,7 @@ bool LifeCycleManager::AddHeartbeatInfo(int port, HeartbeatInfo info)
 
 void LifeCycleManager::Init(std::function<bool(std::string)> callback)
 {
+    LOG(INFO) << L_GREEN << "init lifecycle manager" << NONE;
     this->resourcemgr_checkexist = callback;
 }
 

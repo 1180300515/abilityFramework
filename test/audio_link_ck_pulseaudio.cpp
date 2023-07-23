@@ -57,7 +57,7 @@ static void context_state_callback(pa_context *c, void *userdata)
     if (pa_context_get_state(c) == PA_CONTEXT_READY)
     {
         pa_operation *o;
-        std::cout << "ready" << std::endl;
+        //std::cout << "ready" << std::endl;
 
         o = pa_context_get_sink_info_list(c, sink_info_callback, nullptr);
         if (o)
