@@ -174,7 +174,9 @@ private:
     std::string hostname_;
 
     std::thread endsyncThread_;
+    bool endsync_running = false;
     std::thread cloudsyncThread_;
+    bool cloudsync_running = false;
 };
 
 #endif // _RESOURCE_MANAGER_H

@@ -13,6 +13,7 @@
 #include "device_instance_sensor.h"
 #include "device_instance_microphone.h"
 #include "message_package_struct.h"
+#include "color.h"
 
 ResourceManager::ResourceManager()
 {
@@ -469,6 +470,7 @@ void ResourceManager::LoadLocalResource()
 
 void ResourceManager::Init(std::shared_ptr<ConnectionManager> connect)
 {
+    LOG(INFO) << L_GREEN << "init resource manager" << NONE;
     getHostName();
     DatabaseManager::getInstance().Init(this->hostname_);
     LoadLocalResource();
@@ -803,15 +805,29 @@ void ResourceManager::RecvMessageHandle(const std::string &message)
     {
         if (data.packageType == EndSync || data.packageType == EndSyncAllOK)
         {
-            this->endMessageHandle(data);
+            if (this->endsync_running)
+            {
+                this->endMessageHandle(data);
+            }
+            else
+            {
+                LOG(INFO) << L_GREEN << "end sync not yet running" << NONE;
+            }
         }
         else if (data.packageType == CloudSyncAllOK || data.packageType == CloudSyncStepTwo)
         {
-            this->cloudMessageHandle(data);
+            if (this->cloudsync_running)
+            {
+                this->cloudMessageHandle(data);
+            }
+            else
+            {
+                LOG(INFO) << L_GREEN << "cloud sync not yet running" << NONE;
+            }
         }
         else
         {
-            LOG(ERROR) << "message type error";
+            LOG(ERROR) << RED << "message type error" << NONE;
         }
     }
     else
@@ -869,9 +885,6 @@ void ResourceManager::InsertHardwareInfo(std::map<std::string, CameraHardware> &
                 speaker.erase(iter.second->GetHardwareIdentifier());
             }
         }
-    }
-    for (auto iter = camera.begin(); iter != camera.end();)
-    {
     }
 }
 

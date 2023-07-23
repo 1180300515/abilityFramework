@@ -14,6 +14,7 @@
 #include "device_instance_microphone.h"
 #include "global_var.h"
 #include "resource_manager.h"
+#include "color.h"
 
 void HardwareScan::insertCameraInfo(Json::Value &jnode)
 {
@@ -201,7 +202,6 @@ void HardwareScan::getAudioInfo()
 
     sleep(2);
     pa_threaded_mainloop_stop(mainloop);
-    pa_threaded_mainloop_free(mainloop);
 
     // std::cout << "Output devices:" << std::endl;
     // for (const auto &device : outputDevices)
@@ -231,55 +231,100 @@ void HardwareScan::getAudioInfo()
 void HardwareScan::periodicHardwareScanThread()
 {
     // delay 30 seconds to start first scan to make sure all the instannce have add into the resource manager
-    std::this_thread::sleep_for(std::chrono::seconds(30));
+    std::this_thread::sleep_for(std::chrono::seconds(10));
 
-    LOG(INFO) << "local hardware scan begin";
+    LOG(INFO) << L_GREEN << "local hardware scan begin" << NONE;
     localHardwareScan();
     std::map<std::string, CameraHardware> camera_;
     std::map<std::string, AudioHardware> mic_;
     std::map<std::string, AudioHardware> speaker_;
     generateIndentifyKeyValue(camera_, mic_, speaker_);
     this->resource_manager->InsertHardwareInfo(camera_, mic_, speaker_);
+
+    // LOG(INFO) << L_BLUE << "after insert" << NONE;
+    // for (const auto &iter : mic_)
+    // {
+    //     LOG(INFO) << RED << iter.first << NONE;
+    // }
+    // for (const auto &iter : speaker_)
+    // {
+    //     LOG(INFO) << RED << iter.first << NONE;
+    // }
+
     this->AutoGenerateCR(camera_, mic_, speaker_);
+
+    // for (const auto &iter : this->hardware_autogen_record)
+    // {
+    //     LOG(INFO) << RED << iter.first << "+" << iter.second << NONE;
+    // }
+
+    LOG(INFO) << L_GREEN << "local hardware autogen finish" << NONE;
     while (true)
     {
         // sleep 10 minute;
-        std::this_thread::sleep_for(std::chrono::minutes(10));
+        std::this_thread::sleep_for(std::chrono::seconds(20));
 
-        LOG(INFO) << "local hardware scan begin";
+        LOG(INFO) << L_GREEN << "local hardware scan begin" << NONE;
         localHardwareScan();
         std::map<std::string, CameraHardware> camera_;
         std::map<std::string, AudioHardware> mic_;
         std::map<std::string, AudioHardware> speaker_;
         generateIndentifyKeyValue(camera_, mic_, speaker_);
+
+        // for (const auto &iter : mic_)
+        // {
+        //     LOG(INFO) << RED << iter.first << NONE;
+        // }
+        // for (const auto &iter : speaker_)
+        // {
+        //     LOG(INFO) << RED << iter.first << NONE;
+        // }
+
         this->resource_manager->InsertHardwareInfo(camera_, mic_, speaker_);
+
+        // LOG(INFO) << L_BLUE << "after insert" << NONE;
+        // for (const auto &iter : mic_)
+        // {
+        //     LOG(INFO) << RED << iter.first << NONE;
+        // }
+        // for (const auto &iter : speaker_)
+        // {
+        //     LOG(INFO) << RED << iter.first << NONE;
+        // }
+
         // delete the autogen instance which have combined with instance
+
         for (auto iter = this->hardware_autogen_record.begin(); iter != this->hardware_autogen_record.end();)
         {
-            if (camera_.count(iter->first) == 0 && mic_.count(iter->first) == 0 && speaker_.count(iter->first) == 0)
+
+            if (camera_.count(iter->first) != 0)
             {
-                //the hardware has been combined,or is not exist, should delete the autogen instance
-                this->resource_manager->DeleteDeviceInstance(iter->second);
-                this->hardware_autogen_record.erase(iter);
-                ++iter;
-            }
-            else if (camera_.count(iter->first) != 0)
-            {
-                //not yet combine,but the instance has been automatically generated
+                // not yet combine,but the instance has been automatically generated
                 camera_.erase(iter->first);
+                ++iter;
             }
             else if (mic_.count(iter->first) != 0)
             {
-                //not yet combine,but the instance has been automatically generated
+                // not yet combine,but the instance has been automatically generated
                 mic_.erase(iter->first);
+                ++iter;
             }
             else if (speaker_.count(iter->first) != 0)
             {
-                //not yet combine,but the instance has been automatically generated
+                // not yet combine,but the instance has been automatically generated
                 speaker_.erase(iter->first);
+                ++iter;
+            }
+            else
+            {
+                // LOG(INFO) << RED << iter->first << NONE;
+                // the hardware has been combined,or is not exist, should delete the autogen instance
+                this->resource_manager->DeleteDeviceInstance(iter->second);
+                this->hardware_autogen_record.erase(iter++);
             }
         }
         this->AutoGenerateCR(camera_, mic_, speaker_);
+        LOG(INFO) << L_GREEN << "local hardware autogen finish" << NONE;
     }
 }
 
@@ -289,10 +334,12 @@ void HardwareScan::generateIndentifyKeyValue(std::map<std::string, CameraHardwar
         std::lock_guard<std::mutex> locker(audio_hardware_lock_);
         for (const auto &iter : profile.micDevices)
         {
+            // LOG(INFO) << RED << iter.name << NONE;
             mic[iter.name] = iter;
         }
         for (const auto &iter : profile.speakerDevices)
         {
+            // LOG(INFO) << RED << iter.name << NONE;
             speaker[iter.name] = iter;
         }
     }
@@ -300,6 +347,7 @@ void HardwareScan::generateIndentifyKeyValue(std::map<std::string, CameraHardwar
         std::lock_guard<std::mutex> locker(camer_hardware_lock_);
         for (const auto &iter : profile.cameraDevices)
         {
+            // LOG(INFO) << RED << iter.card << NONE;
             camera[iter.card] = iter;
         }
     }
@@ -310,7 +358,7 @@ void HardwareScan::context_state_callback(pa_context *c, void *userdata)
     if (pa_context_get_state(c) == PA_CONTEXT_READY)
     {
         pa_operation *o;
-        std::cout << "ready" << std::endl;
+        // std::cout << "ready" << std::endl;
 
         o = pa_context_get_sink_info_list(c, sink_info_callback, nullptr);
         if (o)
@@ -433,8 +481,8 @@ void HardwareScan::AutoGenerateCR(const std::map<std::string, CameraHardware> &c
             else
             {
                 LOG(INFO) << "add device instance : " << instance.metadata.name << " success";
+                this->hardware_autogen_record[instance.spec.properties.card] = instance.metadata.namespace_name + "/" + instance.metadata.name;
             }
-            this->hardware_autogen_record[instance.spec.properties.card] = instance.metadata.namespace_name + "/" + instance.metadata.name;
         }
     }
     if (mic.size() != 0)
@@ -471,8 +519,8 @@ void HardwareScan::AutoGenerateCR(const std::map<std::string, CameraHardware> &c
             else
             {
                 LOG(INFO) << "add device instance : " << instance.metadata.name << " success";
+                this->hardware_autogen_record[instance.spec.properties.hardwareName] = instance.metadata.namespace_name + "/" + instance.metadata.name;
             }
-            this->hardware_autogen_record[instance.spec.properties.hardwareName] = instance.metadata.namespace_name + "/" + instance.metadata.name;
         }
     }
     if (speaker.size() != 0)
@@ -509,8 +557,8 @@ void HardwareScan::AutoGenerateCR(const std::map<std::string, CameraHardware> &c
             else
             {
                 LOG(INFO) << "add device instance : " << instance.metadata.name << " success";
+                this->hardware_autogen_record[instance.spec.properties.hardwareName] = instance.metadata.namespace_name + "/" + instance.metadata.name;
             }
-            this->hardware_autogen_record[instance.spec.properties.hardwareName] = instance.metadata.namespace_name + "/" + instance.metadata.name;
         }
     }
 }

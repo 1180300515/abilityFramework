@@ -38,15 +38,15 @@ void HardwareResourceManager::EndAddressResult(std::map<std::string, std::string
             }
             for (const auto &speakerDevice : item.second.speakerDevices)
             {
-                speakerDevices.push_back(speakerDevice.ToKeyValue(item.first));
+                speakerDevices.emplace_back(speakerDevice.ToKeyValue(item.first));
             }
             for (const auto &cameraDevice : item.second.cameraDevices)
             {
-                cameraDevices.push_back(cameraDevice.ToKeyValue(item.first));
+                cameraDevices.emplace_back(cameraDevice.ToKeyValue(item.first));
             }
             for (const auto &displayDevice : item.second.displayDevices)
             {
-                displayDevices.push_back(displayDevice.ToKeyValue(item.first));
+                displayDevices.emplace_back(displayDevice.ToKeyValue(item.first));
             }
         }
         change = false;
