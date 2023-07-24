@@ -150,5 +150,5 @@ std::vector<std::vector<std::string>> AbilityRelationManager::cartesianProduct(c
 bool AbilityRelationManager::fileExists(const std::string &filename)
 {
     struct stat buffer;
-    return (stat(("bin/" + filename).c_str(), &buffer) == 0);
+    return (stat(filename.c_str(), &buffer) == 0);
 }
