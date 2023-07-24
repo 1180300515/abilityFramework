@@ -31,6 +31,7 @@ void DiscoveryManager::ReceiveDeviceInfo(DiscoveryDeviceInfo info)
         {
             if (in->IsOffline(std::time(nullptr)))
             {
+                LOG(INFO) << "host : " << it->first << ", the " << in->discovery_source << " is offline";
                 in = it->second.erase(in);
             }
             else
@@ -40,6 +41,7 @@ void DiscoveryManager::ReceiveDeviceInfo(DiscoveryDeviceInfo info)
         }
         if (it->second.size() == 0)
         {
+            LOG(INFO) << "host: " << it->first << " is offline";
             it = devices.erase(it);
         }
         else
@@ -70,8 +72,6 @@ void DiscoveryManager::Init(std::function<void(std::map<std::string, ConnectInfo
     this->blediscovery_ = std::make_shared<BLEDiscovery>();
 }
 
-
-
 void DiscoveryManager::Run()
 {
     // start receiver
@@ -90,7 +90,7 @@ void DiscoveryManager::Run()
             for (const auto &iter : devices)
             {
                 //print
-                LOG(INFO) << RED << "the device :" << iter.first << " address: " << iter.second.front().address << NONE;
+                //LOG(INFO) << RED << "the device :" << iter.first << " address: " << iter.second.front().address << NONE;
                 resource_callback_info[iter.first] = iter.second.front().address;
                 if (iter.first == this->hostname_)
                 {
