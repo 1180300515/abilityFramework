@@ -99,8 +99,6 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/src/resourcemgr resourcemgr)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/utils utils)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/httpserver httpserver)
 
-
-
 include_directories(${PROJECT_SOURCE_DIR}/include/protos)
 include_directories(${PROJECT_SOURCE_DIR}/include/utils)
 include_directories(${PROJECT_SOURCE_DIR}/include/abilityrelationmgr)
@@ -111,7 +109,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include/lifecyclemgr)
 include_directories(${PROJECT_SOURCE_DIR}/include/resourcemgr)
 include_directories(${PROJECT_SOURCE_DIR}/include/httpserver)
 
-
+#生成abilityframework可执行文件
 add_executable(${PROJECT_NAME} src/main.cpp 
     ${protos}
     ${abilityrelationmgr}
@@ -123,19 +121,33 @@ add_executable(${PROJECT_NAME} src/main.cpp
     ${utils}
     ${httpserver}
 )
-# add_executable(${PROJECT_NAME} src/main.cpp 
-#     src/plugincore/pluginload.cpp 
-#     src/plugincore/abimgr.cpp
-#     src/eventhandler/eventhandler.cpp
-#     src/discoverymanager/discoverymanager.cpp
-#     src/discoverymanager/audiodevs.cpp
-#     src/discoverymanager/camdevs.cpp
-#     src/discoverymanager/dispdevs.cpp
-#     src/discoverymanager/localhw_discovery.cpp
-#     src/discoverymanager/discoverymanager.cpp
-#     src/discoverymanager/devpool.cpp
-#     src/protos/abilityProto.grpc.pb.cc
-#     src/protos/abilityProto.pb.cc
-#     ${SRC_LIST1} ${SRC_LIST2} ${SRC_LIST3})
-# target_link_libraries(AbilityFramework sqlite3 JsonCpp::JsonCpp glog yaml-cpp X11 pulse Xrandr v4l2 pthread dl crypto ssl z protobuf ${GRPC_LIBRARIES} ${PROTOBUF_LIBRARIES} )
 target_link_libraries(AbilityFramework stdc++ sqlite3 JsonCpp::JsonCpp glog yaml-cpp X11 pulse Xrandr v4l2 pthread dl crypto ssl z protobuf::libprotobuf gRPC::grpc++ )
+
+#生成test可执行文件
+add_executable(cameratest test/test_ability_lifecycle.cpp ${protos})
+target_link_libraries(cameratest stdc++ protobuf::libprotobuf gRPC::grpc++ )
+
+#生成testGetAbilityRunning可执行文件
+add_executable(testGetAbilityRunning test/test_get_abilityrunning.cpp)
+target_link_libraries(testGetAbilityRunning stdc++)
+
+#生成testGetAbilitySupport可执行文件
+add_executable(testGetAbilitySupport test/test_get_abilitysupport.cpp)
+target_link_libraries(testGetAbilitySupport stdc++)
+
+#生成testGetDevice可执行文件
+add_executable(testGetDevice test/test_get_device.cpp)
+target_link_libraries(testGetDevice stdc++)
+
+#生成testPostAbilityRequest可执行文件
+add_executable(testPostStartAbilityRequest test/test_post_start_abilityrequest.cpp)
+target_link_libraries(testPostStartAbilityRequest stdc++)
+
+add_executable(testPostConnectAbilityRequest test/test_post_connect_abilityrequest.cpp)
+target_link_libraries(testPostConnectAbilityRequest stdc++)
+
+add_executable(testPostDisconnectAbilityRequest test/test_post_disconnect_abilityrequest.cpp)
+target_link_libraries(testPostDisconnectAbilityRequest stdc++)
+
+add_executable(testPostTerminateAbilityRequest test/test_post_terminate_abilityrequest.cpp)
+target_link_libraries(testPostTerminateAbilityRequest stdc++)
