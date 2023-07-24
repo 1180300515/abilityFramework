@@ -36,26 +36,22 @@ private:
      * @param ip
      * @return
      */
-    DeviceProfile getDeviceProfileFromHost(const std::string &ip);
+    DeviceProfile getDeviceProfileFromHost(const std::string &ip); 
     /**
-     * @brief compare the new discovery host, delete the non-existing host
+     * @brief compare the old and new, delete the non exist host
+     * @param new_ 
      */
     void compareOldAndNew(std::map<std::string, std::string> new_);
+    
+    std::map<std::string, DeviceProfile> hardware_resources; //store the whole info about each host
+    std::chrono::steady_clock::time_point last_update;
+    bool change = false; //each discovery result, whether exec get deviceprofile
 
-    /**
-     * @brief store the whole info about each host
-     */
-    std::map<std::string, DeviceProfile> hardware_resources;
-
-    /**
-     * @brief store the mic device info as a string
-     */
-    std::vector<std::string> micDevices;
+    std::vector<std::string> micDevices; //store the mic device info as a string
     std::vector<std::string> speakerDevices;
     std::vector<std::string> cameraDevices;
     std::vector<std::string> displayDevices;
     std::mutex locker_;
-    bool change = false;
 
     std::string hostname_;
 };

@@ -16,18 +16,6 @@
 #include "resource_manager.h"
 #include "color.h"
 
-void HardwareScan::insertCameraInfo(Json::Value &jnode)
-{
-}
-
-void HardwareScan::insertMicInfo(Json::Value &jnode)
-{
-}
-
-void HardwareScan::insertLoudspeakerInfo(Json::Value &jnode)
-{
-}
-
 void HardwareScan::getCameraInfo()
 {
     std::lock_guard<std::mutex> locker(camer_hardware_lock_);
@@ -230,11 +218,10 @@ void HardwareScan::getAudioInfo()
 
 void HardwareScan::periodicHardwareScanThread()
 {
-    // delay 30 seconds to start first scan to make sure all the instannce have add into the resource manager
-    std::this_thread::sleep_for(std::chrono::seconds(10));
-
     LOG(INFO) << L_GREEN << "local hardware scan begin" << NONE;
     localHardwareScan();
+    // delay 30 seconds to start first scan to make sure all the instannce have add into the resource manager
+    std::this_thread::sleep_for(std::chrono::seconds(5));
     std::map<std::string, CameraHardware> camera_;
     std::map<std::string, AudioHardware> mic_;
     std::map<std::string, AudioHardware> speaker_;
@@ -262,7 +249,7 @@ void HardwareScan::periodicHardwareScanThread()
     while (true)
     {
         // sleep 10 minute;
-        std::this_thread::sleep_for(std::chrono::seconds(20));
+        std::this_thread::sleep_for(std::chrono::minutes(10));
 
         LOG(INFO) << L_GREEN << "local hardware scan begin" << NONE;
         localHardwareScan();

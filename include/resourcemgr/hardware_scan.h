@@ -48,14 +48,6 @@ private:
     void getAudioInfo();
 
     /**
-     * @brief insert camera hardware info
-     * @param jnode
-     */
-    void insertCameraInfo(Json::Value &jnode);
-    void insertMicInfo(Json::Value &jnode);
-    void insertLoudspeakerInfo(Json::Value &jnode);
-
-    /**
      * @brief periodic hardware scan
      */
     void periodicHardwareScanThread();

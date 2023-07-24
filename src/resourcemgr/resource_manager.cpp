@@ -393,9 +393,11 @@ std::string ResourceManager::isLocalResource(std::string key)
 
 bool ResourceManager::AbilityExistJudge(const std::string &key)
 {
+    std::string wait_for_check = "default/" + key;
+    LOG(INFO) << L_BLUE << "check ability exist : " << wait_for_check << NONE;
     for (const auto &iter : abilities_)
     {
-        if (key == iter.first)
+        if (wait_for_check == iter.first)
         {
             return true;
         }
@@ -408,15 +410,16 @@ void ResourceManager::EndAddressDiscoveryResult(const std::map<std::string, std:
     this->hardware_manager_->EndAddressResult(result);
 }
 
-void ResourceManager::LoadLocalResource()
+void ResourceManager::LoadLocalResourceInDB()
 {
-    std::map<std::string,std::string> data;
+
+    std::map<std::string, std::string> data;
     DatabaseManager::getInstance().DBGetAbilityInstances(data);
     if (data.size() != 0)
     {
         for (const auto &iter : data)
         {
-            LOG(INFO) << "add resource : " << iter.first ;
+            LOG(INFO) << "add resource : " << iter.first;
             auto new_ability = std::make_shared<AbilityInstanceInfo>();
             new_ability->UnMarshal(iter.second);
             this->abilities_[iter.first] = new_ability;
@@ -468,18 +471,21 @@ void ResourceManager::LoadLocalResource()
     }
 }
 
-void ResourceManager::Init(std::shared_ptr<ConnectionManager> connect)
+void ResourceManager::Init(std::shared_ptr<ConnectionManager> connect, bool cleandb)
 {
     LOG(INFO) << L_GREEN << "init resource manager" << NONE;
     getHostName();
-    DatabaseManager::getInstance().Init(this->hostname_);
-    LoadLocalResource();
+    
+    DatabaseManager::getInstance().Init(this->hostname_, cleandb);
+    LoadLocalResourceInDB();
 
     this->connection_ = connect;
     connection_->Init(std::bind(&ResourceManager::RecvMessageHandle, this, std::placeholders::_1));
+
     this->hardware_ = std::make_shared<HardwareScan>();
     std::shared_ptr<ResourceManager> p(this);
     this->hardware_->Init(p, this->hostname_);
+
     this->hardware_manager_ = std::make_shared<HardwareResourceManager>();
     this->hardware_manager_->Init(this->hostname_);
 }

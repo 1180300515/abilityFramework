@@ -2,6 +2,8 @@
 
 #include <httplib.h>
 
+#include "glog/logging.h"
+
 #include "global_var.h"
 
 void HardwareResourceManager::Init(std::string hostname)
@@ -12,16 +14,45 @@ void HardwareResourceManager::Init(std::string hostname)
 void HardwareResourceManager::EndAddressResult(std::map<std::string, std::string> result)
 {
     compareOldAndNew(result);
-    //get the new host device profile
-    for (const auto &iter : result)
+    if (this->hardware_resources.size() == 0)
     {
-        if (this->hardware_resources.count(iter.first) == 0)
+        //the manager first start
+        LOG(INFO) << "Insert all host device profile";
+        for (const auto &iter : result)
         {
             auto dp = getDeviceProfileFromHost(iter.second);
             hardware_resources[iter.first] = dp;
-            change = true;
+        }
+        this->last_update = std::chrono::steady_clock::now();
+        change = true;
+    }
+    else if (std::chrono::steady_clock::now() - this->last_update > std::chrono::minutes(5))
+    {
+        LOG(INFO) << "Update all host device profile";
+        //beyond the time limit
+        for (const auto &iter : result)
+        {
+            auto dp = getDeviceProfileFromHost(iter.second);
+            hardware_resources[iter.first] = dp;
+        }
+        this->last_update = std::chrono::steady_clock::now();
+        change = true;
+    }
+    else
+    {
+        //only get the new host deviceprofile
+        for (const auto &iter : result)
+        {
+            if (this->hardware_resources.count(iter.first) == 0)
+            {
+                LOG(INFO) << "new host: " << iter.first << " will get the host device profile";
+                auto dp = getDeviceProfileFromHost(iter.second);
+                hardware_resources[iter.first] = dp;
+                change = true;
+            }
         }
     }
+
     // regenerate records
     if (change)
     {
@@ -55,6 +86,7 @@ void HardwareResourceManager::EndAddressResult(std::map<std::string, std::string
 
 std::vector<std::string> HardwareResourceManager::GetHardwareResourceList(std::string type)
 {
+    std::lock_guard<std::mutex> lock(locker_);
     if (type == "mic")
     {
         return micDevices;
@@ -104,8 +136,8 @@ void HardwareResourceManager::compareOldAndNew(std::map<std::string, std::string
     {
         if (new_.count(iter->first) == 0)
         {
-            hardware_resources.erase(iter);
-            ++iter;
+            LOG(INFO) << "host: " << iter->first << " is offline, the device profile will be deleted";
+            hardware_resources.erase(iter++);
             change = true;
         }
         else

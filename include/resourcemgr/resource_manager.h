@@ -55,7 +55,7 @@ public:
     /**
      * @brief load data from the database
      */
-    void LoadLocalResource();
+    void LoadLocalResourceInDB();
     /**
      * @brief judge the key resource type
      * @param key
@@ -66,7 +66,7 @@ public:
     /**
      * @brief init the resource manager
      */
-    void Init(std::shared_ptr<ConnectionManager> connect);
+    void Init(std::shared_ptr<ConnectionManager> connect, bool cleandb);
     /**
      * @brief start the resource manager module
      * @param startcloudsync
@@ -87,7 +87,7 @@ public:
     // callback function defination
     /**
      * @brief called by lifecycle manager, judge ability exist or not
-     * @param key the ability key
+     * @param key the ability name,don't include namespace
      * @return exist or not
      */
     bool AbilityExistJudge(const std::string &key);
