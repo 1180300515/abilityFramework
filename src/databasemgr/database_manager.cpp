@@ -11,7 +11,7 @@ std::vector<InstanceDBStruct> DatabaseManager::abilitystructs;
 std::string DatabaseManager::cloud_address;
 std::string DatabaseManager::host_name;
 
-void DatabaseManager::Init(std::string hostname)
+void DatabaseManager::Init(std::string hostname, bool cleandb)
 {
     host_name = "";
     int rc;
@@ -36,6 +36,12 @@ void DatabaseManager::Init(std::string hostname)
             LOG(ERROR) << "sql excute error: " << erroms;
             return;
         }
+    }
+    if (cleandb)
+    {
+        DBCleanCRD();
+        DBCleanAbility();
+        DBCleanDevice();
     }
 }
 
@@ -692,7 +698,7 @@ int DatabaseManager::crd_callback(void *unused, int columenCount, char **columnV
         }
     }
     crdstructs.push_back(crd);
-    LOG(INFO) << "crdcallback: find matched crd struct with key: " << crd.key;
+    // LOG(INFO) << "crdcallback: find matched crd struct with key: " << crd.key;
     return SQLITE_OK;
 }
 
@@ -723,7 +729,7 @@ int DatabaseManager::device_callback(void *unused, int columenCount, char **colu
         }
     }
     devicestructs.push_back(instance);
-    LOG(INFO) << "devicecallback: find instance:" << instance.key;
+    // LOG(INFO) << "devicecallback: find instance:" << instance.key;
     return SQLITE_OK;
 }
 
@@ -754,7 +760,7 @@ int DatabaseManager::ability_callback(void *unused, int columenCount, char **col
         }
     }
     abilitystructs.push_back(instance);
-    LOG(INFO) << "abilitycallback: find ability:" << instance.key;
+    // LOG(INFO) << "abilitycallback: find ability:" << instance.key;
     return SQLITE_OK;
 }
 

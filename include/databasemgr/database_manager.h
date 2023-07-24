@@ -26,7 +26,7 @@ public:
      * @brief judge the database data whether match with local hostname
      * @param hostname the local hostname
      */
-    void Init(std::string hostname);
+    void Init(std::string hostname, bool cleandb);
     /**
      * read file into the crd table.
      *
