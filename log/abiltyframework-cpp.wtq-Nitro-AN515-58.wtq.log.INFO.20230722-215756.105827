@@ -1,4 +1,0 @@
-Log file created at: 2023/07/22 21:57:56
-Running on machine: wtq-Nitro-AN515-58
-Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
-I0722 21:57:56.348798 105827 database_manager.cpp:787] db exist,open success
