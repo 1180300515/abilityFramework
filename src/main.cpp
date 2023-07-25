@@ -17,7 +17,7 @@
 int main(int argc, char **argv)
 {
     std::cout << RED << "Load Config From File" << NONE << std::endl;
-    std::string config_file_path = "../config/start_config.yaml";
+    std::string config_file_path = "config/start_config.yaml";
     YAML::Node config;
     try
     {
@@ -153,6 +153,7 @@ int main(int argc, char **argv)
 
     resource_manager->Run(false, false);
     discovery_manager->Run();
+    lifecycle_manager->Run();
     http_server->Run();
     return 0;
 }
