@@ -15,6 +15,10 @@ int main(int argc, char **argv)
     auto res = ccc.Post("/api/AbilityRequest", params);
     if (res)
     {
-        std::cout << res->body << std::endl;
+        std::cout << "success" << std::endl;
+    } 
+    else
+    {
+        std::cout << res.error() << std::endl;
     }
 }
