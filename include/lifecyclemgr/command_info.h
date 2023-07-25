@@ -9,7 +9,7 @@
 class CommandInfo
 {
 public:
-    int port;
+    int IPCPort;
     std::string abilityName;
     std::string cmd;
     int connectPort;
@@ -17,7 +17,7 @@ public:
 
     CommandInfo(int port, std::string abilityName, std::string cmd, int connectPort, std::string connectIP);
 
-    Json::Value toJson();
+    Json::Value toJson() const;
 
     void print();
 };

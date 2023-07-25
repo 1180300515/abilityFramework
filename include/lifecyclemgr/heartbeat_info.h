@@ -9,12 +9,13 @@
 struct HeartbeatInfo
 {
     std::string abilityName; // ability name
-    int IPCPort;         // ipc port
+    int IPCPort;             // ipc port
+    int abilityPort;         // the ability port
     std::string status;      // the state of the current ability
     std::chrono::steady_clock::time_point last_update;
 
-    Json::Value toJson(int port) const;
-    bool IsOffline();
+    Json::Value toJson() const;
+    bool IsOffline() const;
 };
 
 #endif // _HEARTBEAT_INFO_H

@@ -29,7 +29,7 @@ public:
      */
     void Init(std::function<bool(std::string)> callback);
     /**
-     * @brief run lifecycle
+     * @brief start lifecycle manager
      */
     void Run();
     /**
@@ -38,21 +38,23 @@ public:
      */
     std::string GetHeartbeatMap();
 
-private:
-    std::unordered_map<std::string, std::thread> threads;                    // store ability lifecycle deal thread
-    std::unordered_map<std::string, std::unique_ptr<AbilityClient>> clients; // store ability client (by grpc)
+private: 
+    std::unordered_map<int, std::thread> threads;                    // store IPCPort and ability lifecycle deal thread
+    std::unordered_map<int, std::unique_ptr<AbilityClient>> clients; // store IPCPort and ability client (by grpc)
+    std::mutex clients_lock_;
 
-    std::unordered_map<std::string, HeartbeatInfo> heartbeat_map; // abilityName and the heart beat info
+    std::unordered_map<int, HeartbeatInfo> heartbeat_map; // IPCPort and the heart beat info
     std::mutex heartbeat_map_lock;
 
-    std::thread checkTimeOutThread;
-    std::thread checkProcessThread;
+    std::thread checkClientThread;
 
     std::function<bool(std::string)> resourcemgr_checkexist; // resource manager check resource exist function
 
     void lifeCycleDeal(AbilityClient &client, HeartbeatInfo &hbinfo, const CommandInfo &cmdinfo);
 
     bool start_process(const std::string &abilityName);
+
+    void checkAbilityClientAndTimeout();
 };
 
 #endif // _LIFECYCLE_MANAGER_H

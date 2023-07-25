@@ -7,68 +7,65 @@
 
 void LifeCycleManager::HandleCommandInfo(const CommandInfo &cmd_info)
 {
-    //a new process will be start
-    if (cmd_info.cmd == CMD_START && resourcemgr_checkexist(cmd_info.abilityName) && heartbeat_map.count(cmd_info.abilityName) == 0)
+    LOG(INFO) << "handle the command info : " << cmd_info.toJson().toStyledString();
+    if (!resourcemgr_checkexist(cmd_info.abilityName))
     {
-        LOG(INFO) << "ready for start : " << cmd_info.abilityName << " process";
-        start_process(cmd_info.abilityName);
-        // 稍微等待500ms
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    }
-    if (heartbeat_map.count(cmd_info.abilityName) == 0)
-    {
-        LOG(INFO) << "heartbeat map not exist the ability : " << cmd_info.abilityName << " info , wait 1 seconds";
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    if (heartbeat_map.count(cmd_info.abilityName) == 0)
-    {
-        LOG(ERROR) << "heartbeat map not exist the ability : " << cmd_info.abilityName << " info , please check process";
+        LOG(ERROR) << "the ability : " << cmd_info.abilityName << " is not exist";
         return;
     }
-    else
+    if (cmd_info.IPCPort == 0 && cmd_info.cmd != CMD_START)
     {
-        if (heartbeat_map[cmd_info.abilityName].IsOffline())
+        LOG(ERROR) << "the cmd info must specify the port number";
+        return;
+    }
+    if (cmd_info.IPCPort != 0 && this->clients.count(cmd_info.IPCPort) == 0)
+    {
+        LOG(ERROR) << "no ability client matching the port : " << cmd_info.IPCPort;
+        return;
+    }
+    // a new process will be start
+    if (cmd_info.IPCPort == 0 && cmd_info.cmd == CMD_START)
+    {
+        LOG(INFO) << "ready for start : " << cmd_info.abilityName << " process";
+        if (!start_process(cmd_info.abilityName))
         {
-            LOG(ERROR) << "the ability : " << cmd_info.abilityName << " is offline";
+            LOG(ERROR) << "start the " << cmd_info.abilityName << " fail";
             return;
         }
     }
-    if (threads.count(cmd_info.abilityName) == 0)
+    std::lock_guard<std::mutex> locker(this->heartbeat_map_lock);
+    for (const auto &iter : this->heartbeat_map)
     {
-        clients[cmd_info.abilityName] = std::make_unique<AbilityClient>(grpc::CreateChannel("localhost:" + std::to_string(heartbeat_map[cmd_info.abilityName].IPCPort), grpc::InsecureChannelCredentials()));
-        LOG(INFO) << RED << "Generate Client to Control LC : Port: " << heartbeat_map[cmd_info.abilityName].IPCPort << NONE;
-        threads[cmd_info.abilityName] = std::thread([this, cmd_info]()
-                                             { this->lifeCycleDeal(*clients[cmd_info.abilityName], heartbeat_map.at(cmd_info.abilityName), cmd_info); });
-        LOG(INFO) << RED << "Finished Control Process" << NONE;
-    }
-    else
-    {
-        // Logic to update process status
-        LOG(INFO) << RED << "Adjust life cycle" << NONE;
-        lifeCycleDeal(*clients[cmd_info.abilityName], heartbeat_map.at(cmd_info.abilityName), cmd_info);
-        LOG(INFO) << RED << "Finished life cycle adjust" << NONE;
+        // clean timeout
+        if (iter.second.IsOffline())
+        {
+            continue;
+        }
+        else if (iter.second.abilityName == cmd_info.abilityName && this->clients.count(iter.first) == 0)
+        {
+            std::lock_guard<std::mutex> locker1(this->clients_lock_);
+            clients[iter.first] = std::make_unique<AbilityClient>(grpc::CreateChannel("localhost:" + std::to_string(iter.first),
+                                                                                      grpc::InsecureChannelCredentials()));
+            LOG(INFO) << "create ability client for ability : " << cmd_info.abilityName << " in IPCPort : " << iter.first;
+            threads[iter.first] = std::thread(
+                [this, iter, cmd_info]()
+                {
+                    this->lifeCycleDeal(*clients[iter.first], this->heartbeat_map.at(iter.first), cmd_info);
+                });
+        }
+        else if (iter.second.abilityName == cmd_info.abilityName && iter.first == cmd_info.IPCPort)
+        {
+            LOG(INFO) << RED << "Adjust life cycle" << NONE;
+            lifeCycleDeal(*clients[iter.first], this->heartbeat_map.at(iter.first), cmd_info);
+            LOG(INFO) << RED << "Finished life cycle adjust" << NONE;
+        }
     }
 }
 
 bool LifeCycleManager::AddHeartbeatInfo(HeartbeatInfo info)
 {
     std::lock_guard<std::mutex> locker(heartbeat_map_lock);
-    for (auto it = heartbeat_map.begin(); it != heartbeat_map.end();)
-    {
-        if (it->second.IsOffline())
-        {
-            threads[it->first].join(); // ensure the thread is finished
-            threads.erase(it->first);  // this process has ended, clean up the thread
-            clients.erase(it->first);  // this process has ended, clean up the client
-            LOG(INFO) << "the ability : " << it->second.abilityName << " timeout, already clean";
-            heartbeat_map.erase(it++); // timeout, delete the record
-        }
-        else
-        {
-            ++it;
-        }
-    }
-    heartbeat_map[info.abilityName] = info;
+    heartbeat_map[info.IPCPort] = info;
     return true;
 }
 
@@ -79,108 +76,112 @@ void LifeCycleManager::Init(std::function<bool(std::string)> callback)
     // this->resourcemgr_checkexist("camera");
 }
 
+void LifeCycleManager::Run()
+{
+    this->checkClientThread = std::thread(&LifeCycleManager::checkAbilityClientAndTimeout, this);
+}
+
 std::string LifeCycleManager::GetHeartbeatMap()
 {
     std::lock_guard<std::mutex> locker(heartbeat_map_lock);
-    auto now = std::chrono::steady_clock::now();
-    for (auto it = heartbeat_map.begin(); it != heartbeat_map.end();)
-    {
-        if (it->second.IsOffline())
-        {
-            threads[it->first].join(); // ensure the thread is finished
-            threads.erase(it->first);  // this process has ended, clean up the thread
-            clients.erase(it->first);  // this process has ended, clean up the client
-            LOG(INFO) << "the ability : " << it->second.abilityName << " timeout, already clean";
-            heartbeat_map.erase(it++); // timeout, delete the record
-        }
-        else
-        {
-            ++it;
-        }
-    }
     Json::Value data;
     for (const auto &iter : this->heartbeat_map)
     {
-        data.append(iter.second.toJson(iter.second.IPCPort));
+        if (iter.second.IsOffline())
+        {
+            continue;
+        }
+        data.append(iter.second.toJson());
     }
     return data.toStyledString();
 }
 
 void LifeCycleManager::lifeCycleDeal(AbilityClient &client, HeartbeatInfo &hbinfo, const CommandInfo &cmdinfo)
 {
-    LOG(INFO) << RED << "Now status of Ability is :" << hbinfo.status << NONE << std::endl;
+    LOG(INFO) << RED << "Now the Ability : " << cmdinfo.abilityName << " in port: " << hbinfo.IPCPort << " status is :" << hbinfo.status << NONE << std::endl;
     if (hbinfo.status == STATUS_INIT)
     {
-        abilityUnit::StartInfo start_info;
-        start_info.set_timestamp(time(0));
-        client.Start(start_info);
+        if (cmdinfo.cmd == CMD_START)
+        {
+            abilityUnit::StartInfo start_info;
+            start_info.set_timestamp(time(0));
+            client.Start(start_info);
+        }
+        else
+        {
+            LOG(ERROR) << "illegal cmd : " << cmdinfo.cmd << " in status: " << hbinfo.status;
+        }
     }
-    if (hbinfo.abilityName == cmdinfo.abilityName)
+    else if (hbinfo.status == STATUS_STANDBY)
     {
-        if (hbinfo.status == STATUS_STANDBY)
+        if (cmdinfo.cmd == CMD_CONNECT)
         {
-            if (cmdinfo.cmd == CMD_CONNECT)
-            {
-                abilityUnit::ConnectInfo connect_info;
-                connect_info.set_ip(cmdinfo.connectIP);
-                connect_info.set_port(cmdinfo.connectPort);
-                connect_info.set_timestamp(time(0));
-                client.Connect(connect_info);
-            }
-            else if (cmdinfo.cmd == CMD_TERMINATE)
-            {
-                abilityUnit::TerminateInfo terminate_info;
-                terminate_info.set_timestamp(time(0));
-                client.Terminate(terminate_info);
-            }
-            else
-            {
-            }
+            abilityUnit::ConnectInfo connect_info;
+            connect_info.set_ip(cmdinfo.connectIP);
+            connect_info.set_port(cmdinfo.connectPort);
+            connect_info.set_timestamp(time(0));
+            client.Connect(connect_info);
         }
-        else if (hbinfo.status == STATUS_RUNNING)
+        else if (cmdinfo.cmd == CMD_TERMINATE)
         {
-            if (cmdinfo.cmd == CMD_DISCONNECT)
-            {
-                abilityUnit::DisconnectInfo disconnect_info;
-                disconnect_info.set_timestamp(time(0));
-                client.Disconnect(disconnect_info);
-            }
-            else if (cmdinfo.cmd == CMD_TERMINATE)
-            {
-                abilityUnit::TerminateInfo terminate_info;
-                terminate_info.set_timestamp(time(0));
-                client.Terminate(terminate_info);
-            }
-            else
-            {
-            }
+            abilityUnit::TerminateInfo terminate_info;
+            terminate_info.set_timestamp(time(0));
+            client.Terminate(terminate_info);
         }
-        else if (hbinfo.status == STATUS_SUSPEND)
+        else
         {
-            if (cmdinfo.cmd == CMD_CONNECT)
-            {
-                abilityUnit::ConnectInfo connect_info;
-                connect_info.set_ip(cmdinfo.connectIP);
-                connect_info.set_port(cmdinfo.connectPort);
-                connect_info.set_timestamp(time(0));
-                client.Connect(connect_info);
-            }
-            else if (cmdinfo.cmd == CMD_TERMINATE)
-            {
-                abilityUnit::TerminateInfo terminate_info;
-                terminate_info.set_timestamp(time(0));
-                client.Terminate(terminate_info);
-            }
-            else if (cmdinfo.cmd == CMD_START)
-            {
-                abilityUnit::StartInfo start_info;
-                start_info.set_timestamp(time(0));
-                client.Start(start_info);
-            }
+            LOG(ERROR) << "illegal cmd : " << cmdinfo.cmd << " in status: " << hbinfo.status;
         }
-        else if (hbinfo.status == STATUS_TERMINATE)
+    }
+    else if (hbinfo.status == STATUS_RUNNING)
+    {
+        if (cmdinfo.cmd == CMD_DISCONNECT)
         {
+            abilityUnit::DisconnectInfo disconnect_info;
+            disconnect_info.set_timestamp(time(0));
+            client.Disconnect(disconnect_info);
         }
+        else if (cmdinfo.cmd == CMD_TERMINATE)
+        {
+            abilityUnit::TerminateInfo terminate_info;
+            terminate_info.set_timestamp(time(0));
+            client.Terminate(terminate_info);
+        }
+        else
+        {
+            LOG(ERROR) << "illegal cmd : " << cmdinfo.cmd << " in status: " << hbinfo.status;
+        }
+    }
+    else if (hbinfo.status == STATUS_SUSPEND)
+    {
+        if (cmdinfo.cmd == CMD_CONNECT)
+        {
+            abilityUnit::ConnectInfo connect_info;
+            connect_info.set_ip(cmdinfo.connectIP);
+            connect_info.set_port(cmdinfo.connectPort);
+            connect_info.set_timestamp(time(0));
+            client.Connect(connect_info);
+        }
+        else if (cmdinfo.cmd == CMD_TERMINATE)
+        {
+            abilityUnit::TerminateInfo terminate_info;
+            terminate_info.set_timestamp(time(0));
+            client.Terminate(terminate_info);
+        }
+        else if (cmdinfo.cmd == CMD_START)
+        {
+            abilityUnit::StartInfo start_info;
+            start_info.set_timestamp(time(0));
+            client.Start(start_info);
+        }
+        else
+        {
+            LOG(ERROR) << "illegal cmd : " << cmdinfo.cmd << " in status: " << hbinfo.status;
+        }
+    }
+    else if (hbinfo.status == STATUS_TERMINATE)
+    {
+        LOG(INFO) << "status : " << hbinfo.status << " is uncontrollable";
     }
 }
 
@@ -202,9 +203,53 @@ bool LifeCycleManager::start_process(const std::string &abilityName)
         std::string program_path = abilityName;
         LOG(INFO) << "start process : " << abilityName;
         // 我们在子进程中，启动新的程序
-        execl(program_path.c_str(), program_path.c_str(), (char *)NULL);
-        // 如果execl返回，那么说明出错了
-        return false;
+        execl(("bin/" + program_path).c_str(), program_path.c_str(), (char *)NULL);
+        // 如果execl返回，那么说明出错了,需要终结子进程
+        perror("execl fail : ");
+        exit(0);
     }
     return true;
+}
+
+void LifeCycleManager::checkAbilityClientAndTimeout()
+{
+    while (true)
+    {
+        {
+            std::lock_guard<std::mutex> locker(this->heartbeat_map_lock);
+            std::lock_guard<std::mutex> locker1(this->clients_lock_);
+            for (auto iter = this->heartbeat_map.begin(); iter != this->heartbeat_map.end();)
+            {
+                // clean timeout
+                if (iter->second.IsOffline())
+                {
+                    
+                    threads[iter->first].join(); // ensure the thread is finished
+                    threads.erase(iter->first);  // this process has ended, clean up the thread
+                    clients.erase(iter->first);  // this process has ended, clean up the client
+                    LOG(INFO) << "the ability : " << iter->second.abilityName << "on IPCPort : " << iter->first << "  timeout, already clean";
+                    heartbeat_map.erase(iter++); // timeout, delete the record
+                }
+                else if (this->clients.count(iter->first) == 0 && iter->second.status == STATUS_INIT)
+                {
+                    clients[iter->first] = std::make_unique<AbilityClient>(grpc::CreateChannel("localhost:" + std::to_string(iter->first),
+                                                                                               grpc::InsecureChannelCredentials()));
+                    LOG(INFO) << "create ability client for ability : " << iter->second.abilityName << " in IPCPort : " << iter->first;
+                    threads[iter->first] = std::thread(
+                        [this, iter]()
+                        {
+                            abilityUnit::StartInfo start_info;
+                            start_info.set_timestamp(time(0));
+                            this->clients[iter->first]->Start(start_info);
+                        });
+                    ++iter;
+                }
+                else
+                {
+                    ++iter;
+                }
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+    }
 }
