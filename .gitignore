@@ -130,3 +130,4 @@ lib/modules/libconnection_mgr.so
 lib/modules/libability_mgr.so
 log/*
 bin/*
+resource/db/ability.db
