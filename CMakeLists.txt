@@ -140,14 +140,5 @@ add_executable(testGetDevice test/test_get_device.cpp)
 target_link_libraries(testGetDevice stdc++)
 
 #生成testPostAbilityRequest可执行文件
-add_executable(testPostStartAbilityRequest test/test_post_start_abilityrequest.cpp)
-target_link_libraries(testPostStartAbilityRequest stdc++)
-
-add_executable(testPostConnectAbilityRequest test/test_post_connect_abilityrequest.cpp)
-target_link_libraries(testPostConnectAbilityRequest stdc++)
-
-add_executable(testPostDisconnectAbilityRequest test/test_post_disconnect_abilityrequest.cpp)
-target_link_libraries(testPostDisconnectAbilityRequest stdc++)
-
-add_executable(testPostTerminateAbilityRequest test/test_post_terminate_abilityrequest.cpp)
-target_link_libraries(testPostTerminateAbilityRequest stdc++)
+add_executable(testPostAbilityRequest test/test_post_abilityrequest.cpp)
+target_link_libraries(testPostAbilityRequest stdc++)
