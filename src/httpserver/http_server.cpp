@@ -23,7 +23,7 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_, std::shared_pt
             res.status = 400;  // Bad Request
             return;
         }
-        auto new_info = HeartbeatInfo{ req.get_param_value("abilityName"), std::stoi(req.get_param_value("IPCPort")), req.get_param_value("status"),  std::chrono::steady_clock::now()};
+        auto new_info = HeartbeatInfo{ req.get_param_value("abilityName"), std::stoi(req.get_param_value("IPCPort")), std::stoi(req.get_param_value("abilityPort")), req.get_param_value("status"),  std::chrono::steady_clock::now()};
         this->lifecycle_manager_->AddHeartbeatInfo(new_info);
     });
 
@@ -48,7 +48,7 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_, std::shared_pt
     this->server->Post("/api/AbilityRequest", [this](const httplib::Request &req, httplib::Response &res)
     {
         LOG(INFO) << L_BLUE << "httpserver receive abilityrequest" << NONE;
-        auto cmd_g = CommandInfo{std::stoi(req.get_param_value("port")),
+        auto cmd_g = CommandInfo{std::stoi(req.get_param_value("IPCPort")),
                                 req.get_param_value("abilityName"),
                                 req.get_param_value("cmd"),
                                 std::stoi(req.get_param_value("connectPort")),
