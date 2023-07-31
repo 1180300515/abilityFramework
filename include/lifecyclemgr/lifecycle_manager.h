@@ -16,7 +16,7 @@ public:
      * @brief handle the command info
      * @param cmd_info
      */
-    void HandleCommandInfo(const CommandInfo &cmd_info);
+    void HandleCommandInfo(const std::string &cmd);
     /**
      * @brief add a heart beart info
      * @param info

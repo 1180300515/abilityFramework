@@ -6,18 +6,16 @@
 
 #include "json/json.h"
 
-class CommandInfo
+struct CommandInfo
 {
-public:
     int IPCPort;
     std::string abilityName;
     std::string cmd;
     int connectPort;
     std::string connectIP;
 
-    CommandInfo(int port, std::string abilityName, std::string cmd, int connectPort, std::string connectIP);
-
     Json::Value toJson() const;
+    void FromJson(const Json::Value &root);
 
     void print();
 };

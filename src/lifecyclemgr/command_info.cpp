@@ -1,13 +1,5 @@
 #include "command_info.h"
 
-CommandInfo::CommandInfo(int port, std::string abilityName, std::string cmd, int connectPort, std::string connectIP)
-{
-    this->IPCPort = port;
-    this->abilityName = abilityName;
-    this->cmd = cmd;
-    this->connectPort = connectPort;
-    this->connectIP = connectIP;
-}
 
 Json::Value CommandInfo::toJson() const
 {
@@ -18,6 +10,15 @@ Json::Value CommandInfo::toJson() const
     root["connectPort"] = connectPort;
     root["connectIP"] = connectIP;
     return root;
+}
+
+void CommandInfo::FromJson(const Json::Value &root)
+{
+    IPCPort = root["IPCPort"].asInt();
+    abilityName = root["abilityName"].asString();
+    cmd = root["cmd"].asString();
+    connectPort = root["connectPort"].asInt();
+    connectIP = root["connectIP"].asString();
 }
 
 void CommandInfo::print()

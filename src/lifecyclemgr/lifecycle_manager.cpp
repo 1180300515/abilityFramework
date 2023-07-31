@@ -5,8 +5,13 @@
 #include "global_var.h"
 #include "color.h"
 
-void LifeCycleManager::HandleCommandInfo(const CommandInfo &cmd_info)
+void LifeCycleManager::HandleCommandInfo(const std::string &cmd)
 {
+    Json::Value root;
+    Json::Reader reader;
+    reader.parse(cmd,root);
+    CommandInfo cmd_info;
+    cmd_info.FromJson(root);
     LOG(INFO) << "handle the command info : " << cmd_info.toJson().toStyledString();
     if (!resourcemgr_checkexist(cmd_info.abilityName))
     {
@@ -222,8 +227,7 @@ void LifeCycleManager::checkAbilityClientAndTimeout()
             {
                 // clean timeout
                 if (iter->second.IsOffline())
-                {
-                    
+                {               
                     threads[iter->first].join(); // ensure the thread is finished
                     threads.erase(iter->first);  // this process has ended, clean up the thread
                     clients.erase(iter->first);  // this process has ended, clean up the client
