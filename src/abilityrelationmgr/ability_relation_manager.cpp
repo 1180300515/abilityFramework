@@ -18,7 +18,7 @@ void AbilityRelationManager::Init(std::function<std::vector<AbilityInfoExtract>(
 std::string AbilityRelationManager::GetAbilitySupport()
 {
     auto list = this->abilityinfoextract_callback_();
-    for (const auto & iter : list)
+    for (const auto &iter : list)
     {
         LOG(INFO) << iter.name;
     }
