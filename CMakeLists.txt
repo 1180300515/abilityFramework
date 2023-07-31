@@ -54,41 +54,6 @@ find_package(Threads REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
 
-# find_package(PkgConfig)
-# pkg_search_module(GRPC REQUIRED grpc++)
-# pkg_search_module(PROTOBUF REQUIRED protobuf)
-
-# message(STATUS "=== PROTOBUF_LIBRARIES: ${PROTOBUF_LIBRARIES}")
-# message(STATUS "=== PROTOBUF_INCLUDE_DIRS: ${PROTOBUF_INCLUDE_DIRS}")
-# message(STATUS "=== GRPC_LIBRARIES: ${GRPC_LIBRARIES}")
-# message(STATUS "=== GRPC_INCLUDE_DIRS: ${GRPC_INCLUDE_DIRS}")
-
-# include_directories(${JSON_CPP_INCLUDE_DIR} ${PROTO_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS} ${GRPC_INCLUDE_DIRS})
-
-# add_library(Module_A SHARED ${CMAKE_SOURCE_DIR}/src/plugincore/pluginload.cpp)
-# set_target_properties(Module_A PROPERTIES
-#     CXX_STANDARD 17
-#     CXX_STANDARD_REQUIRED ON
-#     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/modules)
-# target_include_directories(Module_A PUBLIC ${CMAKE_SOURCE_DIR}/include/plugincore)
-# target_link_libraries(Module_A yaml-cpp)
-
-# add_library(ability_mgr SHARED ${CMAKE_SOURCE_DIR}/src/abilitymanager/abimanager.cpp)
-# set_target_properties(ability_mgr PROPERTIES
-#     CXX_STANDARD 17
-#     CXX_STANDARD_REQUIRED ON
-#     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/modules)
-# target_include_directories(ability_mgr PUBLIC ${CMAKE_SOURCE_DIR}/include/abilitymanager)
-# target_link_libraries(ability_mgr)
-
-# add_library(connection_mgr SHARED ${CMAKE_SOURCE_DIR}/src/connmanager/connmanager.cpp)
-# set_target_properties(connection_mgr PROPERTIES
-#     CXX_STANDARD 17
-#     CXX_STANDARD_REQUIRED ON
-#     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/modules)
-# target_include_directories(connection_mgr PUBLIC ${CMAKE_SOURCE_DIR}/include/connmanager)
-# target_link_libraries(connection_mgr)
-
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/protos protos)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/abilityrelationmgr abilityrelationmgr)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/connectionmgr connectionmgr)
