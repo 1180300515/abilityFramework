@@ -164,21 +164,9 @@ bool SchemaValidation(const std::string &schemajsonstring, const std::string &in
     }
     else
     {
-        LOG(INFO) << "validate success";
+        //LOG(INFO) << "validate success";
         return true;
     }
-}
-
-std::string JsonToString(const Json::Value &jnode)
-{
-    Json::FastWriter writer;
-    return writer.write(jnode);
-}
-
-void StringToJson(const std::string jsonformatstring, Json::Value &jnode)
-{
-    Json::Reader reader;
-    reader.parse(jsonformatstring, jnode);
 }
 
 std::string GetCrdSchemaPart(const Json::Value &jnode)
@@ -198,7 +186,8 @@ std::string GetCrdSchemaPart(const Json::Value &jnode)
                 LOG(ERROR) << "format error can't excute schema";
             }
         }
-        return JsonToString(tag);
+        Json::FastWriter writer;
+        return writer.write(tag);
     }
     else
     {
@@ -223,7 +212,8 @@ std::string GetAbilityValidatePart(const Json::Value &jnode)
     tag.removeMember("apiVersion");
     tag.removeMember("kind");
     tag.removeMember("metadata");
-    return JsonToString(jnode);
+    Json::FastWriter writer;
+    return writer.write(jnode);
 }
 
 std::string GetInstanceValidatePart(const Json::Value &jnode)
@@ -232,8 +222,10 @@ std::string GetInstanceValidatePart(const Json::Value &jnode)
     tag.removeMember("apiVersion");
     tag.removeMember("kind");
     tag.removeMember("metadata");
-    return JsonToString(tag);
+    Json::FastWriter writer;
+    return writer.write(tag);
 }
+
 std::string StripSlashPrefix(const std::string &str)
 {
     size_t pos = str.rfind('/');

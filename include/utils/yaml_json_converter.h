@@ -19,9 +19,9 @@ bool YamlToJsonForInstance(const YAML::Node &ynode, Json::Value &jnode, std::str
  */
 bool SchemaValidation(const std::string &schemajsonstring, const std::string &inputstring);
 
-std::string JsonToString(const Json::Value &jnode);
+//std::string JsonToString(const Json::Value &jnode);
 
-void StringToJson(const std::string jsonformatstring, Json::Value &jnode);
+//void StringToJson(const std::string jsonformatstring, Json::Value &jnode);
 
 std::string GetCrdSchemaPart(const Json::Value &jnode);
 
