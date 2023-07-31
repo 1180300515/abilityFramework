@@ -52,6 +52,11 @@ spec:
                   type: array
                   items:
                     type: string
+                    enum:
+                      - mic
+                      - display
+                      - speaker
+                      - camera
             spec:
               description: the spec part
               type: object

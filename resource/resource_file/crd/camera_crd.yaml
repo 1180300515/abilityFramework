@@ -82,11 +82,11 @@ spec:
                       type: string
                     telephoto:
                       type: boolean
-                    deviceNode:
+                    devicePath:
                       type: string
                     driverName:
                       type: string
-                    cardType:
+                    card:
                       type: string
                     busInfo:
                       type: string
