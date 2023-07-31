@@ -9,18 +9,16 @@
 
 #include "discovery_device_info.h"
 #include "lan_ipv4_discovery.h"
-#include "ble_discovery.h"
-#include "connect_info.h"
 
 class DiscoveryManager
 {
 public:
-    void Init(std::function<void(std::map<std::string, ConnectInfo>)> connection_, std::function<void(std::map<std::string, std::string>)> resource_);
+    void Init(std::function<void(std::map<std::string, std::string>)> resource_);
     void Run();
 
 private:
     /**
-     * as the lanipv4discovery, blediscovery.. callback
+     * as the lanipv4discovery... callback
      */
     void ReceiveDeviceInfo(DiscoveryDeviceInfo info);
 
@@ -28,10 +26,8 @@ private:
     std::mutex lock_;
 
     std::shared_ptr<LANIPV4Discovery> lanipv4discovery_;
-    std::shared_ptr<BLEDiscovery> blediscovery_;
 
-    std::function<void(std::map<std::string, ConnectInfo>)> connection_callback; // connection manager callback function
-    std::function<void(std::map<std::string, std::string>)> resource_callback;   // resource manager callback function
+    std::function<void(std::map<std::string, std::string>)> resource_callback; // resource manager callback function to remind the resource manager about discovery result
 
     std::string hostname_;
 

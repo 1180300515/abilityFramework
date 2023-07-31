@@ -51,7 +51,7 @@ void DiscoveryManager::ReceiveDeviceInfo(DiscoveryDeviceInfo info)
     }
 }
 
-void DiscoveryManager::Init(std::function<void(std::map<std::string, ConnectInfo>)> connection_, std::function<void(std::map<std::string, std::string>)> resource_)
+void DiscoveryManager::Init(std::function<void(std::map<std::string, std::string>)> resource_)
 {
     LOG(INFO) << L_GREEN << "init discovery manager" << NONE;
     char hostname[256];
@@ -63,13 +63,10 @@ void DiscoveryManager::Init(std::function<void(std::map<std::string, ConnectInfo
     hostname[sizeof(hostname) - 1] = '\0';
     this->hostname_ = std::string(hostname);
 
-    connection_callback = connection_;
     resource_callback = resource_;
 
     this->lanipv4discovery_ = std::make_shared<LANIPV4Discovery>();
     this->lanipv4discovery_->RegisterCallback(std::bind(&DiscoveryManager::ReceiveDeviceInfo, this, std::placeholders::_1));
-
-    this->blediscovery_ = std::make_shared<BLEDiscovery>();
 }
 
 void DiscoveryManager::Run()
@@ -86,27 +83,13 @@ void DiscoveryManager::Run()
 
                 sleep(4);
                 // deal the device and send to callbak func
-                std::map<std::string, ConnectInfo> connection_callback_info;
                 std::map<std::string, std::string> resource_callback_info;
                 for (const auto &iter : devices)
                 {
-                    // print
-                    // LOG(INFO) << RED << "the device :" << iter.first << " address: " << iter.second.front().address << NONE;
+                    LOG(INFO) << "Discovery result : the device :" << iter.first << " address: " << iter.second.front().address;
                     resource_callback_info[iter.first] = iter.second.front().address;
-                    if (iter.first == this->hostname_)
-                    {
-                        // skip localhost
-                        continue;
-                    }
-                    ConnectInfo new_info;
-                    new_info.destinationAddress = iter.second.front().address;
-                    new_info.protocoltype = ProtocolType::RandomProtocol;
-                    new_info.status = ConnectionStatus::Uninitialized;
-                    new_info.tendency = ProtocolTendency::Random;
-                    connection_callback_info[iter.first] = new_info;
                 }
-                // tell the connection manager the discovery result
-                connection_callback(connection_callback_info);
+                // tell the resource manager about the discovery result
                 resource_callback(resource_callback_info);
             }
         });
