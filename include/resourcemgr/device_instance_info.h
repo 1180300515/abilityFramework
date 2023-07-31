@@ -53,6 +53,7 @@ public:
     virtual std::string Marshal() = 0;
     virtual std::string GetHardwareIdentifier() = 0;
     virtual bool UpdateHardwareInfo(const Json::Value &info) = 0;
+    virtual Json::Value ToJson() = 0;
 
     virtual bool FromJson(const Json::Value &jnode);
     virtual bool UnMarshal(const std::string &data);

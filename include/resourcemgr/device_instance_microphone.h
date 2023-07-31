@@ -39,6 +39,7 @@ public:
     std::string GetHardwareIdentifier();
     bool UpdateHardwareInfo(const Json::Value &info);
     std::string Marshal();
+    Json::Value ToJson();
     bool FromJson(const Json::Value &jnode);
     bool UnMarshal(const std::string &data);
     bool updateInstance(const Json::Value &jnode);

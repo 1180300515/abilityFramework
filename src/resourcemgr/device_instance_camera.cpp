@@ -14,11 +14,17 @@ std::string CameraInstance::GetHardwareIdentifier()
 
 bool CameraInstance::UpdateHardwareInfo(const Json::Value &info)
 {
+    //LOG(INFO) << "camera hardware info \n" << info.toStyledString();
     bool changeornot = false;
     CameraHardware hardware;
     hardware.fromJson(info);
-    if (hardware.card == spec.properties.card)
+    if (hardware.card == spec.hardwareidentifier)
     {
+        if (spec.properties.card != hardware.card)
+        {
+            spec.properties.card = hardware.card;
+            changeornot = true;
+        }
         if (spec.properties.busInfo != hardware.bus_info)
         {
             spec.properties.busInfo = hardware.bus_info;
@@ -38,7 +44,7 @@ bool CameraInstance::UpdateHardwareInfo(const Json::Value &info)
         {
             for (const auto &iter : hardware.formats)
             {
-                auto count = std::count(spec.properties.supportFormat.begin(),spec.properties.supportFormat.end(),iter);
+                auto count = std::count(spec.properties.supportFormat.begin(), spec.properties.supportFormat.end(), iter);
                 if (count == 0)
                 {
                     spec.properties.supportFormat = hardware.formats;
@@ -50,12 +56,19 @@ bool CameraInstance::UpdateHardwareInfo(const Json::Value &info)
     }
     else
     {
-        LOG(ERROR) << "this hardware info don't match this instance";
+        LOG(ERROR) << "this camera hardware card: \"" << hardware.card << "\" don't match this hardwareidentifier: \"" << spec.hardwareidentifier << "\"";
     }
     return changeornot;
 }
 
 std::string CameraInstance::Marshal()
+{
+    auto root = ToJson();
+    Json::FastWriter writer;
+    return writer.write(root);
+}
+
+Json::Value CameraInstance::ToJson()
 {
     Json::Value jnode;
     jnode["apiVersion"] = apiVersion;
@@ -142,8 +155,7 @@ std::string CameraInstance::Marshal()
         cap["status"] = devicelist[i].status;
         jnode["devicelist"].append(cap);
     }
-    Json::FastWriter writer;
-    return writer.write(jnode);
+    return jnode;
 }
 
 bool CameraInstance::FromJson(const Json::Value &jnode)
@@ -233,7 +245,6 @@ bool CameraInstance::UnMarshal(const std::string &data)
     FromJson(jnode);
     return true;
 }
-
 
 bool CameraInstance::updateInstance(const Json::Value &jnode)
 {

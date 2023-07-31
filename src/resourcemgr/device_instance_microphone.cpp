@@ -15,8 +15,13 @@ bool MicrophoneInstance::UpdateHardwareInfo(const Json::Value &info)
     bool changeornot = false;
     AudioHardware hardware;
     hardware.fromJson(info);
-    if (hardware.name == spec.properties.hardwareName)
+    if (hardware.name == spec.hardwareidentifier)
     {
+        if (spec.properties.hardwareName != hardware.name)
+        {
+            spec.properties.hardwareName = hardware.name;
+            changeornot = true;
+        }
         if (std::to_string(hardware.sampleRate) != spec.properties.sampleRates)
         {
             spec.properties.sampleRates = std::to_string(hardware.sampleRate);
@@ -52,6 +57,13 @@ bool MicrophoneInstance::UpdateHardwareInfo(const Json::Value &info)
 
 std::string MicrophoneInstance::Marshal()
 {
+    auto jnode = ToJson();
+    Json::FastWriter writer;
+    return writer.write(jnode);
+}
+
+Json::Value MicrophoneInstance::ToJson()
+{
     Json::Value jnode;
     jnode["apiVersion"] = apiVersion;
     jnode["kind"] = kind;
@@ -60,12 +72,15 @@ std::string MicrophoneInstance::Marshal()
     jnode["status"]["occupancy"] = status.occupancy;
     // spec part
     jnode["spec"]["kind"] = spec.kind;
-    jnode["spec"]["hardwareidentifier"] = spec.hardwareidentifier;
     jnode["spec"]["version"] = spec.version;
     jnode["spec"]["hostname"] = spec.hostname;
+    jnode["spec"]["hardwareidentifier"] = spec.hardwareidentifier;
     jnode["spec"]["properties"]["sampleRates"] = spec.properties.sampleRates;
     jnode["spec"]["properties"]["channelNumber"] = spec.properties.channelNumber;
     jnode["spec"]["properties"]["bitWidth"] = spec.properties.bitWidth;
+    jnode["spec"]["properties"]["hardwareName"] = spec.properties.hardwareName;
+    jnode["spec"]["properties"]["volume"] = spec.properties.volume;
+    jnode["spec"]["properties"]["mute"] = spec.properties.mute;
     jnode["spec"]["properties"]["description"] = spec.properties.description;
     jnode["spec"]["properties"]["interface"] = spec.properties.interface;
 
@@ -140,8 +155,7 @@ std::string MicrophoneInstance::Marshal()
         cap["status"] = devicelist[i].status;
         jnode["devicelist"].append(cap);
     }
-    Json::FastWriter writer;
-    return writer.write(jnode);
+    return jnode;
 }
 
 bool MicrophoneInstance::FromJson(const Json::Value &jnode)
@@ -205,7 +219,6 @@ bool MicrophoneInstance::UnMarshal(const std::string &data)
     FromJson(jnode);
     return true;
 }
-
 
 bool MicrophoneInstance::updateInstance(const Json::Value &jnode)
 {

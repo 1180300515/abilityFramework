@@ -19,7 +19,7 @@ public:
     AudioHardware() = default;
     AudioHardware(std::string name, std::string description, uint32_t volume, bool mute, uint32_t sampleRate, uint8_t channels)
         : name(name), description(description), volume(volume), mute(mute), sampleRate(sampleRate), channels(channels) {}
-    static AudioHardware fromJson(const Json::Value &root);
+    void fromJson(const Json::Value &root);
     Json::Value toJson() const;
     std::string ToKeyValue(const std::string &hostname) const;
     void print();

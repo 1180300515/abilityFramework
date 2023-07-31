@@ -4,7 +4,14 @@
 
 std::string SensorInstance::Marshal()
 {
-    Json::Value jnode;
+    auto jnode = ToJson();
+    Json::FastWriter writer;
+    return writer.write(jnode);
+}
+
+Json::Value SensorInstance::ToJson()
+{
+        Json::Value jnode;
     jnode["apiVersion"] = apiVersion;
     jnode["kind"] = kind;
     jnode["metadata"]["name"] = metadata.name;
@@ -90,8 +97,7 @@ std::string SensorInstance::Marshal()
         cap["status"] = devicelist[i].status;
         jnode["devicelist"].append(cap);
     }
-    Json::FastWriter writer;
-    return writer.write(jnode);
+    return jnode;
 }
 
 std::string SensorInstance::GetHardwareIdentifier()

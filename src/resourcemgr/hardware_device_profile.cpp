@@ -34,11 +34,27 @@ void DeviceProfile::print()
 void DeviceProfile::FromJson2Profile(const Json::Value &root)
 {
     for (const auto &cam : root["cameraDevices"])
-        cameraDevices.push_back(CameraHardware::fromJson(cam));
+    {
+        CameraHardware hw;
+        hw.fromJson(cam);
+        cameraDevices.emplace_back(hw);
+    }
     for (const auto &disp : root["displayDevices"])
-        displayDevices.push_back(DisplayHardware::fromJson(disp));
+    {
+        DisplayHardware hw;
+        hw.fromJson(disp);
+        displayDevices.emplace_back(hw);
+    }
     for (const auto &mic : root["micDevices"])
-        micDevices.push_back(AudioHardware::fromJson(mic));
+    {
+        AudioHardware hw;
+        hw.fromJson(mic);
+        micDevices.emplace_back(hw);
+    }
     for (const auto &speaker : root["speakerDevices"])
-        speakerDevices.push_back(AudioHardware::fromJson(speaker));
+    {
+        AudioHardware hw;
+        hw.fromJson(speaker);
+        speakerDevices.emplace_back(hw);
+    }
 }

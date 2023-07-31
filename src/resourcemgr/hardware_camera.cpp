@@ -26,21 +26,22 @@ Json::Value CameraHardware::toJson() const
     root["card"] = card;
     root["bus_info"] = bus_info;
     for (const auto &format : formats)
+    {
         root["formats"].append(format);
+    }
     return root;
 }
 
-CameraHardware CameraHardware::fromJson(const Json::Value &root)
+void CameraHardware::fromJson(const Json::Value &root)
 {
-
-    CameraHardware cam;
-    cam.device_path = root["device_path"].asString();
-    cam.driver = root["driver"].asString();
-    cam.card = root["card"].asString();
-    cam.bus_info = root["bus_info"].asString();
+    device_path = root["device_path"].asString();
+    driver = root["driver"].asString();
+    card = root["card"].asString();
+    bus_info = root["bus_info"].asString();
     for (const auto &format : root["formats"])
-        cam.formats.push_back(format.asString());
-    return cam;
+    {
+        formats.push_back(format.asString());
+    }
 }
 
 std::string CameraHardware::ToKeyValue(std::string hostname) const
@@ -52,7 +53,8 @@ std::string CameraHardware::ToKeyValue(std::string hostname) const
     ss << "card:" << card << ",";
     ss << "bus_info:" << bus_info << ",";
     ss << "formats:[";
-    for (const auto& format : formats) {
+    for (const auto &format : formats)
+    {
         ss << format << " ";
     }
     ss << "]";

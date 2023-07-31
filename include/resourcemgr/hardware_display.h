@@ -15,7 +15,7 @@ public:
     int mmHeight;
 
     Json::Value toJson() const;
-    static DisplayHardware fromJson(const Json::Value &root);
+    void fromJson(const Json::Value &root);
     std::string ToKeyValue(std::string hostname) const;
     void print();
 };

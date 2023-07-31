@@ -28,16 +28,14 @@ std::string AudioHardware::ToKeyValue(const std::string &hostname) const
     return ss.str();
 }
 
-AudioHardware AudioHardware::fromJson(const Json::Value &root)
+void AudioHardware::fromJson(const Json::Value &root)
 {
-
-    return AudioHardware(
-        root["name"].asString(),
-        root["description"].asString(),
-        root["volume"].asUInt(),
-        root["mute"].asBool(),
-        root["sampleRate"].asUInt(),
-        root["channels"].asUInt());
+    name = root["name"].asString();
+    volume = root["volume"].asUInt();
+    description = root["description"].asString();
+    sampleRate = root["sampleRate"].asUInt();
+    mute = root["mute"].asBool();
+    channels = root["channels"].asUInt();
 }
 
 void AudioHardware::print()

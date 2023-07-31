@@ -31,6 +31,7 @@ class SensorInstance : public DeviceInstanceInfo
 public:
     SensorSpec spec;
     std::string Marshal();
+    Json::Value ToJson();
     std::string GetHardwareIdentifier();
     bool UpdateHardwareInfo(const Json::Value &info);
     bool FromJson(const Json::Value &jnode);

@@ -15,8 +15,13 @@ bool LoudspeakerInstance::UpdateHardwareInfo(const Json::Value &info)
     bool changeornot = false;
     AudioHardware hardware;
     hardware.fromJson(info);
-    if (hardware.name == spec.properties.hardwareName)
+    if (hardware.name == spec.hardwareidentifier)
     {
+        if (spec.properties.hardwareName != hardware.name)
+        {
+            spec.properties.hardwareName = hardware.name;
+            changeornot = true;
+        }
         if (std::to_string(hardware.sampleRate) != spec.properties.sampleRates)
         {
             spec.properties.sampleRates = std::to_string(hardware.sampleRate);
@@ -52,83 +57,7 @@ bool LoudspeakerInstance::UpdateHardwareInfo(const Json::Value &info)
 
 std::string LoudspeakerInstance::Marshal()
 {
-    Json::Value jnode;
-    jnode["apiVersion"] = apiVersion;
-    jnode["kind"] = kind;
-    jnode["metadata"]["name"] = metadata.name;
-    jnode["metadata"]["namespace"] = metadata.namespace_name;
-    jnode["status"]["occupancy"] = status.occupancy;
-    // spec part
-    jnode["spec"]["kind"] = spec.kind;
-    jnode["spec"]["hardwareidentifier"] = spec.hardwareidentifier;
-    jnode["spec"]["version"] = spec.version;
-    jnode["spec"]["hostname"] = spec.hostname;
-    jnode["spec"]["properties"]["sampleRates"] = spec.properties.sampleRates;
-    jnode["spec"]["properties"]["channelNumber"] = spec.properties.channelNumber;
-    jnode["spec"]["properties"]["bitWidth"] = spec.properties.bitWidth;
-    jnode["spec"]["properties"]["hardwareName"] = spec.properties.hardwareName;
-    jnode["spec"]["properties"]["volume"] = spec.properties.volume;
-    jnode["spec"]["properties"]["mute"] = spec.properties.mute;
-    jnode["spec"]["properties"]["description"] = spec.properties.description;
-    jnode["spec"]["properties"]["interface"] = spec.properties.interface;
-    for (int i = 0; i < spec.capability1.size(); i++)
-    {
-        Json::Value cap;
-        cap["name"] = spec.capability1[i].name;
-        for (int j = 0; j < spec.capability1[i].api.size(); j++)
-        {
-            cap["api"].append(spec.capability1[i].api[j]);
-        }
-        jnode["spec"]["capability1"].append(cap);
-    }
-    for (int i = 0; i < spec.capability2.size(); i++)
-    {
-        Json::Value cap;
-        cap["name"] = spec.capability2[i].name;
-        for (int j = 0; j < spec.capability2[i].api.size(); j++)
-        {
-            cap["api"].append(spec.capability2[i].api[j]);
-        }
-        jnode["spec"]["capability2"].append(cap);
-    }
-    for (auto &iter : spec.customprops)
-    {
-        jnode["spec"]["customprops"][iter.first] = iter.second;
-    }
-    // api part
-    for (int i = 0; i < api.function.size(); i++)
-    {
-        Json::Value cap;
-        cap["name"] = api.function[i].name;
-        for (int j = 0; j < api.function[i].param.size(); j++)
-        {
-            Json::Value param;
-            param["name"] = api.function[i].param[j].name;
-            param["type"] = api.function[i].param[j].type;
-            param["index"] = api.function[i].param[j].index;
-            cap["param"].append(param);
-        }
-        for (int k = 0; k < api.function[i].returnparam.size(); k++)
-        {
-            Json::Value returnparam;
-            returnparam["name"] = api.function[i].returnparam[k].name;
-            returnparam["type"] = api.function[i].returnparam[k].type;
-            returnparam["index"] = api.function[i].returnparam[k].index;
-            cap["returnparam"].append(returnparam);
-        }
-        jnode["api"]["function"].append(cap);
-    }
-    // devicelist part
-    for (int i = 0; i < devicelist.size(); i++)
-    {
-        Json::Value cap;
-        cap["devicename"] = devicelist[i].devicename;
-        cap["deviceid"] = devicelist[i].deviceid;
-        cap["deviceip"] = devicelist[i].deviceip;
-        cap["deviceport"] = devicelist[i].deviceport;
-        cap["status"] = devicelist[i].status;
-        jnode["devicelist"].append(cap);
-    }
+    auto jnode = ToJson();
     Json::FastWriter writer;
     return writer.write(jnode);
 }
@@ -198,6 +127,88 @@ bool LoudspeakerInstance::FromJson(const Json::Value &jnode)
         }
     }
     return true;
+}
+
+Json::Value LoudspeakerInstance::ToJson()
+{
+    Json::Value jnode;
+    jnode["apiVersion"] = apiVersion;
+    jnode["kind"] = kind;
+    jnode["metadata"]["name"] = metadata.name;
+    jnode["metadata"]["namespace"] = metadata.namespace_name;
+    jnode["status"]["occupancy"] = status.occupancy;
+    // spec part
+    jnode["spec"]["kind"] = spec.kind;
+    jnode["spec"]["version"] = spec.version;
+    jnode["spec"]["hostname"] = spec.hostname;
+    jnode["spec"]["hardwareidentifier"] = spec.hardwareidentifier;
+    jnode["spec"]["properties"]["sampleRates"] = spec.properties.sampleRates;
+    jnode["spec"]["properties"]["channelNumber"] = spec.properties.channelNumber;
+    jnode["spec"]["properties"]["bitWidth"] = spec.properties.bitWidth;
+    jnode["spec"]["properties"]["hardwareName"] = spec.properties.hardwareName;
+    jnode["spec"]["properties"]["volume"] = spec.properties.volume;
+    jnode["spec"]["properties"]["mute"] = spec.properties.mute;
+    jnode["spec"]["properties"]["description"] = spec.properties.description;
+    jnode["spec"]["properties"]["interface"] = spec.properties.interface;
+    for (int i = 0; i < spec.capability1.size(); i++)
+    {
+        Json::Value cap;
+        cap["name"] = spec.capability1[i].name;
+        for (int j = 0; j < spec.capability1[i].api.size(); j++)
+        {
+            cap["api"].append(spec.capability1[i].api[j]);
+        }
+        jnode["spec"]["capability1"].append(cap);
+    }
+    for (int i = 0; i < spec.capability2.size(); i++)
+    {
+        Json::Value cap;
+        cap["name"] = spec.capability2[i].name;
+        for (int j = 0; j < spec.capability2[i].api.size(); j++)
+        {
+            cap["api"].append(spec.capability2[i].api[j]);
+        }
+        jnode["spec"]["capability2"].append(cap);
+    }
+    for (auto &iter : spec.customprops)
+    {
+        jnode["spec"]["customprops"][iter.first] = iter.second;
+    }
+    // api part
+    for (int i = 0; i < api.function.size(); i++)
+    {
+        Json::Value cap;
+        cap["name"] = api.function[i].name;
+        for (int j = 0; j < api.function[i].param.size(); j++)
+        {
+            Json::Value param;
+            param["name"] = api.function[i].param[j].name;
+            param["type"] = api.function[i].param[j].type;
+            param["index"] = api.function[i].param[j].index;
+            cap["param"].append(param);
+        }
+        for (int k = 0; k < api.function[i].returnparam.size(); k++)
+        {
+            Json::Value returnparam;
+            returnparam["name"] = api.function[i].returnparam[k].name;
+            returnparam["type"] = api.function[i].returnparam[k].type;
+            returnparam["index"] = api.function[i].returnparam[k].index;
+            cap["returnparam"].append(returnparam);
+        }
+        jnode["api"]["function"].append(cap);
+    }
+    // devicelist part
+    for (int i = 0; i < devicelist.size(); i++)
+    {
+        Json::Value cap;
+        cap["devicename"] = devicelist[i].devicename;
+        cap["deviceid"] = devicelist[i].deviceid;
+        cap["deviceip"] = devicelist[i].deviceip;
+        cap["deviceport"] = devicelist[i].deviceport;
+        cap["status"] = devicelist[i].status;
+        jnode["devicelist"].append(cap);
+    }
+    return jnode;
 }
 
 bool LoudspeakerInstance::UnMarshal(const std::string &data)

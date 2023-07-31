@@ -41,6 +41,7 @@ public:
     bool UpdateHardwareInfo(const Json::Value &info);
     std::string Marshal();
     bool FromJson(const Json::Value &jnode);
+    Json::Value ToJson();
     bool UnMarshal(const std::string &data);
     bool updateInstance(const Json::Value &jnode);
     std::string getInstanceVersion();

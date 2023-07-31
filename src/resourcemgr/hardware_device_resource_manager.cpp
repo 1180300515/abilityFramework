@@ -5,9 +5,11 @@
 #include "glog/logging.h"
 
 #include "global_var.h"
+#include "resource_manager.h"
 
-void HardwareResourceManager::Init(std::string hostname)
+void HardwareResourceManager::Init(std::shared_ptr<ResourceManager> manager_, std::string hostname)
 {
+    this->resource_manager = manager_;
     this->hostname_ = hostname;
 }
 
@@ -16,12 +18,25 @@ void HardwareResourceManager::EndAddressResult(std::map<std::string, std::string
     compareOldAndNew(result);
     if (this->hardware_resources.size() == 0)
     {
-        //the manager first start
+        // the manager first start
         LOG(INFO) << "Insert all host device profile";
         for (const auto &iter : result)
         {
-            auto dp = getDeviceProfileFromHost(iter.second);
-            hardware_resources[iter.first] = dp;
+            if (iter.first == this->hostname_)
+            {
+                std::string data = this->resource_manager->GetHardwareDeviceInfo();
+                DeviceProfile dp;
+                Json::Value jnode;
+                Json::Reader reader;
+                reader.parse(data, jnode);
+                dp.FromJson2Profile(jnode);
+                hardware_resources[iter.first] = dp;
+            }
+            else
+            {
+                auto dp = getDeviceProfileFromHost(iter.second);
+                hardware_resources[iter.first] = dp;
+            }
         }
         this->last_update = std::chrono::steady_clock::now();
         change = true;
@@ -29,18 +44,31 @@ void HardwareResourceManager::EndAddressResult(std::map<std::string, std::string
     else if (std::chrono::steady_clock::now() - this->last_update > std::chrono::minutes(5))
     {
         LOG(INFO) << "Update all host device profile";
-        //beyond the time limit
+        // beyond the time limit
         for (const auto &iter : result)
         {
-            auto dp = getDeviceProfileFromHost(iter.second);
-            hardware_resources[iter.first] = dp;
+            if (iter.first == this->hostname_)
+            {
+                std::string data = this->resource_manager->GetHardwareDeviceInfo();
+                DeviceProfile dp;
+                Json::Value jnode;
+                Json::Reader reader;
+                reader.parse(data, jnode);
+                dp.FromJson2Profile(jnode);
+                hardware_resources[iter.first] = dp;
+            }
+            else
+            {
+                auto dp = getDeviceProfileFromHost(iter.second);
+                hardware_resources[iter.first] = dp;
+            }
         }
         this->last_update = std::chrono::steady_clock::now();
         change = true;
     }
     else
     {
-        //only get the new host deviceprofile
+        // only get the new host deviceprofile
         for (const auto &iter : result)
         {
             if (this->hardware_resources.count(iter.first) == 0)

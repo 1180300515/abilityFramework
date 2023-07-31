@@ -15,17 +15,15 @@ Json::Value DisplayHardware::toJson() const
     return root;
 }
 
-DisplayHardware DisplayHardware::fromJson(const Json::Value &root)
+void DisplayHardware::fromJson(const Json::Value &root)
 {
-    DisplayHardware disp;
-    disp.screen = root["screen"].asInt();
-    disp.x = root["x"].asInt();
-    disp.y = root["y"].asInt();
-    disp.width = root["width"].asInt();
-    disp.height = root["height"].asInt();
-    disp.mmWidth = root["mmWidth"].asInt();
-    disp.mmHeight = root["mmHeight"].asInt();
-    return disp;
+    screen = root["screen"].asInt();
+    x = root["x"].asInt();
+    y = root["y"].asInt();
+    width = root["width"].asInt();
+    height = root["height"].asInt();
+    mmWidth = root["mmWidth"].asInt();
+    mmHeight = root["mmHeight"].asInt();
 }
 
 std::string DisplayHardware::ToKeyValue(std::string hostname) const
