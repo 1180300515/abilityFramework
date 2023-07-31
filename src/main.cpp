@@ -7,7 +7,6 @@
 
 #include "resource_manager.h"
 #include "lifecycle_manager.h"
-#include "connection_manager.h"
 #include "http_server.h"
 #include "discovery_manager.h"
 #include "ability_relation_manager.h"
@@ -33,33 +32,32 @@ int main(int argc, char **argv)
         std::cout << "file can't be load" << std::endl;
         exit(0);
     }
-    bool loadcrd = config["loadCrdFile"].as<bool>();
-    bool loaddevice = config["loadDeviceFile"].as<bool>();
-    bool loadability = config["loadAbilityFile"].as<bool>();
-    bool loadfromdb = config["loadFromDB"].as<bool>();
-    bool logintofile = config["logIntoFile"].as<bool>();
+    bool loadcrd = config["LoadCrdFile"].as<bool>();
+    bool loaddevice = config["LoadDeviceFile"].as<bool>();
+    bool loadability = config["LoadAbilityFile"].as<bool>();
+    bool cleandb = config["CleanDB"].as<bool>();
+    bool logintofile = config["LogIntoFile"].as<bool>();
 
     if (logintofile)
     {
         FLAGS_log_dir = LOG_FILE_PATH;
     }
     FLAGS_alsologtostderr = 1;
+    FLAGS_colorlogtostderr = 1;
     google::InitGoogleLogging("abiltyframework-cpp");
 
     auto resource_manager = std::make_shared<ResourceManager>();
     auto lifecycle_manager = std::make_shared<LifeCycleManager>();
-    auto connection_manager = std::make_shared<ConnectionManager>();
     auto http_server = std::make_shared<HttpServer>();
     auto discovery_manager = std::make_shared<DiscoveryManager>();
     auto ability_relation_manager = std::make_shared<AbilityRelationManager>();
 
-    resource_manager->Init(connection_manager, loadfromdb);
+    resource_manager->Init(cleandb);
     lifecycle_manager->Init(std::bind(&ResourceManager::AbilityExistJudge, resource_manager, std::placeholders::_1));
-    discovery_manager->Init(std::bind(&ConnectionManager::OnEndAddressRecordChange, connection_manager, std::placeholders::_1),
-                            std::bind(&ResourceManager::EndAddressDiscoveryResult, resource_manager, std::placeholders::_1));
+    discovery_manager->Init(std::bind(&ResourceManager::EndAddressDiscoveryResult, resource_manager, std::placeholders::_1));
     ability_relation_manager->Init(std::bind(&ResourceManager::GetAbilityInfoExtractList, resource_manager),
                                    std::bind(&ResourceManager::GetHardWareResourceList, resource_manager, std::placeholders::_1));
-    http_server->Init(resource_manager, lifecycle_manager, ability_relation_manager, connection_manager);
+    http_server->Init(resource_manager, lifecycle_manager, ability_relation_manager);
 
     std::vector<std::string> crd_file_names;
     std::vector<std::string> instance_file_names;
@@ -77,7 +75,7 @@ int main(int argc, char **argv)
                     continue;
                 }
                 crd_file_names.emplace_back(ent->d_name);
-                LOG(INFO) << ent->d_name;
+                //LOG(INFO) << ent->d_name;
             }
             closedir(dir);
             // add data into crd table
@@ -151,7 +149,7 @@ int main(int argc, char **argv)
         }
     }
 
-    resource_manager->Run(false, false);
+    resource_manager->Run();
     discovery_manager->Run();
     lifecycle_manager->Run();
     http_server->Run();
