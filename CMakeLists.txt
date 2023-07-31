@@ -142,3 +142,9 @@ target_link_libraries(testGetDevice stdc++)
 #生成testPostAbilityRequest可执行文件
 add_executable(testPostAbilityRequest test/test_post_abilityrequest.cpp)
 target_link_libraries(testPostAbilityRequest stdc++)
+
+add_executable(testResourceMgr test/resource_mgr_test/test_resourcemgr.cpp
+    ${databasemgr}
+    ${resourcemgr}
+    ${utils})
+target_link_libraries(testResourceMgr stdc++ sqlite3 JsonCpp::JsonCpp glog yaml-cpp X11 pulse Xrandr v4l2 pthread dl crypto ssl z protobuf::libprotobuf gRPC::grpc++)
