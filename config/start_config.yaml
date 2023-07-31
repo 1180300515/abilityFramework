@@ -1,5 +1,5 @@
-loadCrdFile: true #true will load from file
-loadDeviceFile: true
-loadAbilityFile: true
-loadFromDB: false #true will load from db(if hostname is right),false will clean db
-logIntoFile: false
+LoadCrdFile: true #true will load from file
+LoadDeviceFile: true
+LoadAbilityFile: true
+CleanDB: true #true will load from db(if hostname is right),false will clean db
+LogIntoFile: true
