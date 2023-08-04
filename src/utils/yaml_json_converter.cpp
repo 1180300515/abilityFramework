@@ -164,7 +164,7 @@ bool SchemaValidation(const std::string &schemajsonstring, const std::string &in
     }
     else
     {
-        //LOG(INFO) << "validate success";
+        // LOG(INFO) << "validate success";
         return true;
     }
 }
@@ -206,7 +206,7 @@ std::string GetInstanceKind(const Json::Value &jnode)
     return jnode["kind"].asString();
 }
 
-std::string GetAbilityValidatePart(const Json::Value &jnode)
+std::string GetValidatePart(const Json::Value &jnode)
 {
     Json::Value tag = jnode;
     tag.removeMember("apiVersion");
@@ -214,16 +214,6 @@ std::string GetAbilityValidatePart(const Json::Value &jnode)
     tag.removeMember("metadata");
     Json::FastWriter writer;
     return writer.write(jnode);
-}
-
-std::string GetInstanceValidatePart(const Json::Value &jnode)
-{
-    Json::Value tag = jnode;
-    tag.removeMember("apiVersion");
-    tag.removeMember("kind");
-    tag.removeMember("metadata");
-    Json::FastWriter writer;
-    return writer.write(tag);
 }
 
 std::string StripSlashPrefix(const std::string &str)
