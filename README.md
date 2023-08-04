@@ -5,7 +5,7 @@
 1. [yaml-cpp](https://github.com/jbeder/yaml-cpp) 提供yaml处理能力
 2. [jsoncpp](https://github.com/open-source-parsers/jsoncpp) 提供json处理能力
 3. [rapidjson](https://github.com/Tencent/rapidjson) 用来进行schema校验
-4. [mongoose](https://github.com/cesanta/mongoose) 提供http server  
+4. [httplib](https://github.com/yhirose/cpp-httplib) 提供http server  
 5. [google-glog](https://github.com/google/glog) 提供日志支持
 ```
 sudo apt install libgoogle-glog-dev
@@ -17,9 +17,10 @@ sudo apt install libxrandr-dev
 sudo apt install libv4l-dev
 sudo apt install libx11-dev
 sudo apt install libpulse-dev
+sudo apt install libalsa-ocaml-dev 
 ```
 ```
-apt install libunwind-dev sqlite3 libsqlite3-dev libyaml-cpp-dev  libgoogle-glog-dev libjsoncpp-dev rapidjson-dev libyaml-cpp-dev libxrandr-dev libv4l-dev libx11-dev libpulse-dev
+apt install libunwind-dev sqlite3 libsqlite3-dev libyaml-cpp-dev  libgoogle-glog-dev libjsoncpp-dev rapidjson-dev libyaml-cpp-dev libxrandr-dev libv4l-dev libx11-dev libpulse-dev libalsa-ocaml-dev 
 ```
 
 ## 目录结构
