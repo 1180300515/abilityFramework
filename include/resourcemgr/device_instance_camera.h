@@ -10,15 +10,15 @@
 // a cameradevice struct
 struct CameraProperties
 {
+    //get from the yaml
     std::string vendor;
+    std::string resolution;
     std::string location;
     int wideAngle;
     std::string focusMethod;
     bool telephoto;
-    std::string resolution;
     std::string interface;
-    std::string description;
-    // following information can get from the harware info
+    //get from the hardware
     std::string devicePath;
     std::string driverName;
     std::string card; 
@@ -34,7 +34,7 @@ struct CameraSpec
     std::vector<Acapability> capability1;
     std::vector<Acapability> capability2;
     CameraProperties properties;
-    std::map<std::string, std::string> customprops;
+    //std::map<std::string, std::string> customprops;
 };
 
 class CameraInstance : public DeviceInstanceInfo
@@ -42,15 +42,16 @@ class CameraInstance : public DeviceInstanceInfo
 public:
     CameraSpec spec;
 
-    std::string GetHardwareIdentifier();
+    std::string GetHardwareIdentifier() const;
     bool UpdateHardwareInfo(const Json::Value &info);
-    std::string Marshal();
-    Json::Value ToJson();
+    void EraseHardwareInfo();
+    std::string Marshal() const;
+    Json::Value ToJson() const;
 
     bool FromJson(const Json::Value &jnode);
     bool UnMarshal(const std::string &data);
     bool updateInstance(const Json::Value &jnode);
-    std::string getInstanceVersion();
+    std::string getInstanceVersion() const;
 };
 
 #endif // _DEVICE_INSTANCE_CAMERA_H

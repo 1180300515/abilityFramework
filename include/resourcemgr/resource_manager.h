@@ -89,7 +89,7 @@ public:
      * @brief start the resource manager module
      */
     void Run();
-    void Wait();
+    //void Wait();
     /**
      * @brief get the local hardware device json string
      * @param format format string or not
@@ -125,13 +125,7 @@ public:
      * @return the info
      */
     std::vector<std::string> GetHardWareResourceList(std::string type);
-    /**
-     * @brief insert the hardware info into the matching instance
-     */
-    void InsertHardwareInfo(const std::map<std::string, CameraHardware> &camera,
-                            const std::map<std::string, AudioHardware> &mic,
-                            const std::map<std::string, AudioHardware> &speaker,
-                            std::map<std::string, std::string> &record);
+    
 
 private:
     /**
@@ -139,9 +133,16 @@ private:
      */
     void getHostName();
 
-    bool addDeviceInstance(const Json::Value &instance_json);
+    void handleNamespace(Json::Value &instance_json);
+    bool handleHostname(Json::Value &instance_json);
 
     bool deleteDeviceInstance(const std::string &key);
+
+    void resourceMatching();
+
+    void autoGenerateCR();
+
+    void periodicScanThread();
 
     std::shared_ptr<HardwareScan> hardware_;
     std::shared_ptr<HardwareResourceManager> hardware_manager_;
@@ -153,7 +154,7 @@ private:
 
     std::string hostname_;
 
-    friend class HardwareScan;
+    std::thread periodic_scan_thread;
 };
 
 #endif // _RESOURCE_MANAGER_H

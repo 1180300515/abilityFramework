@@ -2,16 +2,16 @@
 
 #include "json/json.h"
 
-std::string SensorInstance::Marshal()
+std::string SensorInstance::Marshal() const
 {
     auto jnode = ToJson();
     Json::FastWriter writer;
     return writer.write(jnode);
 }
 
-Json::Value SensorInstance::ToJson()
+Json::Value SensorInstance::ToJson() const
 {
-        Json::Value jnode;
+    Json::Value jnode;
     jnode["apiVersion"] = apiVersion;
     jnode["kind"] = kind;
     jnode["metadata"]["name"] = metadata.name;
@@ -25,19 +25,6 @@ Json::Value SensorInstance::ToJson()
     jnode["spec"]["properties"]["vendor"] = spec.properties.vendor;
     jnode["spec"]["properties"]["location"] = spec.properties.location;
     jnode["spec"]["properties"]["interface"] = spec.properties.interface;
-
-    if (spec.capability1.size() != 0)
-    {
-        spec.capability1.clear();
-    }
-    if (spec.capability2.size() != 0)
-    {
-        spec.capability2.clear();
-    }
-    if (spec.customprops.size() != 0)
-    {
-        spec.customprops.clear();
-    }
 
     for (int i = 0; i < spec.capability1.size(); i++)
     {
@@ -59,10 +46,10 @@ Json::Value SensorInstance::ToJson()
         }
         jnode["spec"]["capability2"].append(cap);
     }
-    for (auto &iter : spec.customprops)
-    {
-        jnode["spec"]["customprops"][iter.first] = iter.second;
-    }
+    // for (auto &iter : spec.customprops)
+    // {
+    //     jnode["spec"]["customprops"][iter.first] = iter.second;
+    // }
     // api part
     for (int i = 0; i < api.function.size(); i++)
     {
@@ -100,7 +87,7 @@ Json::Value SensorInstance::ToJson()
     return jnode;
 }
 
-std::string SensorInstance::GetHardwareIdentifier()
+std::string SensorInstance::GetHardwareIdentifier() const
 {
     // no need yet
     return std::string();
@@ -112,9 +99,14 @@ bool SensorInstance::UpdateHardwareInfo(const Json::Value &info)
     return false;
 }
 
+void SensorInstance::EraseHardwareInfo()
+{
+    //nothing
+}
+
 bool SensorInstance::FromJson(const Json::Value &jnode)
 {
-     DeviceInstanceInfo::FromJson(jnode);
+    DeviceInstanceInfo::FromJson(jnode);
     spec.kind = jnode["spec"]["kind"].asString();
     spec.hardwareidentifier = jnode["spec"]["hardwareidentifier"].asString();
     spec.version = jnode["spec"]["version"].asString();
@@ -148,15 +140,15 @@ bool SensorInstance::FromJson(const Json::Value &jnode)
     spec.properties.vendor = jnode["spec"]["properties"]["vendor"].asString();
     spec.properties.location = jnode["spec"]["properties"]["location"].asString();
     spec.properties.interface = jnode["spec"]["properties"]["interface"].asString();
-    if (jnode["spec"].isMember("customprops"))
-    {
-        Json::Value::Members member;
-        member = jnode["spec"]["customprops"].getMemberNames();
-        for (Json::Value::Members::iterator it = member.begin(); it != member.end(); it++)
-        {
-            spec.customprops[*it] = jnode["spec"]["customprops"][*it].asString();
-        }
-    }
+    // if (jnode["spec"].isMember("customprops"))
+    // {
+    //     Json::Value::Members member;
+    //     member = jnode["spec"]["customprops"].getMemberNames();
+    //     for (Json::Value::Members::iterator it = member.begin(); it != member.end(); it++)
+    //     {
+    //         spec.customprops[*it] = jnode["spec"]["customprops"][*it].asString();
+    //     }
+    // }
     return true;
 }
 
@@ -169,13 +161,12 @@ bool SensorInstance::UnMarshal(const std::string &data)
     return true;
 }
 
-
 bool SensorInstance::updateInstance(const Json::Value &jnode)
 {
     return FromJson(jnode);
 }
 
-std::string SensorInstance::getInstanceVersion()
+std::string SensorInstance::getInstanceVersion() const
 {
     return spec.version;
 }

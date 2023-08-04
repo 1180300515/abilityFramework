@@ -7,18 +7,18 @@
 
 #include "hardware_camera.h"
 
-std::string CameraInstance::GetHardwareIdentifier()
+std::string CameraInstance::GetHardwareIdentifier() const
 {
     return spec.hardwareidentifier;
 }
 
 bool CameraInstance::UpdateHardwareInfo(const Json::Value &info)
 {
-    //LOG(INFO) << "camera hardware info \n" << info.toStyledString();
+    // LOG(INFO) << "camera hardware info \n" << info.toStyledString();
     bool changeornot = false;
     CameraHardware hardware;
     hardware.fromJson(info);
-    if (hardware.card == spec.hardwareidentifier)
+    if (hardware.bus_info == spec.hardwareidentifier)
     {
         if (spec.properties.card != hardware.card)
         {
@@ -56,19 +56,28 @@ bool CameraInstance::UpdateHardwareInfo(const Json::Value &info)
     }
     else
     {
-        LOG(ERROR) << "this camera hardware card: \"" << hardware.card << "\" don't match this hardwareidentifier: \"" << spec.hardwareidentifier << "\"";
+        LOG(ERROR) << "this camera hardware bus_info: \"" << hardware.bus_info << "\" don't match this hardwareidentifier: \"" << spec.hardwareidentifier << "\"";
     }
     return changeornot;
 }
 
-std::string CameraInstance::Marshal()
+void CameraInstance::EraseHardwareInfo()
+{
+    spec.properties.card = "";
+    spec.properties.busInfo = "";
+    spec.properties.devicePath = "";
+    spec.properties.driverName = "";
+    spec.properties.supportFormat.clear();
+}
+
+std::string CameraInstance::Marshal() const
 {
     auto root = ToJson();
     Json::FastWriter writer;
     return writer.write(root);
 }
 
-Json::Value CameraInstance::ToJson()
+Json::Value CameraInstance::ToJson() const
 {
     Json::Value jnode;
     jnode["apiVersion"] = apiVersion;
@@ -91,7 +100,6 @@ Json::Value CameraInstance::ToJson()
     jnode["spec"]["properties"]["driverName"] = spec.properties.driverName;
     jnode["spec"]["properties"]["card"] = spec.properties.card;
     jnode["spec"]["properties"]["busInfo"] = spec.properties.busInfo;
-    jnode["spec"]["properties"]["description"] = spec.properties.description;
     for (int i = 0; i < spec.properties.supportFormat.size(); i++)
     {
         jnode["spec"]["properties"]["supportFormat"].append(spec.properties.supportFormat[i]);
@@ -117,10 +125,10 @@ Json::Value CameraInstance::ToJson()
         }
         jnode["spec"]["capability2"].append(cap);
     }
-    for (auto &iter : spec.customprops)
-    {
-        jnode["spec"]["customprops"][iter.first] = iter.second;
-    }
+    // for (auto &iter : spec.customprops)
+    // {
+    //     jnode["spec"]["customprops"][iter.first] = iter.second;
+    // }
     // api part
     for (int i = 0; i < api.function.size(); i++)
     {
@@ -178,10 +186,10 @@ bool CameraInstance::FromJson(const Json::Value &jnode)
     {
         spec.properties.supportFormat.clear();
     }
-    if (spec.customprops.size() != 0)
-    {
-        spec.customprops.clear();
-    }
+    // if (spec.customprops.size() != 0)
+    // {
+    //     spec.customprops.clear();
+    // }
 
     if (jnode["spec"].isMember("capability1"))
     {
@@ -219,21 +227,20 @@ bool CameraInstance::FromJson(const Json::Value &jnode)
     spec.properties.driverName = jnode["spec"]["properties"]["driverName"].asString();
     spec.properties.card = jnode["spec"]["properties"]["card"].asString();
     spec.properties.busInfo = jnode["spec"]["properties"]["busInfo"].asString();
-    spec.properties.description = jnode["spec"]["properties"]["description"].asString();
     for (int i = 0; i < jnode["spec"]["properties"]["supportFormat"].size(); i++)
     {
         spec.properties.supportFormat.emplace_back(jnode["spec"]["properties"]["supportFormat"][i].asString());
     }
     spec.properties.interface = jnode["spec"]["properties"]["interface"].asString();
-    if (jnode["spec"].isMember("customprops"))
-    {
-        Json::Value::Members member;
-        member = jnode["spec"]["customprops"].getMemberNames();
-        for (Json::Value::Members::iterator it = member.begin(); it != member.end(); it++)
-        {
-            spec.customprops[*it] = jnode["spec"]["customprops"][*it].asString();
-        }
-    }
+    // if (jnode["spec"].isMember("customprops"))
+    // {
+    //     Json::Value::Members member;
+    //     member = jnode["spec"]["customprops"].getMemberNames();
+    //     for (Json::Value::Members::iterator it = member.begin(); it != member.end(); it++)
+    //     {
+    //         spec.customprops[*it] = jnode["spec"]["customprops"][*it].asString();
+    //     }
+    // }
     return true;
 }
 
@@ -251,7 +258,7 @@ bool CameraInstance::updateInstance(const Json::Value &jnode)
     return FromJson(jnode);
 }
 
-std::string CameraInstance::getInstanceVersion()
+std::string CameraInstance::getInstanceVersion() const
 {
     return spec.version;
 }

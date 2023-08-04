@@ -9,6 +9,7 @@
 class CameraHardware
 {
 public:
+    std::string identifier;
     std::string device_path;
     std::string driver;
     std::string card;

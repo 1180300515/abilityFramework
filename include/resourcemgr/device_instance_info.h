@@ -50,15 +50,16 @@ public:
     Api api;
     std::vector<DeviceDescribe> devicelist;
 
-    virtual std::string Marshal() = 0;
-    virtual std::string GetHardwareIdentifier() = 0;
+    virtual std::string Marshal() const = 0 ;
+    virtual std::string GetHardwareIdentifier() const = 0;
     virtual bool UpdateHardwareInfo(const Json::Value &info) = 0;
-    virtual Json::Value ToJson() = 0;
+    virtual void EraseHardwareInfo() = 0;
+    virtual Json::Value ToJson() const = 0;
 
     virtual bool FromJson(const Json::Value &jnode);
     virtual bool UnMarshal(const std::string &data);
     virtual bool updateInstance(const Json::Value &jnode) = 0;
-    virtual std::string getInstanceVersion() = 0;
+    virtual std::string getInstanceVersion() const = 0;
 };
 
 #endif // _DEVICE_INSTANCE_INFO_H

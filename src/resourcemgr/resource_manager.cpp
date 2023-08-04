@@ -40,10 +40,10 @@ bool ResourceManager::UnregistCrd(const std::string &name)
 
 bool ResourceManager::AddAbilityInstance(const std::string &data, bool from_file)
 {
+    Json::Value instance_json;
     if (from_file)
     {
         YAML::Node instance_yaml;
-        Json::Value instance_json;
         try
         {
             instance_yaml = YAML::LoadFile(data);
@@ -63,42 +63,28 @@ bool ResourceManager::AddAbilityInstance(const std::string &data, bool from_file
             LOG(ERROR) << "convert the yaml file in: " << data << " to json format fail";
             return false;
         }
-        if (DatabaseManager::getInstance().DBStoreAbilityInstance(instance_json))
-        {
-            std::lock_guard<std::mutex> locker(abilities_lock_);
-            auto resource = std::make_shared<AbilityInstanceInfo>();
-            resource->FromJson(instance_json);
-            std::string key = GetInstanceKey(instance_json);
-            abilities_[key] = resource;
-            LOG(INFO) << "resource manager add ability instance : " << key;
-            return true;
-        }
-        else
-        {
-            LOG(ERROR) << "resource manager add ability instance fail";
-            return false;
-        }
     }
     else
     {
-        Json::Value instance_json;
+
         Json::Reader reader;
         reader.parse(data, instance_json);
-        if (DatabaseManager::getInstance().DBStoreAbilityInstance(instance_json))
-        {
-            std::lock_guard<std::mutex> locker(abilities_lock_);
-            auto resource = std::make_shared<AbilityInstanceInfo>();
-            resource->FromJson(instance_json);
-            std::string key = GetInstanceKey(instance_json);
-            abilities_[key] = resource;
-            LOG(INFO) << "resource manager add ability instance : " << key;
-            return true;
-        }
-        else
-        {
-            LOG(ERROR) << "resource manager add ability instance fail";
-            return false;
-        }
+    }
+    handleNamespace(instance_json);
+    if (DatabaseManager::getInstance().DBStoreAbilityInstance(instance_json))
+    {
+        std::lock_guard<std::mutex> locker(abilities_lock_);
+        auto resource = std::make_shared<AbilityInstanceInfo>();
+        resource->FromJson(instance_json);
+        std::string key = GetInstanceKey(instance_json);
+        abilities_[key] = resource;
+        LOG(INFO) << "resource manager add ability instance : " << key;
+        return true;
+    }
+    else
+    {
+        LOG(ERROR) << "resource manager add ability instance fail";
+        return false;
     }
     return false;
 }
@@ -151,10 +137,10 @@ bool ResourceManager::DeleteAbilityInstance(const std::string &key)
 
 bool ResourceManager::AddDeviceInstance(const std::string &data, bool from_file)
 {
+    Json::Value instance_json;
     if (from_file)
     {
         YAML::Node instance_yaml;
-        Json::Value instance_json;
         try
         {
             instance_yaml = YAML::LoadFile(data);
@@ -174,50 +160,82 @@ bool ResourceManager::AddDeviceInstance(const std::string &data, bool from_file)
             LOG(ERROR) << "convert the yaml file in: " << data << " to json format fail";
             return false;
         }
-        if (DatabaseManager::getInstance().DBStoreDeviceInstance(instance_json))
-        {
-            if (!addDeviceInstance(instance_json))
-            {
-                auto key = GetInstanceKey(instance_json);
-                DatabaseManager::getInstance().DBDelteDeviceInstance(key);
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-        else
-        {
-            LOG(ERROR) << "resource manager add device instance fail";
-            return false;
-        }
     }
     else
     {
-        Json::Value instance_json;
         Json::Reader reader;
         reader.parse(data, instance_json);
-        if (DatabaseManager::getInstance().DBStoreDeviceInstance(instance_json))
+    }
+    if (!handleHostname(instance_json))
+    {
+        return false;
+    }
+    handleNamespace(instance_json);
+    if (!DatabaseManager::getInstance().validateJson(instance_json))
+    {
+        return false;
+    }
+
+    std::lock_guard<std::mutex> locker(devices_lock_);
+    std::string device_kind = GetInstanceKind(instance_json);
+    std::shared_ptr<DeviceInstanceInfo> new_device;
+    if (device_kind == CameraDeviceResourcetype)
+    {
+        new_device = std::make_shared<CameraInstance>();
+        new_device->FromJson(instance_json);
+    }
+    else if (device_kind == LoudspeakerDeviceResourcetype)
+    {
+        new_device = std::make_shared<LoudspeakerInstance>();
+        new_device->FromJson(instance_json);
+    }
+    else if (device_kind == MicrophoneDeviceResourcetype)
+    {
+        new_device = std::make_shared<MicrophoneInstance>();
+        new_device->FromJson(instance_json);
+    }
+    else if (device_kind == SensorDeviceResourcetype)
+    {
+        new_device = std::make_shared<SensorInstance>();
+        new_device->FromJson(instance_json);
+        auto key = GetInstanceKey(instance_json);
+        if (!DatabaseManager::getInstance().DBStoreDeviceInstance(new_device->ToJson()))
         {
-            if (!addDeviceInstance(instance_json))
-            {
-                auto key = GetInstanceKey(instance_json);
-                DatabaseManager::getInstance().DBDelteDeviceInstance(key);
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            LOG(ERROR) << "resource manager add device instance : " << key << " type: " << device_kind << " fail";
+            return false;
         }
-        else
+
+        devices_[key] = new_device;
+        LOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
+        return true;
+    }
+    else
+    {
+        LOG(ERROR) << "unkonown resource type : " << device_kind;
+        return false;
+    }
+    auto key = GetInstanceKey(instance_json);
+    std::string id = new_device->GetHardwareIdentifier();
+    auto hw = this->hardware_->GetHardware(id, key, new_device->kind);
+    if (hw != std::nullopt)
+    {
+        new_device->UpdateHardwareInfo(hw.value());
+        if (!DatabaseManager::getInstance().DBStoreDeviceInstance(new_device->ToJson()))
         {
-            LOG(ERROR) << "resource manager add device instance fail";
+            return false;
+        }
+        this->hardware_->SetMap(id, key);
+    }
+    else
+    {
+        if (!DatabaseManager::getInstance().DBStoreDeviceInstance(new_device->ToJson()))
+        {
             return false;
         }
     }
-    return false;
+    devices_[key] = new_device;
+    LOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
+    return true;
 }
 
 bool ResourceManager::UpdateDeviceInstance(const std::string &data)
@@ -410,7 +428,7 @@ void ResourceManager::Init(bool cleandb)
 
     this->hardware_ = std::make_shared<HardwareScan>();
     std::shared_ptr<ResourceManager> p(this);
-    this->hardware_->Init(p, this->hostname_);
+    this->hardware_->Init(this->hostname_);
 
     this->hardware_manager_ = std::make_shared<HardwareResourceManager>();
     this->hardware_manager_->Init(p, this->hostname_);
@@ -418,17 +436,13 @@ void ResourceManager::Init(bool cleandb)
 
 void ResourceManager::Run()
 {
-    this->hardware_->Run();
-}
-
-void ResourceManager::Wait()
-{
-    this->hardware_->Wait();
+    autoGenerateCR();
+    periodic_scan_thread = std::thread(&ResourceManager::periodicScanThread, this);
 }
 
 std::string ResourceManager::GetHardwareDeviceInfo(bool format)
 {
-    return hardware_->GetHardwareDeviceInfo(format);
+    return hardware_->GetHardwareDeviceProfile(format);
 }
 
 std::shared_ptr<DeviceInstanceInfo> ResourceManager::GetDeviceInstance(const std::string &key)
@@ -485,144 +499,6 @@ std::vector<std::string> ResourceManager::GetHardWareResourceList(std::string ty
     return this->hardware_manager_->GetHardwareResourceList(type);
 }
 
-void ResourceManager::InsertHardwareInfo(const std::map<std::string, CameraHardware> &camera,
-                                         const std::map<std::string, AudioHardware> &mic,
-                                         const std::map<std::string, AudioHardware> &speaker,
-                                         std::map<std::string, std::string> &record)
-{
-    LOG(INFO) << "begin insert the hardware into the matched instance";
-    std::lock_guard<std::mutex> locker(devices_lock_);
-    std::vector<std::string> wait_for_delete;
-    for (const auto &iter : devices_)
-    {
-        if (this->hardware_->isAutogenInstance(iter.first))
-        {
-            continue;
-        }
-        auto hwid = iter.second->GetHardwareIdentifier();
-        if (iter.second->kind == CameraDeviceResourcetype)
-        {
-            if (camera.count(hwid) != 0 && record.count(hwid) == 0)
-            {
-                // 第一次匹配到，而且尚未自动生成
-                auto change = iter.second->UpdateHardwareInfo(camera.at(hwid).toJson());
-                if (change)
-                {
-                    DatabaseManager::getInstance().DBUpdateDeviceInstance(iter.second->ToJson());
-                    LOG(INFO) << "camera device instance : " << iter.first << " update hardware info";
-                }
-                record[hwid] = iter.first;
-            }
-            else if (camera.count(hwid) != 0 && record[hwid] == iter.first)
-            {
-                // 已经与instance匹配的hardware,只需要更新
-                // LOG(INFO) << "camera hardware id : \"" << hwid << "\" match with camera device instance : " << iter.first;
-                auto change = iter.second->UpdateHardwareInfo(camera.at(hwid).toJson());
-                if (change)
-                {
-                    DatabaseManager::getInstance().DBUpdateDeviceInstance(iter.second->ToJson());
-                    LOG(INFO) << "camera device instance : " << iter.first << " update hardware info";
-                }
-            }
-            else if (camera.count(hwid) != 0 && this->hardware_->isAutogenInstance(record[hwid]))
-            {
-                // 匹配到，但是该硬件之前已经自动生成了
-                DatabaseManager::getInstance().DBDelteDeviceInstance(record[hwid]);
-                wait_for_delete.emplace_back(record[hwid]);
-                auto change = iter.second->UpdateHardwareInfo(camera.at(hwid).toJson());
-                if (change)
-                {
-                    DatabaseManager::getInstance().DBUpdateDeviceInstance(iter.second->ToJson());
-                    LOG(INFO) << "camera device instance : " << iter.first << " update hardware info";
-                }
-                record[hwid] = iter.first;
-            }
-        }
-        else if (iter.second->kind == MicrophoneDeviceResourcetype)
-        {
-            if (mic.count(hwid) != 0 && record.count(hwid) == 0)
-            {
-                // 第一次匹配到，而且尚未自动生成
-                auto change = iter.second->UpdateHardwareInfo(mic.at(hwid).toJson());
-                if (change)
-                {
-                    DatabaseManager::getInstance().DBUpdateDeviceInstance(iter.second->ToJson());
-                    LOG(INFO) << "mic device instance : " << iter.first << " update hardware info";
-                }
-                record[hwid] = iter.first;
-            }
-            else if (mic.count(hwid) != 0 && record[hwid] == iter.first)
-            {
-                // 已经与instance匹配的hardware,只需要更新
-                // LOG(INFO) << "camera hardware id : \"" << hwid << "\" match with camera device instance : " << iter.first;
-                auto change = iter.second->UpdateHardwareInfo(mic.at(hwid).toJson());
-                if (change)
-                {
-                    DatabaseManager::getInstance().DBUpdateDeviceInstance(iter.second->ToJson());
-                    LOG(INFO) << "camera device instance : " << iter.first << " update hardware info";
-                }
-            }
-            else if (mic.count(hwid) != 0 && this->hardware_->isAutogenInstance(record[hwid]))
-            {
-                // 匹配到，但是该硬件之前已经自动生成了
-                DatabaseManager::getInstance().DBDelteDeviceInstance(record[hwid]);
-                wait_for_delete.emplace_back(record[hwid]);
-                auto change = iter.second->UpdateHardwareInfo(mic.at(hwid).toJson());
-                if (change)
-                {
-                    DatabaseManager::getInstance().DBUpdateDeviceInstance(iter.second->ToJson());
-                    LOG(INFO) << "camera device instance : " << iter.first << " update hardware info";
-                }
-                record[hwid] = iter.first;
-            }
-        }
-        else if (iter.second->kind == LoudspeakerDeviceResourcetype)
-        {
-            if (speaker.count(hwid) != 0 && record.count(hwid) == 0)
-            {
-                // 第一次匹配到，而且尚未自动生成
-                auto change = iter.second->UpdateHardwareInfo(speaker.at(hwid).toJson());
-                if (change)
-                {
-                    DatabaseManager::getInstance().DBUpdateDeviceInstance(iter.second->ToJson());
-                    LOG(INFO) << "speaker device instance : " << iter.first << " update hardware info";
-                }
-                record[hwid] = iter.first;
-            }
-            else if (speaker.count(hwid) != 0 && record[hwid] == iter.first)
-            {
-                // 已经与instance匹配的hardware,只需要更新
-                // LOG(INFO) << "speaker hardware id : \"" << hwid << "\" match with speaker device instance : " << iter.first;
-                auto change = iter.second->UpdateHardwareInfo(speaker.at(hwid).toJson());
-                if (change)
-                {
-                    DatabaseManager::getInstance().DBUpdateDeviceInstance(iter.second->ToJson());
-                    LOG(INFO) << "speaker device instance : " << iter.first << " update hardware info";
-                }
-            }
-            else if (speaker.count(hwid) != 0 && this->hardware_->isAutogenInstance(record[hwid]))
-            {
-                // 匹配到，但是该硬件之前已经自动生成了
-                DatabaseManager::getInstance().DBDelteDeviceInstance(record[hwid]);
-                wait_for_delete.emplace_back(record[hwid]);
-                auto change = iter.second->UpdateHardwareInfo(speaker.at(hwid).toJson());
-                if (change)
-                {
-                    DatabaseManager::getInstance().DBUpdateDeviceInstance(iter.second->ToJson());
-                    LOG(INFO) << "speaker device instance : " << iter.first << " update hardware info";
-                }
-                record[hwid] = iter.first;
-            }
-        }
-    }
-    for (const auto &iter : wait_for_delete)
-    {
-        this->devices_.erase(iter);
-        LOG(INFO) << "resource manager delete autogen CR : " << iter;
-    }
-    LOG(INFO) << "finish insert";
-}
-
 void ResourceManager::getHostName()
 {
     char hostname[256];
@@ -637,141 +513,26 @@ void ResourceManager::getHostName()
     }
 }
 
-bool ResourceManager::addDeviceInstance(const Json::Value &instance_json)
+void ResourceManager::handleNamespace(Json::Value &instance_json)
 {
-    std::lock_guard<std::mutex> locker(devices_lock_);
-    std::string device_kind = GetInstanceKind(instance_json);
-    if (device_kind == CameraDeviceResourcetype)
+    if (!instance_json["metadata"].isMember("namespace"))
     {
-        auto new_device = std::make_shared<CameraInstance>();
-        new_device->FromJson(instance_json);
-        auto key = GetInstanceKey(instance_json);
-        std::string id = new_device->GetHardwareIdentifier();
-        if (id != "")
+        instance_json["metadata"]["namespace"] = "default";
+    }
+}
+
+bool ResourceManager::handleHostname(Json::Value &instance_json)
+{
+    if (instance_json["spec"].isMember("hostname"))
+    {
+        if (instance_json["spec"]["hostname"] != this->hostname_ && instance_json["spec"]["hostname"] != "")
         {
-            auto hw = this->hardware_->GetCameraHardware(id, key);
-            if (hw != std::nullopt)
-            {
-                auto old_key = this->hardware_->GetMatchedKey(id);
-                if (old_key != "")
-                {
-                    // need to delete the autogen instance
-                    if (DatabaseManager::getInstance().DBDelteDeviceInstance(old_key))
-                    {
-                        devices_.erase(old_key);
-                        LOG(INFO) << "resource manager delete device instance : " << old_key;
-                    }
-                    else
-                    {
-                        LOG(ERROR) << "delete fail";
-                        return false;
-                    }
-                }
-                auto change = new_device->UpdateHardwareInfo(hw.value().toJson());
-                if (change)
-                {
-                    DatabaseManager::getInstance().DBUpdateDeviceInstance(new_device->ToJson());
-                    LOG(INFO) << "camera device instance : " << key << " update hardware info";
-                }
-                this->hardware_->SetMap(id, key);
-            }
+            LOG(ERROR) << "the " << instance_json["spec"]["hostname"] << " is not the local hostname";
+            return false;
         }
-        devices_[key] = new_device;
-        LOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
-        return true;
     }
-    else if (device_kind == LoudspeakerDeviceResourcetype)
-    {
-        auto new_device = std::make_shared<LoudspeakerInstance>();
-        new_device->FromJson(instance_json);
-        auto key = GetInstanceKey(instance_json);
-        std::string id = new_device->GetHardwareIdentifier();
-        if (id != "")
-        {
-            auto hw = this->hardware_->GetSpeakerHardware(id, key);
-            if (hw != std::nullopt)
-            {
-                auto old_key = this->hardware_->GetMatchedKey(id);
-                if (old_key != "")
-                {
-                    // need to delete the autogen instance
-                    if (DatabaseManager::getInstance().DBDelteDeviceInstance(old_key))
-                    {
-                        devices_.erase(old_key);
-                        LOG(INFO) << "resource manager delete device instance : " << old_key;
-                    }
-                    else
-                    {
-                        LOG(ERROR) << "delete fail";
-                        return false;
-                    }
-                }
-                auto change = new_device->UpdateHardwareInfo(hw.value().toJson());
-                if (change)
-                {
-                    DatabaseManager::getInstance().DBUpdateDeviceInstance(new_device->ToJson());
-                    LOG(INFO) << "speaker device instance : " << key << " update hardware info";
-                }
-                this->hardware_->SetMap(id, key);
-            }
-        }
-        devices_[key] = new_device;
-        LOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
-        return true;
-    }
-    else if (device_kind == MicrophoneDeviceResourcetype)
-    {
-        auto new_device = std::make_shared<MicrophoneInstance>();
-        new_device->FromJson(instance_json);
-        auto key = GetInstanceKey(instance_json);
-        std::string id = new_device->GetHardwareIdentifier();
-        if (id != "")
-        {
-            auto hw = this->hardware_->GetMicHardware(id, key);
-            if (hw != std::nullopt)
-            {
-                auto old_key = this->hardware_->GetMatchedKey(id);
-                if (old_key != "")
-                {
-                    // need to delete the autogen instance
-                    if (DatabaseManager::getInstance().DBDelteDeviceInstance(old_key))
-                    {
-                        devices_.erase(old_key);
-                        LOG(INFO) << "resource manager delete device instance : " << old_key;
-                    }
-                    else
-                    {
-                        LOG(ERROR) << "delete fail";
-                        return false;
-                    }
-                }
-                auto change = new_device->UpdateHardwareInfo(hw.value().toJson());
-                if (change)
-                {
-                    DatabaseManager::getInstance().DBUpdateDeviceInstance(new_device->ToJson());
-                    LOG(INFO) << "mic device instance : " << key << " update hardware info";
-                }
-                this->hardware_->SetMap(id, key);
-            }
-        }
-        devices_[key] = new_device;
-        LOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
-        return true;
-    }
-    else if (device_kind == SensorDeviceResourcetype)
-    {
-        auto new_device = std::make_shared<SensorInstance>();
-        new_device->FromJson(instance_json);
-        auto key = GetInstanceKey(instance_json);
-        devices_[key] = new_device;
-        LOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
-        return true;
-    }
-    else
-    {
-        LOG(ERROR) << "unkonown resource type : " << device_kind;
-        return false;
-    }
+    instance_json["spec"]["hostname"] = this->hostname_;
+    return true;
 }
 
 bool ResourceManager::deleteDeviceInstance(const std::string &key)
@@ -799,4 +560,198 @@ bool ResourceManager::deleteDeviceInstance(const std::string &key)
         }
     }
     return false;
+}
+
+void ResourceManager::resourceMatching()
+{
+    LOG(INFO) << "begin resource match with hardware";
+    std::vector<std::string> wait_for_delete;
+    std::lock_guard<std::mutex> locker(devices_lock_);
+    for (auto &iter : this->devices_)
+    {
+        std::string id = iter.second->GetHardwareIdentifier();
+        // check hardware is exist or not
+        auto old_key = hardware_->GetMatchedKey(id);
+        if (old_key == "delete")
+        {
+            if (hardware_->isAutogenInstance(iter.first))
+            {
+                wait_for_delete.emplace_back(iter.first);
+                continue;
+            }
+            else
+            {
+                iter.second->EraseHardwareInfo();
+                DatabaseManager::getInstance().DBUpdateDeviceInstance(iter.second->ToJson());
+                hardware_->DeleteMap(id);
+                continue;
+            }
+        }
+        if (old_key == "")
+        {
+            continue;
+        }
+        // update or insert hardware into instance
+        auto hw = this->hardware_->GetHardware(id, iter.first, iter.second->kind);
+        if (hw == std::nullopt)
+        {
+            continue;
+        }
+        auto change = iter.second->UpdateHardwareInfo(hw.value());
+        if (change)
+        {
+            DatabaseManager::getInstance().DBUpdateDeviceInstance(iter.second->ToJson());
+            LOG(INFO) << "device instance : " << iter.first << " update hardware info";
+        }
+        if (hardware_->isAutogenInstance(old_key))
+        {
+            wait_for_delete.emplace_back(old_key);
+        }
+        this->hardware_->SetMap(id, iter.first);
+    }
+    for (const auto &iter : wait_for_delete)
+    {
+        DatabaseManager::getInstance().DBDelteDeviceInstance(iter);
+        devices_.erase(iter);
+        LOG(INFO) << "resource manager delete autogen CR : " << iter;
+    }
+    LOG(INFO) << "finish match";
+}
+
+void ResourceManager::autoGenerateCR()
+{
+    LOG(INFO) << "begin autogen CR";
+    std::vector<CameraHardware> camera;
+    std::vector<AudioHardware> mic;
+    std::vector<AudioHardware> speaker;
+    hardware_->UnmatchedHardware(camera, mic, speaker);
+    for (const auto &iter : camera)
+    {
+        CameraInstance instance;
+        instance.apiVersion = "stable.example.com/v1";
+        instance.kind = CameraDeviceResourcetype;
+        int count = hardware_->GenerateSerialNumber("camera");
+        instance.metadata.name = "Autogen-Camera-" + std::to_string(count);
+        instance.metadata.namespace_name = "default";
+        instance.spec.version = "1.0";
+        instance.spec.hostname = hostname_;
+        instance.spec.kind = "camera";
+        instance.spec.hardwareidentifier = iter.bus_info;
+        // properties part
+        instance.spec.properties.vendor = "unknown";
+        instance.spec.properties.resolution = "unknown";
+        instance.spec.properties.location = "unknown";
+        instance.spec.properties.wideAngle = 0;
+        instance.spec.properties.focusMethod = "unknown";
+        instance.spec.properties.telephoto = false;
+        instance.spec.properties.interface = "unknown";
+
+        instance.spec.properties.devicePath = iter.device_path;
+        instance.spec.properties.driverName = iter.driver;
+        instance.spec.properties.card = iter.card;
+        instance.spec.properties.busInfo = iter.bus_info;
+        for (int i = 0; i < iter.formats.size(); i++)
+        {
+            instance.spec.properties.supportFormat.emplace_back(iter.formats[i]);
+        }
+        // status part
+        instance.status.occupancy = false;
+        std::string data = instance.Marshal();
+        if (!AddDeviceInstance(data))
+        {
+            LOG(ERROR) << "autogen CR: " << instance.metadata.name << " add fail";
+            continue;
+        }
+        hardware_->SetMap(iter.bus_info, instance.metadata.namespace_name + "/" + instance.metadata.name);
+    }
+    for (const auto &iter : mic)
+    {
+        MicrophoneInstance instance;
+        instance.apiVersion = "stable.example.com/v1";
+        instance.kind = MicrophoneDeviceResourcetype;
+        int count = hardware_->GenerateSerialNumber("mic");
+        instance.metadata.name = "Autogen-Mic-" + std::to_string(count);
+        instance.metadata.namespace_name = "default";
+
+        instance.spec.version = "1.0";
+        instance.spec.hostname = hostname_;
+        instance.spec.kind = "microphone";
+        instance.spec.hardwareidentifier = iter.name;
+        // properties part
+        instance.spec.properties.interface = "unknown";
+        instance.spec.properties.sampleRates = "unknown";
+
+        instance.spec.properties.hardwareName = iter.name;
+        instance.spec.properties.description = iter.description;
+        instance.spec.properties.sampleRate = iter.sampleRate;
+        instance.spec.properties.channels = iter.channels;
+        instance.spec.properties.format = iter.format;
+        instance.spec.properties.cardID = iter.cardID;
+        instance.spec.properties.deviceID = iter.deviceID;
+
+        // status part
+        instance.status.occupancy = false;
+
+        std::string data = instance.Marshal();
+        if (!AddDeviceInstance(data))
+        {
+            LOG(ERROR) << "autogen CR: " << instance.metadata.name << " add fail";
+            continue;
+        }
+
+        // LOG(INFO) << "add device instance : " << instance.metadata.name << " success";
+        hardware_->SetMap(iter.name, instance.metadata.namespace_name + "/" + instance.metadata.name);
+    }
+    for (const auto &iter : speaker)
+    {
+        LoudspeakerInstance instance;
+        instance.apiVersion = "stable.example.com/v1";
+        instance.kind = LoudspeakerDeviceResourcetype;
+        int count = hardware_->GenerateSerialNumber("speaker");
+        instance.metadata.name = "Autogen-Loudspeaker-" + std::to_string(count);
+        instance.metadata.namespace_name = "default";
+
+        instance.spec.version = "1.0";
+        instance.spec.hostname = hostname_;
+        instance.spec.kind = "loudspeaker";
+        instance.spec.hardwareidentifier = iter.name;
+        // properties part
+        instance.spec.properties.sampleRates = "unknown";
+        instance.spec.properties.channelNumber = 0;
+        instance.spec.properties.bitWidth = 0;
+        instance.spec.properties.interface = "unknown";
+
+        instance.spec.properties.hardwareName = iter.name;
+
+        instance.spec.properties.hardwareName = iter.name;
+        instance.spec.properties.description = iter.description;
+        instance.spec.properties.sampleRate = iter.sampleRate;
+        instance.spec.properties.channels = iter.channels;
+        instance.spec.properties.format = iter.format;
+        instance.spec.properties.cardID = iter.cardID;
+        instance.spec.properties.deviceID = iter.deviceID;
+        // status part
+        instance.status.occupancy = false;
+
+        std::string data = instance.Marshal();
+        if (!AddDeviceInstance(data))
+        {
+            LOG(ERROR) << "autogen CR: " << instance.metadata.name << " add fail";
+            continue;
+        }
+        // LOG(INFO) << "add device instance : " << instance.metadata.name << " success";
+        hardware_->SetMap(iter.name, instance.metadata.namespace_name + "/" + instance.metadata.name);
+    }
+    LOG(INFO) << "finish autogen CR";
+}
+
+void ResourceManager::periodicScanThread()
+{
+    while (true)
+    {
+        std::this_thread::sleep_for(std::chrono::minutes(1));
+        hardware_->LocalHardwareScan();
+        resourceMatching();
+        autoGenerateCR();
+    }
 }

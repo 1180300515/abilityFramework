@@ -24,20 +24,21 @@ struct SensorSpec
     std::vector<Acapability> capability1;
     std::vector<Acapability> capability2;
     Sensorproperties properties;
-    std::map<std::string, std::string> customprops;
+    //std::map<std::string, std::string> customprops;
 };
 class SensorInstance : public DeviceInstanceInfo
 {
 public:
     SensorSpec spec;
-    std::string Marshal();
-    Json::Value ToJson();
-    std::string GetHardwareIdentifier();
+    std::string Marshal() const;
+    Json::Value ToJson() const;
+    std::string GetHardwareIdentifier() const;
     bool UpdateHardwareInfo(const Json::Value &info);
+    void EraseHardwareInfo();
     bool FromJson(const Json::Value &jnode);
     bool UnMarshal(const std::string &data);
     bool updateInstance(const Json::Value &jnode);
-    std::string getInstanceVersion();
+    std::string getInstanceVersion() const;
 };
 
 #endif // _DEVICE_INSTANCE_SENSOR_H

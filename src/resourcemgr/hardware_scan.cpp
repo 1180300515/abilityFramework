@@ -7,20 +7,18 @@
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrandr.h>
 
+
 #include "glog/logging.h"
 
 #include "device_instance_camera.h"
 #include "device_instance_loudspeaker.h"
 #include "device_instance_microphone.h"
 #include "global_var.h"
-#include "resource_manager.h"
 #include "color.h"
 
 void HardwareScan::getCameraInfo()
 {
-    std::lock_guard<std::mutex> locker(camera_hardware_lock_);
     this->profile.cameraDevices.clear();
-
     glob_t glob_result;
     // 找到所有的V4L设备
     glob("/dev/video*", GLOB_TILDE, nullptr, &glob_result);
@@ -108,7 +106,6 @@ void HardwareScan::getCameraInfo()
 
 void HardwareScan::getDisplayHardware()
 {
-    std::lock_guard<std::mutex> locker(display_hardware_lock_);
     this->profile.displayDevices.clear();
 
     const char *displayEnv = getenv("DISPLAY");
@@ -164,81 +161,202 @@ void HardwareScan::getDisplayHardware()
     XCloseDisplay(dpy);
 }
 
-void HardwareScan::getAudioInfo()
+void HardwareScan::getMicInfo()
 {
-    std::lock_guard<std::mutex> locker(audio_hardware_lock_);
-    this->loudspeakerdevices.clear();
-    this->microphonedevices.clear();
-    microphonedevices.clear();
-    loudspeakerdevices.clear();
-
-    pa_threaded_mainloop *mainloop = pa_threaded_mainloop_new();
-    pa_mainloop_api *mainloop_api = pa_threaded_mainloop_get_api(mainloop);
-    pa_context *context = pa_context_new(mainloop_api, "Device Details");
-
-    pa_context_set_state_callback(context, context_state_callback, nullptr);
-    // std::cout << "connect " << std::endl;
-    pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
-
-    // std::cout << "Before run" << std::endl;
-    pa_threaded_mainloop_start(mainloop);
-    // usleep(2000 * 1000);
-    // std::cout << "Quit the loop." << std::endl;
-    // pa_mainloop_quit(mainloop, 0);
-
-    // pa_context_disconnect(context);
-    // pa_context_unref(context);
-    // pa_mainloop_free(mainloop);
-
-    sleep(2);
-    pa_context_disconnect(context);
-    pa_threaded_mainloop_stop(mainloop);
-    pa_threaded_mainloop_free(mainloop);
-
-    // std::cout << "Output devices:" << std::endl;
-    // for (const auto &device : outputDevices)
-    // {
-    //     std::cout << "  " << device.description << std::endl;
-    //     std::cout << "  " << device.name << std::endl;
-    //     std::cout << "  " << device.volume << std::endl;
-    //     std::cout << "  " << device.mute << std::endl;
-    //     std::cout << "  " << device.sampleRate << std::endl;
-    //     std::cout << "  " << device.channels << std::endl;
-    // }
-
-    // std::cout << "Input devices:" << std::endl;
-    // for (const auto &device : inputDevices)
-    // {
-    //     std::cout << "  " << device.description << std::endl;
-    //     std::cout << "  " << device.name << std::endl;
-    //     std::cout << "  " << device.volume << std::endl;
-    //     std::cout << "  " << device.mute << std::endl;
-    //     std::cout << "  " << device.sampleRate << std::endl;
-    //     std::cout << "  " << device.channels << std::endl;
-    // }
-    this->profile.speakerDevices = loudspeakerdevices;
-    this->profile.micDevices = microphonedevices;
+    this->profile.micDevices = getAudioList("record");
 }
 
-void HardwareScan::periodicHardwareScanThread()
+void HardwareScan::getSpeakerInfo()
 {
-    while (true)
-    {
-        // sleep 10 minute;
-        std::this_thread::sleep_for(std::chrono::minutes(1));
+    this->profile.speakerDevices = getAudioList("playback");
+}
 
-        localHardwareScan();
-        std::map<std::string, CameraHardware> camera_;
-        std::map<std::string, AudioHardware> mic_;
-        std::map<std::string, AudioHardware> speaker_;
-        generateIndentifyKeyValue(camera_, mic_, speaker_);
-        {
-            std::lock_guard<std::mutex> locker1(this->map_lock_);
-            this->resource_manager->InsertHardwareInfo(camera_, mic_, speaker_, this->hardware_instance_map);
-        }
-        this->AutoGenerateCR();
-        this->printMap();
+std::vector<AudioHardware> HardwareScan::getAudioList(const std::string &type)
+{
+    std::vector<AudioHardware> audioDevices;
+    const char *command;
+    snd_pcm_stream_t stream;
+    if (type == "record")
+    {
+        command = "arecord";
+        stream = SND_PCM_STREAM_CAPTURE;
     }
+    else if (type == "playback")
+    {
+        command = "aplay";
+        stream = SND_PCM_STREAM_PLAYBACK;
+    }
+    else
+    {
+        LOG(ERROR) << "Wrong type." << std::endl;
+        return audioDevices;
+    }
+
+    snd_ctl_t *handle;
+    int card, err, dev, idx;
+    snd_ctl_card_info_t *info;
+    snd_pcm_info_t *pcminfo;
+    snd_ctl_card_info_alloca(&info);
+    snd_pcm_info_alloca(&pcminfo);
+
+    card = -1;
+    if (snd_card_next(&card) < 0 || card < 0)
+    {
+        LOG(ERROR) << "No soundcards found...";
+        return audioDevices;
+    }
+    snd_pcm_stream_name(stream);
+    while (card >= 0)
+    {
+        char name[32];
+        sprintf(name, "hw:%d", card);
+        if ((err = snd_ctl_open(&handle, name, 0)) < 0)
+        {
+            LOG(ERROR) << "control open " << card << " error: " << snd_strerror(err);
+            goto next_card;
+        }
+        if ((err = snd_ctl_card_info(handle, info)) < 0)
+        {
+            LOG(ERROR) << "control hardware info " << card << " error: " << snd_strerror(err);
+            snd_ctl_close(handle);
+            goto next_card;
+        }
+        dev = -1;
+        while (1)
+        {
+            unsigned int count;
+            if (snd_ctl_pcm_next_device(handle, &dev) < 0)
+                std::cout << "snd_ctl_pcm_next_device" << std::endl;
+            if (dev < 0)
+                break;
+            snd_pcm_info_set_device(pcminfo, dev);
+            snd_pcm_info_set_subdevice(pcminfo, 0);
+            snd_pcm_info_set_stream(pcminfo, stream);
+            if ((err = snd_ctl_pcm_info(handle, pcminfo)) < 0)
+            {
+                if (err != -ENOENT)
+                    LOG(ERROR) << "control digital audio info (" << card << "): " << snd_strerror(err);
+                continue;
+            }
+            std::string name = "card-" + std::to_string(card) + ".device-" + std::to_string(dev) + "." + std::string(snd_ctl_card_info_get_name(info));
+
+            AudioHardware audioDevice(name, snd_pcm_info_get_name(pcminfo), {}, {}, {}, std::to_string(card), std::to_string(dev));
+            if (retriveOtherAudioParameters(stream, &audioDevice))
+                continue;
+            audioDevices.push_back(audioDevice);
+        }
+
+        snd_ctl_close(handle);
+    next_card:
+        if (snd_card_next(&card) < 0)
+        {
+            std::cout << "snd_card_next" << std::endl;
+            break;
+        }
+    }
+    return audioDevices;
+}
+
+int HardwareScan::retriveOtherAudioParameters(snd_pcm_stream_t stream_type, AudioHardware *audioDevice)
+{
+    snd_pcm_t *pcm;
+    snd_pcm_hw_params_t *hw_params;
+    unsigned int i;
+    unsigned int min, max;
+    int any_rate;
+    int err;
+    std::string deviceName = "hw:" + audioDevice->cardID + "," + audioDevice->deviceID;
+    const char *device_name = deviceName.c_str();
+
+    err = snd_pcm_open(&pcm, device_name, stream_type, SND_PCM_NONBLOCK);
+    if (err < 0)
+    {
+        fprintf(stderr, "cannot open device '%s': %s\n", device_name, snd_strerror(err));
+        return 1;
+    }
+
+    snd_pcm_hw_params_alloca(&hw_params);
+    err = snd_pcm_hw_params_any(pcm, hw_params);
+    if (err < 0)
+    {
+        fprintf(stderr, "cannot get hardware parameters: %s\n", snd_strerror(err));
+        snd_pcm_close(pcm);
+        return 1;
+    }
+    for (i = 0; i < ARRAY_SIZE(formats); ++i)
+    {
+        if (!snd_pcm_hw_params_test_format(pcm, hw_params, formats[i]))
+            audioDevice->format.push_back(snd_pcm_format_name(formats[i]));
+        // printf(" %s", snd_pcm_format_name(formats[i]));
+    }
+
+    err = snd_pcm_hw_params_get_channels_min(hw_params, &min);
+    if (err < 0)
+    {
+        fprintf(stderr, "cannot get minimum channels count: %s\n", snd_strerror(err));
+        snd_pcm_close(pcm);
+        return 1;
+    }
+    err = snd_pcm_hw_params_get_channels_max(hw_params, &max);
+    if (err < 0)
+    {
+        fprintf(stderr, "cannot get maximum channels count: %s\n", snd_strerror(err));
+        snd_pcm_close(pcm);
+        return 1;
+    }
+    // printf("Channels:");
+    for (i = min; i <= max; ++i)
+    {
+        if (!snd_pcm_hw_params_test_channels(pcm, hw_params, i))
+        {
+            audioDevice->channels.push_back(i);
+            // std::cout << "*********** CHANNEL: " << i << std::endl;
+        }
+        // printf(" %u", i);
+    }
+
+    err = snd_pcm_hw_params_get_rate_min(hw_params, &min, NULL);
+    if (err < 0)
+    {
+        fprintf(stderr, "cannot get minimum rate: %s\n", snd_strerror(err));
+        snd_pcm_close(pcm);
+        return 1;
+    }
+    err = snd_pcm_hw_params_get_rate_max(hw_params, &max, NULL);
+    if (err < 0)
+    {
+        fprintf(stderr, "cannot get maximum rate: %s\n", snd_strerror(err));
+        snd_pcm_close(pcm);
+        return 1;
+    }
+    // printf("Sample rates:");
+    if (min == max)
+    {
+        // printf(" %u", min);
+        audioDevice->sampleRate.push_back(min);
+        // std::cout << "*********** RATE: " << min << std::endl;
+    }
+    else if (!snd_pcm_hw_params_test_rate(pcm, hw_params, min + 1, 0))
+        printf(" %u-%u", min, max);
+    else
+    {
+        any_rate = 0;
+        for (i = 0; i < ARRAY_SIZE(rates); ++i)
+        {
+            if (!snd_pcm_hw_params_test_rate(pcm, hw_params, rates[i], 0))
+            {
+                any_rate = 1;
+                audioDevice->sampleRate.push_back(rates[i]);
+                // std::cout << "*********** RATE: " << rates[i] << std::endl;
+                // printf(" %u", rates[i]);
+            }
+        }
+        if (!any_rate)
+            printf(" (empty)");
+    }
+
+    snd_pcm_close(pcm);
+    return 0;
 }
 
 void HardwareScan::printMap()
@@ -252,57 +370,63 @@ void HardwareScan::printMap()
 
 void HardwareScan::compareMap()
 {
-    LOG(INFO) << "compare old hardware and new hardware, delete the non-exist hardware";
-    std::lock_guard<std::mutex> locker1(this->map_lock_);
-    std::lock_guard<std::mutex> locker3(camera_hardware_lock_);
-    std::lock_guard<std::mutex> locker2(audio_hardware_lock_);
-
-    for (auto iter = hardware_instance_map.begin(); iter != hardware_instance_map.end();)
+    LOG(INFO) << "compare old hardware and new hardware, delete the non-exist hardware,add new hardware record";
+    for (auto &iter : hardware_instance_map)
     {
         bool delete_ = true;
         for (const auto &hw : profile.cameraDevices)
         {
-            if (iter->first == hw.card)
+            if (iter.first == hw.card)
             {
                 delete_ = false;
             }
         }
         for (const auto &hw : profile.micDevices)
         {
-            if (iter->first == hw.name)
+            if (iter.first == hw.name)
             {
                 delete_ = false;
             }
         }
         for (const auto &hw : profile.speakerDevices)
         {
-            if (iter->first == hw.name)
+            if (iter.first == hw.name)
             {
                 delete_ = false;
             }
         }
         if (delete_)
         {
-            if (this->resource_manager->deleteDeviceInstance(iter->second))
-            {
-                iter = hardware_instance_map.erase(iter);
-            }
-            else
-            {
-                LOG(ERROR) << "erase autogen CR fail : " << iter->second;
-                ++iter;
-            }
+            iter.second = "delete";
         }
-        else
+    }
+    for (const auto &hw : profile.cameraDevices)
+    {
+        if (hardware_instance_map.count(hw.bus_info) == 0)
         {
-            ++iter;
+            hardware_instance_map[hw.bus_info] = "";
+        }
+    }
+    for (const auto &hw : profile.micDevices)
+    {
+        if (hardware_instance_map.count(hw.name) == 0)
+        {
+            hardware_instance_map[hw.name] = "";
+        }
+    }
+    for (const auto &hw : profile.speakerDevices)
+    {
+        if (hardware_instance_map.count(hw.name) == 0)
+        {
+            hardware_instance_map[hw.name] = "";
         }
     }
     LOG(INFO) << "compare finish";
 }
 
-int HardwareScan::gnerateSerialNumber(const std::string &type)
+int HardwareScan::GenerateSerialNumber(const std::string &type)
 {
+    std::lock_guard<std::mutex> locker1(this->map_lock_);
     if (type == "camera")
     {
         std::vector<int> numbers;
@@ -396,142 +520,68 @@ std::string HardwareScan::GetMatchedKey(const std::string &id)
     }
 }
 
+void HardwareScan::UnmatchedHardware(std::vector<CameraHardware> &camera, std::vector<AudioHardware> &mic, std::vector<AudioHardware> &speaker)
+{
+    std::lock_guard<std::mutex> locker1(this->map_lock_);
+    std::lock_guard<std::mutex> locker2(camera_hardware_lock_);
+    std::lock_guard<std::mutex> locker3(mic_hardware_lock_);
+    std::lock_guard<std::mutex> locker4(speaker_hardware_lock_);
+    for (const auto &hw : profile.cameraDevices)
+    {
+        if (hardware_instance_map.count(hw.bus_info) != 0 && hardware_instance_map.at(hw.bus_info) == "")
+        {
+            camera.emplace_back(hw);
+        }
+    }
+    for (const auto &hw : profile.micDevices)
+    {
+        if (hardware_instance_map.count(hw.name) != 0 && hardware_instance_map.at(hw.name) == "")
+        {
+            mic.emplace_back(hw);
+        }
+    }
+    for (const auto &hw : profile.speakerDevices)
+    {
+        if (hardware_instance_map.count(hw.name) != 0 && hardware_instance_map.at(hw.name) == "")
+        {
+            speaker.emplace_back(hw);
+        }
+    }
+}
+
 void HardwareScan::SetMap(const std::string &id, const std::string &key)
 {
     std::lock_guard<std::mutex> locker1(this->map_lock_);
+    if (hardware_instance_map.at(id) != key)
+    {
+        LOG(INFO) << "instance : " << key << " match with hardware : " << id;
+    }
     hardware_instance_map[id] = key;
 }
 
-void HardwareScan::DeleteMap(const std::string &key)
+void HardwareScan::DeleteMap(const std::string &id)
 {
     std::lock_guard<std::mutex> locker1(this->map_lock_);
-    for (auto iter = hardware_instance_map.begin(); iter != hardware_instance_map.end();)
-    {
-        if (iter->second == key)
-        {
-            iter = hardware_instance_map.erase(iter);
-        }
-        else
-        {
-            ++iter;
-        }
-    }
+    this->hardware_instance_map.erase(id);
 }
 
-void HardwareScan::generateIndentifyKeyValue(std::map<std::string, CameraHardware> &camera, std::map<std::string, AudioHardware> &mic, std::map<std::string, AudioHardware> &speaker)
+void HardwareScan::Init(std::string hostname)
 {
-    std::lock_guard<std::mutex> locker1(camera_hardware_lock_);
-    std::lock_guard<std::mutex> locker2(audio_hardware_lock_);
-    for (const auto &iter : profile.cameraDevices)
-    {
-        // LOG(INFO) << RED << iter.card << NONE;
-        camera[iter.card] = iter;
-    }
-
-    for (const auto &iter : profile.micDevices)
-    {
-        mic[iter.name] = iter;
-        // LOG(INFO) << RED << iter.name << NONE;
-    }
-    for (const auto &iter : profile.speakerDevices)
-    {
-        // LOG(INFO) << RED << iter.name << NONE;
-        speaker[iter.name] = iter;
-    }
-}
-
-void HardwareScan::context_state_callback(pa_context *c, void *userdata)
-{
-    if (pa_context_get_state(c) == PA_CONTEXT_READY)
-    {
-        pa_operation *o;
-
-        o = pa_context_get_sink_info_list(c, sink_info_callback, nullptr);
-        if (o)
-        {
-            pa_operation_unref(o);
-        }
-
-        o = pa_context_get_source_info_list(c, source_info_callback, nullptr);
-        if (o)
-        {
-            pa_operation_unref(o);
-        }
-    }
-    // std::cout << "status: " << pa_context_get_state(c) << std::endl;
-    // #define PA_CONTEXT_UNCONNECTED PA_CONTEXT_UNCONNECTED    0
-    // #define PA_CONTEXT_CONNECTING PA_CONTEXT_CONNECTING      1
-    // #define PA_CONTEXT_AUTHORIZING PA_CONTEXT_AUTHORIZING    2
-    // #define PA_CONTEXT_SETTING_NAME PA_CONTEXT_SETTING_NAME  3
-    // #define PA_CONTEXT_READY PA_CONTEXT_READY                4
-    // #define PA_CONTEXT_FAILED PA_CONTEXT_FAILED              5
-    // #define PA_CONTEXT_TERMINATED PA_CONTEXT_TERMINATED      6
-}
-
-std::vector<AudioHardware> HardwareScan::loudspeakerdevices;
-std::vector<AudioHardware> HardwareScan::microphonedevices;
-
-void HardwareScan::source_info_callback(pa_context *c, const pa_source_info *info, int eol, void *userdata)
-{
-    if (eol > 0)
-        return;
-
-    // std::cout << info->name << std::endl;
-    // sourcei = sourcei + 1;
-    // std::cout << "source channels: " << info->sample_spec.channels << std::endl;
-    if (info && !strstr(info->name, "monitor"))
-    {
-        microphonedevices.emplace_back(info->name, info->description, pa_cvolume_avg(&(info->volume)), info->mute, info->sample_spec.rate, info->sample_spec.channels);
-    }
-}
-
-void HardwareScan::sink_info_callback(pa_context *c, const pa_sink_info *info, int eol, void *userdata)
-{
-    if (eol > 0)
-        return;
-
-    // std::cout << info->name << std::endl;
-    // sinki = sinki + 1;
-    // std::cout << "sink channels: " << info->sample_spec.channels << std::endl;
-    if (info && !strstr(info->name, "monitor"))
-    {
-        loudspeakerdevices.emplace_back(info->name, info->description, pa_cvolume_avg(&(info->volume)), info->mute, info->sample_spec.rate, info->sample_spec.channels);
-    }
-}
-
-void HardwareScan::Init(std::shared_ptr<ResourceManager> manager_, std::string hostname)
-{
-    this->resource_manager = manager_;
     this->hostname_ = hostname;
-    this->localHardwareScan();
+    this->LocalHardwareScan();
 }
 
-void HardwareScan::Run()
-{
-    std::map<std::string, CameraHardware> camera_;
-    std::map<std::string, AudioHardware> mic_;
-    std::map<std::string, AudioHardware> speaker_;
-    generateIndentifyKeyValue(camera_, mic_, speaker_);
-    {
-        std::lock_guard<std::mutex> locker1(this->map_lock_);
-        this->resource_manager->InsertHardwareInfo(camera_, mic_, speaker_, this->hardware_instance_map);
-    }
-    this->AutoGenerateCR();
-    this->printMap();
-    LOG(INFO) << L_GREEN << "local hardware match and autogen finish" << NONE;
-    this->periodic_scan_thread = std::thread(&HardwareScan::periodicHardwareScanThread, this);
-}
-
-void HardwareScan::Wait()
-{
-    this->periodic_scan_thread.join();
-}
-
-void HardwareScan::localHardwareScan()
+void HardwareScan::LocalHardwareScan()
 {
     LOG(INFO) << L_GREEN << "local hardware scan begin" << NONE;
+    std::lock_guard<std::mutex> locker1(this->map_lock_);
+    std::lock_guard<std::mutex> locker2(camera_hardware_lock_);
+    std::lock_guard<std::mutex> locker3(mic_hardware_lock_);
+    std::lock_guard<std::mutex> locker4(speaker_hardware_lock_);
+    std::lock_guard<std::mutex> locker5(display_hardware_lock_);
     getCameraInfo();
-    getAudioInfo();
+    getMicInfo();
+    getSpeakerInfo();
     getDisplayHardware();
     LOG(INFO) << "hardware scan finish : camera: " << this->profile.cameraDevices.size()
               << "  mic: " << this->profile.micDevices.size()
@@ -540,144 +590,12 @@ void HardwareScan::localHardwareScan()
     compareMap();
 }
 
-void HardwareScan::AutoGenerateCR()
-{
-    LOG(INFO) << "begin auto generate unmatched hardware CR";
-    std::lock_guard<std::mutex> locker1(this->map_lock_);
-    std::lock_guard<std::mutex> locker3(camera_hardware_lock_);
-    std::lock_guard<std::mutex> locker2(audio_hardware_lock_);
-    for (const auto &iter : profile.cameraDevices)
-    {
-        if (this->hardware_instance_map.count(iter.card) == 0)
-        {
-            CameraInstance instance;
-            instance.apiVersion = "stable.example.com/v1";
-            instance.kind = CameraDeviceResourcetype;
-            int count = gnerateSerialNumber("camera");
-            instance.metadata.name = "Autogen-Camera-" + std::to_string(count);
-            instance.metadata.namespace_name = "default";
-            instance.spec.version = "1.0";
-            instance.spec.hostname = hostname_;
-            instance.spec.kind = "camera";
-            instance.spec.hardwareidentifier = iter.card;
-            // properties part
-            instance.spec.properties.vendor = "unknown";
-            instance.spec.properties.resolution = "unknown";
-            instance.spec.properties.location = "unknown";
-            instance.spec.properties.wideAngle = 0;
-            instance.spec.properties.focusMethod = "unknown";
-            instance.spec.properties.telephoto = false;
-            instance.spec.properties.interface = "unknown";
-            instance.spec.properties.devicePath = iter.device_path;
-            instance.spec.properties.driverName = iter.driver;
-            instance.spec.properties.card = iter.card;
-            instance.spec.properties.busInfo = iter.bus_info;
-            instance.spec.properties.description = "ignore";
-            for (int i = 0; i < iter.formats.size(); i++)
-            {
-                instance.spec.properties.supportFormat.emplace_back(iter.formats[i]);
-            }
-            // status part
-            instance.status.occupancy = false;
-
-            std::string data = instance.Marshal();
-            if (!this->resource_manager->AddDeviceInstance(data))
-            {
-                LOG(ERROR) << "autogen CR: " << instance.metadata.name << " add fail";
-            }
-            else
-            {
-                // LOG(INFO) << "add device instance : " << instance.metadata.name << " success";
-                this->hardware_instance_map[iter.card] = instance.metadata.namespace_name + "/" + instance.metadata.name;
-            }
-        }
-    }
-    for (const auto &iter : profile.micDevices)
-    {
-        if (this->hardware_instance_map.count(iter.name) == 0)
-        {
-            MicrophoneInstance instance;
-            instance.apiVersion = "stable.example.com/v1";
-            instance.kind = MicrophoneDeviceResourcetype;
-            int count = gnerateSerialNumber("mic");
-            instance.metadata.name = "Autogen-Mic-" + std::to_string(count);
-            instance.metadata.namespace_name = "default";
-
-            instance.spec.version = "1.0";
-            instance.spec.hostname = hostname_;
-            instance.spec.kind = "microphone";
-            instance.spec.hardwareidentifier = iter.name;
-            // properties part
-            instance.spec.properties.channelNumber = 0;
-            instance.spec.properties.bitWidth = 0;
-            instance.spec.properties.interface = "unknown";
-            instance.spec.properties.hardwareName = iter.name;
-            instance.spec.properties.sampleRates = std::to_string(iter.sampleRate);
-            instance.spec.properties.volume = (int)iter.volume;
-            instance.spec.properties.mute = iter.mute;
-            instance.spec.properties.description = iter.description;
-            // status part
-            instance.status.occupancy = false;
-
-            std::string data = instance.Marshal();
-            if (!this->resource_manager->AddDeviceInstance(data))
-            {
-                LOG(ERROR) << "autogen CR: " << instance.metadata.name << " add fail";
-            }
-            else
-            {
-                // LOG(INFO) << "add device instance : " << instance.metadata.name << " success";
-                this->hardware_instance_map[iter.name] = instance.metadata.namespace_name + "/" + instance.metadata.name;
-            }
-        }
-    }
-    for (const auto &iter : profile.speakerDevices)
-    {
-        if (this->hardware_instance_map.count(iter.name) == 0)
-        {
-            LoudspeakerInstance instance;
-            instance.apiVersion = "stable.example.com/v1";
-            instance.kind = LoudspeakerDeviceResourcetype;
-            int count = gnerateSerialNumber("speaker");
-            instance.metadata.name = "Autogen-Loudspeaker-" + std::to_string(count);
-            instance.metadata.namespace_name = "default";
-
-            instance.spec.version = "1.0";
-            instance.spec.hostname = hostname_;
-            instance.spec.kind = "loudspeaker";
-            instance.spec.hardwareidentifier = iter.name;
-            // properties part
-            instance.spec.properties.channelNumber = 0;
-            instance.spec.properties.bitWidth = 0;
-            instance.spec.properties.interface = "unknown";
-            instance.spec.properties.hardwareName = iter.name;
-            instance.spec.properties.sampleRates = std::to_string(iter.sampleRate);
-            instance.spec.properties.volume = (int)iter.volume;
-            instance.spec.properties.mute = iter.mute;
-            instance.spec.properties.description = iter.description;
-            // status part
-            instance.status.occupancy = false;
-
-            std::string data = instance.Marshal();
-            if (!this->resource_manager->AddDeviceInstance(data))
-            {
-                LOG(ERROR) << "autogen CR: " << instance.metadata.name << " add fail";
-            }
-            else
-            {
-                // LOG(INFO) << "add device instance : " << instance.metadata.name << " success";
-                this->hardware_instance_map[instance.spec.properties.hardwareName] = instance.metadata.namespace_name + "/" + instance.metadata.name;
-            }
-        }
-    }
-    LOG(INFO) << "finish auto generate";
-}
-
-std::string HardwareScan::GetHardwareDeviceInfo(bool format)
+std::string HardwareScan::GetHardwareDeviceProfile(bool format)
 {
     std::lock_guard<std::mutex> locker1(camera_hardware_lock_);
-    std::lock_guard<std::mutex> locker2(audio_hardware_lock_);
-    std::lock_guard<std::mutex> locker3(display_hardware_lock_);
+    std::lock_guard<std::mutex> locker2(mic_hardware_lock_);
+    std::lock_guard<std::mutex> locker3(speaker_hardware_lock_);
+    std::lock_guard<std::mutex> locker4(display_hardware_lock_);
     if (format)
     {
         return this->profile.toJson().toStyledString();
@@ -686,84 +604,82 @@ std::string HardwareScan::GetHardwareDeviceInfo(bool format)
     return writer.write(this->profile.toJson());
 }
 
-std::optional<CameraHardware> HardwareScan::GetCameraHardware(const std::string &id, const std::string &key)
+std::optional<Json::Value> HardwareScan::GetHardware(const std::string &id, const std::string &key, const std::string &type)
 {
+    if (id == "")
+    {
+        return std::nullopt;
+    }
     if (this->isAutogenInstance(key))
     {
         return std::nullopt;
     }
-    std::lock_guard<std::mutex> locker2(this->map_lock_);
-    std::lock_guard<std::mutex> locker1(this->camera_hardware_lock_);
-
-    for (const auto &iter : profile.cameraDevices)
+    if (type == CameraDeviceResourcetype)
     {
-        if (iter.card == id)
+        std::lock_guard<std::mutex> locker2(this->map_lock_);
+        std::lock_guard<std::mutex> locker1(this->camera_hardware_lock_);
+        for (const auto &iter : profile.cameraDevices)
         {
-            if (this->hardware_instance_map.count(id) != 0 && !this->isAutogenInstance(this->hardware_instance_map[id]))
+            if (iter.bus_info == id)
             {
-                LOG(ERROR) << "the camera hardware: \"" << id << "\" already match with: " << this->hardware_instance_map[id];
-                return std::nullopt;
-            }
-            else
-            {
-                return iter;
+                auto key_in_map = hardware_instance_map.at(id);
+                if (key_in_map != "" && key_in_map != key && !isAutogenInstance(key_in_map))
+                {
+                    LOG(ERROR) << "the camera hardware: \"" << id << "\" already match with: " << key_in_map;
+                    return std::nullopt;
+                }
+                else
+                {
+                    return iter.toJson();
+                }
             }
         }
     }
-    LOG(INFO) << "no match hardware with: \"" << id << "\"";
-    return std::nullopt;
-}
-
-std::optional<AudioHardware> HardwareScan::GetMicHardware(const std::string &id, const std::string &key)
-{
-    if (this->isAutogenInstance(key))
+    else if (type == LoudspeakerDeviceResourcetype)
+    {
+        std::lock_guard<std::mutex> locker2(this->map_lock_);
+        std::lock_guard<std::mutex> locker4(speaker_hardware_lock_);
+        for (const auto &iter : profile.speakerDevices)
+        {
+            if (iter.name == id)
+            {
+                auto key_in_map = hardware_instance_map.at(id);
+                if (key_in_map != "" && key_in_map != key && !isAutogenInstance(key_in_map))
+                {
+                    LOG(ERROR) << "the speaker hardware: \"" << id << "\" already match with: " << key_in_map;
+                    return std::nullopt;
+                }
+                else
+                {
+                    return iter.toJson();
+                }
+            }
+        }
+    }
+    else if (type == MicrophoneDeviceResourcetype)
+    {
+        std::lock_guard<std::mutex> locker2(this->map_lock_);
+        std::lock_guard<std::mutex> locker3(mic_hardware_lock_);
+        for (const auto &iter : profile.micDevices)
+        {
+            if (iter.name == id)
+            {
+                auto key_in_map = hardware_instance_map.at(id);
+                if (key_in_map != "" && key_in_map != key && !isAutogenInstance(key_in_map))
+                {
+                    LOG(ERROR) << "the mic hardware: \"" << id << "\" already match with: " << key_in_map;
+                    return std::nullopt;
+                }
+                else
+                {
+                    return iter.toJson();
+                }
+            }
+        }
+    }
+    else
     {
         return std::nullopt;
     }
-    std::lock_guard<std::mutex> locker2(this->map_lock_);
-    std::lock_guard<std::mutex> locker1(this->audio_hardware_lock_);
-    for (const auto &iter : profile.micDevices)
-    {
-        if (iter.name == id)
-        {
-            if (this->hardware_instance_map.count(id) != 0 && !this->isAutogenInstance(this->hardware_instance_map[id]))
-            {
-                LOG(ERROR) << "the mic hardware: \"" << id << "\" already match with: " << this->hardware_instance_map[id];
-                return std::nullopt;
-            }
-            else
-            {
-                return iter;
-            }
-        }
-    }
-    LOG(INFO) << "no match hardware with: \"" << id << "\"";
-    return std::nullopt;
-}
-
-std::optional<AudioHardware> HardwareScan::GetSpeakerHardware(const std::string &id, const std::string &key)
-{
-    if (this->isAutogenInstance(key))
-    {
-        return std::nullopt;
-    }
-    std::lock_guard<std::mutex> locker2(this->map_lock_);
-    std::lock_guard<std::mutex> locker1(this->audio_hardware_lock_);
-    for (const auto &iter : profile.speakerDevices)
-    {
-        if (iter.name == id)
-        {
-            if (this->hardware_instance_map.count(id) != 0 && !this->isAutogenInstance(this->hardware_instance_map[id]))
-            {
-                LOG(ERROR) << "the speaker hardware: \"" << id << "\" already match with: " << this->hardware_instance_map[id];
-                return std::nullopt;
-            }
-            else
-            {
-                return iter;
-            }
-        }
-    }
-    LOG(INFO) << "no match hardware with: \"" << id << "\"";
     return std::nullopt;
 }

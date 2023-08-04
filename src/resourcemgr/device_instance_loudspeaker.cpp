@@ -5,7 +5,7 @@
 
 #include "hardware_audio.h"
 
-std::string LoudspeakerInstance::GetHardwareIdentifier()
+std::string LoudspeakerInstance::GetHardwareIdentifier() const
 {
     return spec.hardwareidentifier;
 }
@@ -22,29 +22,34 @@ bool LoudspeakerInstance::UpdateHardwareInfo(const Json::Value &info)
             spec.properties.hardwareName = hardware.name;
             changeornot = true;
         }
-        if (std::to_string(hardware.sampleRate) != spec.properties.sampleRates)
-        {
-            spec.properties.sampleRates = std::to_string(hardware.sampleRate);
-            changeornot = true;
-        }
-        if (static_cast<int>(hardware.volume) != spec.properties.volume)
-        {
-            spec.properties.volume = static_cast<int>(hardware.volume);
-            changeornot = true;
-        }
-        if (hardware.mute != spec.properties.mute)
-        {
-            spec.properties.mute = hardware.mute;
-            changeornot = true;
-        }
         if (hardware.description != spec.properties.description)
         {
             spec.properties.description = hardware.description;
             changeornot = true;
         }
-        if (static_cast<int>(hardware.channels) != spec.properties.channelNumber)
+        if (spec.properties.sampleRate != hardware.sampleRate)
         {
-            spec.properties.channelNumber = static_cast<int>(hardware.channels);
+            spec.properties.sampleRate = hardware.sampleRate;
+            changeornot = true;
+        }
+        if (spec.properties.channels != hardware.channels)
+        {
+            spec.properties.channels = hardware.channels;
+            changeornot = true;
+        }
+        if (spec.properties.format != hardware.format)
+        {
+            spec.properties.format = hardware.format;
+            changeornot = true;
+        }
+        if (spec.properties.cardID != hardware.cardID)
+        {
+            spec.properties.cardID = hardware.cardID;
+            changeornot = true;
+        }
+        if (spec.properties.deviceID != hardware.deviceID)
+        {
+            spec.properties.deviceID = hardware.deviceID;
             changeornot = true;
         }
     }
@@ -55,7 +60,18 @@ bool LoudspeakerInstance::UpdateHardwareInfo(const Json::Value &info)
     return changeornot;
 }
 
-std::string LoudspeakerInstance::Marshal()
+void LoudspeakerInstance::EraseHardwareInfo()
+{
+    spec.properties.hardwareName = "";
+    spec.properties.description = "";
+    spec.properties.sampleRate.clear();
+    spec.properties.channels.clear();
+    spec.properties.format.clear();
+    spec.properties.cardID = "";
+    spec.properties.deviceID = "";
+}
+
+std::string LoudspeakerInstance::Marshal() const
 {
     auto jnode = ToJson();
     Json::FastWriter writer;
@@ -78,9 +94,21 @@ bool LoudspeakerInstance::FromJson(const Json::Value &jnode)
     {
         spec.capability2.clear();
     }
-    if (spec.customprops.size() != 0)
+    // if (spec.customprops.size() != 0)
+    // {
+    //     spec.customprops.clear();
+    // }
+    if (spec.properties.sampleRate.size() != 0)
     {
-        spec.customprops.clear();
+        spec.properties.sampleRate.clear();
+    }
+    if (spec.properties.channels.size() != 0)
+    {
+        spec.properties.channels.clear();
+    }
+    if (spec.properties.format.size() != 0)
+    {
+        spec.properties.format.clear();
     }
 
     if (jnode["spec"].isMember("capability1"))
@@ -112,24 +140,38 @@ bool LoudspeakerInstance::FromJson(const Json::Value &jnode)
     spec.properties.sampleRates = jnode["spec"]["properties"]["sampleRates"].asString();
     spec.properties.channelNumber = jnode["spec"]["properties"]["channelNumber"].asInt();
     spec.properties.bitWidth = jnode["spec"]["properties"]["bitWidth"].asInt();
-    spec.properties.hardwareName = jnode["spec"]["properties"]["hardwareName"].asString();
-    spec.properties.volume = jnode["spec"]["properties"]["volume"].asInt();
-    spec.properties.mute = jnode["spec"]["properties"]["mute"].asBool();
-    spec.properties.description = jnode["spec"]["properties"]["description"].asString();
     spec.properties.interface = jnode["spec"]["properties"]["interface"].asString();
-    if (jnode["spec"].isMember("customprops"))
+
+    spec.properties.hardwareName = jnode["spec"]["properties"]["hardwareName"].asString();
+    spec.properties.description = jnode["spec"]["properties"]["description"].asString();
+    for (const auto &iter : jnode["spec"]["properties"]["sampleRate"])
     {
-        Json::Value::Members member;
-        member = jnode["spec"]["customprops"].getMemberNames();
-        for (Json::Value::Members::iterator it = member.begin(); it != member.end(); it++)
-        {
-            spec.customprops[*it] = jnode["spec"]["customprops"][*it].asString();
-        }
+        spec.properties.sampleRate.emplace_back(iter.asUInt());
     }
+    for (const auto &iter : jnode["spec"]["properties"]["channels"])
+    {
+        spec.properties.channels.emplace_back(iter.asUInt());
+    }
+    for (const auto &iter : jnode["spec"]["properties"]["format"])
+    {
+        spec.properties.format.emplace_back(iter.asString());
+    }
+    spec.properties.cardID = jnode["spec"]["properties"]["cardID"].asString();
+    spec.properties.deviceID = jnode["spec"]["properties"]["deviceID"].asString();
+
+    // if (jnode["spec"].isMember("customprops"))
+    // {
+    //     Json::Value::Members member;
+    //     member = jnode["spec"]["customprops"].getMemberNames();
+    //     for (Json::Value::Members::iterator it = member.begin(); it != member.end(); it++)
+    //     {
+    //         spec.customprops[*it] = jnode["spec"]["customprops"][*it].asString();
+    //     }
+    // }
     return true;
 }
 
-Json::Value LoudspeakerInstance::ToJson()
+Json::Value LoudspeakerInstance::ToJson() const
 {
     Json::Value jnode;
     jnode["apiVersion"] = apiVersion;
@@ -142,14 +184,29 @@ Json::Value LoudspeakerInstance::ToJson()
     jnode["spec"]["version"] = spec.version;
     jnode["spec"]["hostname"] = spec.hostname;
     jnode["spec"]["hardwareidentifier"] = spec.hardwareidentifier;
+
     jnode["spec"]["properties"]["sampleRates"] = spec.properties.sampleRates;
     jnode["spec"]["properties"]["channelNumber"] = spec.properties.channelNumber;
     jnode["spec"]["properties"]["bitWidth"] = spec.properties.bitWidth;
-    jnode["spec"]["properties"]["hardwareName"] = spec.properties.hardwareName;
-    jnode["spec"]["properties"]["volume"] = spec.properties.volume;
-    jnode["spec"]["properties"]["mute"] = spec.properties.mute;
-    jnode["spec"]["properties"]["description"] = spec.properties.description;
     jnode["spec"]["properties"]["interface"] = spec.properties.interface;
+
+    jnode["spec"]["properties"]["hardwareName"] = spec.properties.hardwareName;
+    jnode["spec"]["properties"]["description"] = spec.properties.description;
+    for (const auto &iter : spec.properties.sampleRate)
+    {
+        jnode["spec"]["properties"]["sampleRate"].append(iter);
+    }
+    for (const auto &iter : spec.properties.channels)
+    {
+        jnode["spec"]["properties"]["channels"].append(iter);
+    }
+    for (const auto &iter : spec.properties.format)
+    {
+        jnode["spec"]["properties"]["format"].append(iter);
+    }
+    jnode["spec"]["properties"]["cardID"] = spec.properties.cardID;
+    jnode["spec"]["properties"]["deviceID"] = spec.properties.deviceID;
+
     for (int i = 0; i < spec.capability1.size(); i++)
     {
         Json::Value cap;
@@ -170,10 +227,10 @@ Json::Value LoudspeakerInstance::ToJson()
         }
         jnode["spec"]["capability2"].append(cap);
     }
-    for (auto &iter : spec.customprops)
-    {
-        jnode["spec"]["customprops"][iter.first] = iter.second;
-    }
+    // for (auto &iter : spec.customprops)
+    // {
+    //     jnode["spec"]["customprops"][iter.first] = iter.second;
+    // }
     // api part
     for (int i = 0; i < api.function.size(); i++)
     {
@@ -225,7 +282,7 @@ bool LoudspeakerInstance::updateInstance(const Json::Value &jnode)
     return FromJson(jnode);
 }
 
-std::string LoudspeakerInstance::getInstanceVersion()
+std::string LoudspeakerInstance::getInstanceVersion() const
 {
     return spec.version;
 }
