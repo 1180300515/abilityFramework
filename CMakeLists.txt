@@ -86,7 +86,7 @@ add_executable(${PROJECT_NAME} src/main.cpp
     ${utils}
     ${httpserver}
 )
-target_link_libraries(AbilityFramework stdc++ sqlite3 jsoncpp glog yaml-cpp X11 pulse Xrandr v4l2 pthread dl crypto ssl z protobuf::libprotobuf gRPC::grpc++ )
+target_link_libraries(AbilityFramework stdc++ sqlite3 jsoncpp glog yaml-cpp X11 asound Xrandr v4l2 pthread dl crypto ssl z protobuf::libprotobuf gRPC::grpc++ )
 
 #生成test可执行文件
 add_executable(cameratest test/test_ability_lifecycle.cpp ${protos})
@@ -112,4 +112,4 @@ add_executable(testResourceMgr test/resource_mgr_test/test_resourcemgr.cpp
     ${databasemgr}
     ${resourcemgr}
     ${utils})
-target_link_libraries(testResourceMgr stdc++ sqlite3 jsoncpp glog yaml-cpp X11 pulse Xrandr v4l2 pthread dl crypto ssl z protobuf::libprotobuf gRPC::grpc++)
+target_link_libraries(testResourceMgr stdc++ sqlite3 jsoncpp glog yaml-cpp X11 asound Xrandr v4l2 pthread dl crypto ssl z protobuf::libprotobuf gRPC::grpc++)
