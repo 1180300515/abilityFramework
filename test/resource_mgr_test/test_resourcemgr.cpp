@@ -189,6 +189,4 @@ int main(int argc, char **argv)
     block();
     test->DeleteDeviceInstance("default/Acermic");
     test->Print();
-
-    test->Wait();
 }
