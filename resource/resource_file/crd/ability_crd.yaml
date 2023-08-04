@@ -57,6 +57,8 @@ spec:
                       - display
                       - speaker
                       - camera
+                      - sensor
+                      - motor
             spec:
               description: the spec part
               type: object
