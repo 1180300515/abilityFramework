@@ -82,25 +82,8 @@ spec:
                       type: string
                     telephoto:
                       type: boolean
-                    devicePath:
-                      type: string
-                    driverName:
-                      type: string
-                    card:
-                      type: string
-                    busInfo:
-                      type: string
-                    description:
-                      type: string
-                    supportFormat:
-                      type: array
-                      items:
-                        type: string
                     interface:
                       type: string
-                customprops:
-                  type: object
-                  description: custom properties to describe a camera device
             status:
               type: object
               required:

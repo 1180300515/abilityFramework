@@ -74,9 +74,6 @@ spec:
                       type: string
                     interface:
                       type: string
-                customprops:
-                  type: object
-                  description: custom properties to describe a sensor device
             status:
               type: object
               required:

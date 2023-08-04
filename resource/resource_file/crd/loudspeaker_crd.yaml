@@ -63,7 +63,6 @@ spec:
                 properties:
                   type: object
                   required:
-                    - channelNumber
                     - interface
                   properties:
                     sampleRates:
@@ -72,17 +71,8 @@ spec:
                       type: integer
                     bitWidth:
                       type: integer
-                    volume:
-                      type: integer
-                    mute:
-                      type: boolean
-                    description:
-                      type: string
                     interface:
                       type: string
-                customprops:
-                  type: object
-                  description: custom properties to describe a loudspeaker device
             status:
               type: object
               required:

@@ -6,7 +6,7 @@ metadata:
 spec:
   version: "1.0"
   hostname: ""
-  hardwareidentifier: "ACER HD User Facing: ACER HD Us"
+  hardwareidentifier: "usb-0000:00:14.0-1"
   kind: camera
   capability1:
     - name: WideAngleCamera
