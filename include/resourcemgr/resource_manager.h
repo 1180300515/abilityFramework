@@ -8,7 +8,6 @@
 
 #include "device_instance_info.h"
 #include "ability_instance_info.h"
-#include "nonlocal_resource_info.h"
 #include "hardware_scan.h"
 #include "message_package_struct.h"
 #include "ability_instance_info_extract.h"

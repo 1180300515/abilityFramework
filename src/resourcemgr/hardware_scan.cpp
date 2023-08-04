@@ -191,7 +191,9 @@ void HardwareScan::getAudioInfo()
     // pa_mainloop_free(mainloop);
 
     sleep(2);
+    pa_context_disconnect(context);
     pa_threaded_mainloop_stop(mainloop);
+    pa_threaded_mainloop_free(mainloop);
 
     // std::cout << "Output devices:" << std::endl;
     // for (const auto &device : outputDevices)
@@ -252,8 +254,9 @@ void HardwareScan::compareMap()
 {
     LOG(INFO) << "compare old hardware and new hardware, delete the non-exist hardware";
     std::lock_guard<std::mutex> locker1(this->map_lock_);
-    std::lock_guard<std::mutex> locker2(audio_hardware_lock_);
     std::lock_guard<std::mutex> locker3(camera_hardware_lock_);
+    std::lock_guard<std::mutex> locker2(audio_hardware_lock_);
+
     for (auto iter = hardware_instance_map.begin(); iter != hardware_instance_map.end();)
     {
         bool delete_ = true;
@@ -417,26 +420,23 @@ void HardwareScan::DeleteMap(const std::string &key)
 
 void HardwareScan::generateIndentifyKeyValue(std::map<std::string, CameraHardware> &camera, std::map<std::string, AudioHardware> &mic, std::map<std::string, AudioHardware> &speaker)
 {
+    std::lock_guard<std::mutex> locker1(camera_hardware_lock_);
+    std::lock_guard<std::mutex> locker2(audio_hardware_lock_);
+    for (const auto &iter : profile.cameraDevices)
     {
-        std::lock_guard<std::mutex> locker(audio_hardware_lock_);
-        for (const auto &iter : profile.micDevices)
-        {
-            mic[iter.name] = iter;
-            // LOG(INFO) << RED << iter.name << NONE;
-        }
-        for (const auto &iter : profile.speakerDevices)
-        {
-            // LOG(INFO) << RED << iter.name << NONE;
-            speaker[iter.name] = iter;
-        }
+        // LOG(INFO) << RED << iter.card << NONE;
+        camera[iter.card] = iter;
     }
+
+    for (const auto &iter : profile.micDevices)
     {
-        std::lock_guard<std::mutex> locker(camera_hardware_lock_);
-        for (const auto &iter : profile.cameraDevices)
-        {
-            // LOG(INFO) << RED << iter.card << NONE;
-            camera[iter.card] = iter;
-        }
+        mic[iter.name] = iter;
+        // LOG(INFO) << RED << iter.name << NONE;
+    }
+    for (const auto &iter : profile.speakerDevices)
+    {
+        // LOG(INFO) << RED << iter.name << NONE;
+        speaker[iter.name] = iter;
     }
 }
 
@@ -508,7 +508,6 @@ void HardwareScan::Init(std::shared_ptr<ResourceManager> manager_, std::string h
 
 void HardwareScan::Run()
 {
-    LOG(INFO) << "begin match the hardware with the device instance";
     std::map<std::string, CameraHardware> camera_;
     std::map<std::string, AudioHardware> mic_;
     std::map<std::string, AudioHardware> speaker_;
@@ -532,8 +531,8 @@ void HardwareScan::localHardwareScan()
 {
     LOG(INFO) << L_GREEN << "local hardware scan begin" << NONE;
     getCameraInfo();
-    getDisplayHardware();
     getAudioInfo();
+    getDisplayHardware();
     LOG(INFO) << "hardware scan finish : camera: " << this->profile.cameraDevices.size()
               << "  mic: " << this->profile.micDevices.size()
               << "  speaker: " << this->profile.speakerDevices.size()
@@ -545,8 +544,8 @@ void HardwareScan::AutoGenerateCR()
 {
     LOG(INFO) << "begin auto generate unmatched hardware CR";
     std::lock_guard<std::mutex> locker1(this->map_lock_);
-    std::lock_guard<std::mutex> locker2(audio_hardware_lock_);
     std::lock_guard<std::mutex> locker3(camera_hardware_lock_);
+    std::lock_guard<std::mutex> locker2(audio_hardware_lock_);
     for (const auto &iter : profile.cameraDevices)
     {
         if (this->hardware_instance_map.count(iter.card) == 0)
@@ -693,8 +692,9 @@ std::optional<CameraHardware> HardwareScan::GetCameraHardware(const std::string 
     {
         return std::nullopt;
     }
-    std::lock_guard<std::mutex> locker1(this->camera_hardware_lock_);
     std::lock_guard<std::mutex> locker2(this->map_lock_);
+    std::lock_guard<std::mutex> locker1(this->camera_hardware_lock_);
+
     for (const auto &iter : profile.cameraDevices)
     {
         if (iter.card == id)
@@ -720,8 +720,8 @@ std::optional<AudioHardware> HardwareScan::GetMicHardware(const std::string &id,
     {
         return std::nullopt;
     }
-    std::lock_guard<std::mutex> locker1(this->audio_hardware_lock_);
     std::lock_guard<std::mutex> locker2(this->map_lock_);
+    std::lock_guard<std::mutex> locker1(this->audio_hardware_lock_);
     for (const auto &iter : profile.micDevices)
     {
         if (iter.name == id)
@@ -747,8 +747,8 @@ std::optional<AudioHardware> HardwareScan::GetSpeakerHardware(const std::string 
     {
         return std::nullopt;
     }
-    std::lock_guard<std::mutex> locker1(this->audio_hardware_lock_);
     std::lock_guard<std::mutex> locker2(this->map_lock_);
+    std::lock_guard<std::mutex> locker1(this->audio_hardware_lock_);
     for (const auto &iter : profile.speakerDevices)
     {
         if (iter.name == id)
