@@ -2,6 +2,7 @@
 #define GLOBAL_VAR_H
 
 #include <string>
+#include <cstdlib>
 
 #include "global_var.h"
 
@@ -47,5 +48,7 @@
 #define STATUS_RUNNING "RUNNING"
 #define STATUS_SUSPEND "SUSPEND"
 #define STATUS_TERMINATE "TERMINATE"
+
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof *(a))
 
 #endif

@@ -19,15 +19,13 @@ bool YamlToJsonForInstance(const YAML::Node &ynode, Json::Value &jnode, std::str
  */
 bool SchemaValidation(const std::string &schemajsonstring, const std::string &inputstring);
 
-//std::string JsonToString(const Json::Value &jnode);
+// std::string JsonToString(const Json::Value &jnode);
 
-//void StringToJson(const std::string jsonformatstring, Json::Value &jnode);
+// void StringToJson(const std::string jsonformatstring, Json::Value &jnode);
 
 std::string GetCrdSchemaPart(const Json::Value &jnode);
 
-std::string GetAbilityValidatePart(const Json::Value &jnode);
-
-std::string GetInstanceValidatePart(const Json::Value &jnode);
+std::string GetValidatePart(const Json::Value &jnode);
 
 std::string GetInstanceKey(const Json::Value &jnode);
 
