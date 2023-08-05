@@ -39,7 +39,7 @@ std::string AudioHardware::ToKeyValue(const std::string &hostname) const
     ss << "channels:[";
     for (const auto &iter : channels)
     {
-        ss << iter << " ";
+        ss << std::to_string(iter) << " ";
     }
     ss << "],";
     ss << "format:[";
@@ -49,7 +49,7 @@ std::string AudioHardware::ToKeyValue(const std::string &hostname) const
     }
     ss << "],";
     ss << "cardID:" << cardID << ",";
-    ss << "deviceID" << deviceID;
+    ss << "deviceID:" << deviceID;
     return ss.str();
 }
 
