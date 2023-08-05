@@ -48,6 +48,11 @@ public:
      */
     int GenerateSerialNumber(const std::string &type);
 
+    /**
+     * @brief print the hardware and instance map
+     */
+    void PrintMap();
+
 private:
     /**
      * @brief get the camera hardware info
@@ -68,10 +73,7 @@ private:
 
     int retriveOtherAudioParameters(snd_pcm_stream_t stream_type, AudioHardware *audioDevice);
 
-    /**
-     * @brief print the hardware and instance map
-     */
-    void printMap();
+    
     /**
      * @brief delete the noexist hadware
      */

@@ -440,6 +440,11 @@ void ResourceManager::Run()
     periodic_scan_thread = std::thread(&ResourceManager::periodicScanThread, this);
 }
 
+void ResourceManager::Wait()
+{
+    periodic_scan_thread.join();
+}
+
 std::string ResourceManager::GetHardwareDeviceInfo(bool format)
 {
     return hardware_->GetHardwareDeviceProfile(format);
@@ -477,6 +482,11 @@ void ResourceManager::Print()
     {
         std::cout << RED << iter.first << NONE << std::endl;
     }
+}
+
+void ResourceManager::PrintMatchMap()
+{
+    hardware_->PrintMap();
 }
 
 std::vector<AbilityInfoExtract> ResourceManager::GetAbilityInfoExtractList()
@@ -587,7 +597,7 @@ void ResourceManager::resourceMatching()
                 continue;
             }
         }
-        if (old_key == "")
+        if (old_key == "not-exist")
         {
             continue;
         }

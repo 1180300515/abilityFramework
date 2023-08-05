@@ -89,7 +89,7 @@ public:
      * @brief start the resource manager module
      */
     void Run();
-    //void Wait();
+    void Wait();
     /**
      * @brief get the local hardware device json string
      * @param format format string or not
@@ -101,6 +101,7 @@ public:
     std::shared_ptr<AbilityInstanceInfo> GetAbilityInstance(const std::string &key);
 
     void Print();
+    void PrintMatchMap();
 
     // callback function defination
     /**

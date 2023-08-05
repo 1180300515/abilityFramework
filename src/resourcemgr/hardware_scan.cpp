@@ -7,7 +7,6 @@
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrandr.h>
 
-
 #include "glog/logging.h"
 
 #include "device_instance_camera.h"
@@ -238,7 +237,15 @@ std::vector<AudioHardware> HardwareScan::getAudioList(const std::string &type)
                     LOG(ERROR) << "control digital audio info (" << card << "): " << snd_strerror(err);
                 continue;
             }
-            std::string name = "card-" + std::to_string(card) + ".device-" + std::to_string(dev) + "." + std::string(snd_ctl_card_info_get_name(info));
+            std::string name;
+            if (type == "record")
+            {
+                name = "mic.card-" + std::to_string(card) + ".device-" + std::to_string(dev) + "." + std::string(snd_ctl_card_info_get_name(info));
+            }
+            else if (type == "playback")
+            {
+                name = "speaker.card-" + std::to_string(card) + ".device-" + std::to_string(dev) + "." + std::string(snd_ctl_card_info_get_name(info));
+            }
 
             AudioHardware audioDevice(name, snd_pcm_info_get_name(pcminfo), {}, {}, {}, std::to_string(card), std::to_string(dev));
             if (retriveOtherAudioParameters(stream, &audioDevice))
@@ -359,7 +366,7 @@ int HardwareScan::retriveOtherAudioParameters(snd_pcm_stream_t stream_type, Audi
     return 0;
 }
 
-void HardwareScan::printMap()
+void HardwareScan::PrintMap()
 {
     std::lock_guard<std::mutex> locker1(this->map_lock_);
     for (const auto &iter : this->hardware_instance_map)
@@ -512,7 +519,7 @@ std::string HardwareScan::GetMatchedKey(const std::string &id)
     std::lock_guard<std::mutex> locker1(this->map_lock_);
     if (this->hardware_instance_map.count(id) == 0)
     {
-        return "";
+        return "not-exist";
     }
     else
     {
