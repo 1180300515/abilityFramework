@@ -73,6 +73,40 @@ bin 可执行文件
 位于`include/controller/global_var.h`头文件中
 - httpserver端口号: 8080
 
-## 硬件资源自动生成Instance
-位于类`HardwareScan`中。函数为`AutoGenerateCR()`
+## 硬件资源自动生成DeviceInstance
+硬件匹配机制为:    
+`camera`采用`CameraHardware`中的`businfo`字段。  
+`mic`和`speaker`则采用`AudioHardware`中的`name`字段。  
+> businfo获取:&ensp;`v4l2-ctl --list-devices --verbose`  
+```
+例子:
+USB 2.0 Camera: USB Camera (usb-0000:00:14.0-1):
+	/dev/video0
+	/dev/video1
+	/dev/media0
+
+VIDIOC_QUERYCAP: ok
+```
+`usb-0000:00:14.0-1`&ensp;即为businfo。
+> name字段获取:  
+mic:&ensp; `arecord -l`   
+speaker:&ensp; `aplay -l`  
+mic组成规则为: &ensp;&ensp; <font color=ff0000>mic.card-[cardID].device-[deviceID].[info]</font>   
+speaker组成规则为: &ensp;&ensp; <font color=ff0000>speaker.card-[cardID].device-[deviceID].[info]</font>
+```
+mic例子:
+card 1: sofhdadsp [sof-hda-dsp], device 0: HDA Analog (*) []
+  子设备: 1/1
+  子设备 #0: subdevice #0
+
+cardID为1，deviceID为0，info为sof-hda-dsp
+
+speaker例子:
+card 0: NVidia [HDA NVidia], device 9: HDMI 3 [HDMI 3]
+  子设备: 1/1
+  子设备 #0: subdevice #0
+cardID为0，deviceID为9，info为HDA NVidia
+```
+mic的`name`为:&ensp; <font color=ff0000>mic.card-1.device-0.sof-hda-dsp</font>
+
 
