@@ -6,7 +6,7 @@ metadata:
 spec:
   version: "1.0"
   hostname: ""
-  hardwareidentifier: "usb-0000:00:14.0-1"
+  hardwareidentifier: ""
   kind: camera
   capability1:
     - name: WideAngleCamera

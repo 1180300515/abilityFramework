@@ -6,7 +6,7 @@ spec:
   kind: camera
   version: "1.0"
   hostname: ""
-  hardwareidentifier: "USB 2.0 Camera: USB Camera"
+  hardwareidentifier: "usb-0000:00:14.0-1"
   capability1:
     - name: WideAngleCamera
       api:

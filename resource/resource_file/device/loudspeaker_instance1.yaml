@@ -6,6 +6,7 @@ spec:
   kind: loudspeaker
   version: "1.0"
   hostname: ""
+  hardwareidentifier: "speaker.card-1.device-0.sof-hda-dsp"
   capability1:
     - name: loudspeaker
       api:
