@@ -152,7 +152,7 @@ bool SchemaValidation(const std::string &schemajsonstring, const std::string &in
     rapidjson::SchemaValidator validator(schema);
     if (!d.Accept(validator))
     {
-        LOG(INFO) << "can't pass the validate, please check the instance file";
+        //LOG(INFO) << "can't pass the validate, please check the instance file";
         rapidjson::StringBuffer sb;
         validator.GetInvalidSchemaPointer().StringifyUriFragment(sb);
         LOG(INFO) << "Invalid schema: " << sb.GetString();
