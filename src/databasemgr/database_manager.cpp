@@ -570,7 +570,7 @@ bool DatabaseManager::validateJson(const Json::Value &instance_json) const
     std::string instance_validate = GetValidatePart(instance_json);
     if (!SchemaValidation(schema, instance_validate))
     {
-        LOG(WARNING) << "can't pass validate";
+        LOG(WARNING) << GetInstanceKey(instance_json) << "can't pass validate";
         return false;
     }
     //LOG(INFO) << "the instance : " << GetInstanceKey(instance_json) << " pass the validate";
