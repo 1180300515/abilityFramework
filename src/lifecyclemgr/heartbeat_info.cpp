@@ -12,6 +12,15 @@ Json::Value HeartbeatInfo::toJson() const
     return j;
 }
 
+void HeartbeatInfo::FromJson(const Json::Value &root)
+{
+    abilityName = root["abilityName"].asString();
+    IPCPort = root["IPCPort"].asInt();
+    status = root["status"].asString();
+    abilityPort = root["abilityPort"].asInt();
+    last_update = std::chrono::steady_clock::now();
+}
+
 bool HeartbeatInfo::IsOffline() const
 {
     auto now = std::chrono::steady_clock::now();

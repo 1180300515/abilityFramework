@@ -5,19 +5,9 @@
 #include "global_var.h"
 #include "color.h"
 
-void LifeCycleManager::HandleCommandInfo(const std::string &cmd)
+void LifeCycleManager::HandleCommandInfo(const CommandInfo &cmd_info)
 {
     //LOG(INFO) << "receive cmd : " << cmd;
-    Json::Value root;
-    Json::Reader reader;
-    bool success = reader.parse(cmd,root);
-    if (!success)
-    {
-        LOG(ERROR) << "json parse error";
-        return;
-    }
-    CommandInfo cmd_info;
-    cmd_info.FromJson(root);
     LOG(INFO) << "handle the command info : " << cmd_info.toJson().toStyledString();
     if (!resourcemgr_checkexist(cmd_info.abilityName))
     {
@@ -75,6 +65,11 @@ void LifeCycleManager::HandleCommandInfo(const std::string &cmd)
 
 bool LifeCycleManager::AddHeartbeatInfo(HeartbeatInfo info)
 {
+    if (info.IPCPort == 0)
+    {
+        LOG(ERROR) << "the heartbeat info IPCPort is illegal";
+        return false;
+    }
     std::lock_guard<std::mutex> locker(heartbeat_map_lock);
     heartbeat_map[info.IPCPort] = info;
     return true;
