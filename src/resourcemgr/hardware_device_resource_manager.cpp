@@ -41,7 +41,7 @@ void HardwareResourceManager::EndAddressResult(std::map<std::string, std::string
         this->last_update = std::chrono::steady_clock::now();
         change = true;
     }
-    else if (std::chrono::steady_clock::now() - this->last_update > std::chrono::minutes(1))
+    else if (std::chrono::steady_clock::now() - this->last_update > std::chrono::minutes(5))
     {
         LOG(INFO) << "Update all host device profile";
         // beyond the time limit
