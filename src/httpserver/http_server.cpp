@@ -17,18 +17,38 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_,
                        [this](const httplib::Request &req, httplib::Response &res)
                        {
                            LOG(INFO) << L_BLUE << "httpserver receive: method: Post   URL: /heartbeat" << NONE;
-                           int port;
-                           try
+                           HeartbeatInfo new_info;
+                           if (req.get_header_value("Content-Type") == "application/json")
                            {
-                               port = std::stoi(req.get_param_value("IPCPort"));
-                               LOG(INFO) << BLUE << "Got heartbeat from port " << port << NONE;
+                               Json::Reader reader;
+                               Json::Value root;
+                               bool success = reader.parse(req.body, root);
+                               if (!success)
+                               {
+                                   LOG(ERROR) << "json parse fail";
+                                   return;
+                               }
+                               new_info.FromJson(root);
                            }
-                           catch (const std::exception &)
+                           else
                            {
-                               res.status = 400; // Bad Request
-                               return;
+                               int port;
+                               try
+                               {
+                                   port = std::stoi(req.get_param_value("IPCPort"));
+                                   LOG(INFO) << BLUE << "Got heartbeat from port " << port << NONE;
+                               }
+                               catch (const std::exception &)
+                               {
+                                   res.status = 400; // Bad Request
+                                   return;
+                               }
+                               new_info = HeartbeatInfo{req.get_param_value("abilityName"),
+                                                        std::stoi(req.get_param_value("IPCPort")),
+                                                        std::stoi(req.get_param_value("abilityPort")),
+                                                        req.get_param_value("status"),
+                                                        std::chrono::steady_clock::now()};
                            }
-                           auto new_info = HeartbeatInfo{req.get_param_value("abilityName"), std::stoi(req.get_param_value("IPCPort")), std::stoi(req.get_param_value("abilityPort")), req.get_param_value("status"), std::chrono::steady_clock::now()};
                            this->lifecycle_manager_->AddHeartbeatInfo(new_info);
                        });
 
@@ -56,8 +76,38 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_,
     this->server->Post("/api/AbilityRequest",
                        [this](const httplib::Request &req, httplib::Response &res)
                        {
+                           // LOG(INFO) << req.get_header_value("Content-Type");
+                           CommandInfo cmd;
+                           if (req.get_header_value("Content-Type") == "application/json")
+                           {
+                               Json::Value root;
+                               Json::Reader reader;
+                               bool success = reader.parse(req.body, root);
+                               if (!success)
+                               {
+                                   LOG(ERROR) << "json parse error";
+                                   return;
+                               }
+                               cmd.FromJson(root);
+                           }
+                           else
+                           {
+                               try
+                               {
+                                   cmd = CommandInfo{std::stoi(req.get_param_value("IPCPort")),
+                                                     req.get_param_value("abilityName"),
+                                                     req.get_param_value("cmd"),
+                                                     std::stoi(req.get_param_value("connectPort")),
+                                                     req.get_param_value("connectIP")};
+                               }
+                               catch (const std::exception &)
+                               {
+                                   res.status = 400; // Bad Request
+                                   return;
+                               }
+                           }
                            LOG(INFO) << L_BLUE << "httpserver receive: method: POST   URL: /api/AbilityRequest" << NONE;
-                           this->lifecycle_manager_->HandleCommandInfo(req.body);
+                           this->lifecycle_manager_->HandleCommandInfo(cmd);
                        });
 }
 
