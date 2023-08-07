@@ -15,6 +15,7 @@ struct HeartbeatInfo
     std::chrono::steady_clock::time_point last_update;
 
     Json::Value toJson() const;
+    void FromJson(const Json::Value &root);
     bool IsOffline() const;
 };
 

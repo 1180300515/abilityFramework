@@ -13,7 +13,7 @@ struct CommandInfo
     std::string cmd;
     int connectPort;
     std::string connectIP;
-
+    
     Json::Value toJson() const;
     void FromJson(const Json::Value &root);
 
