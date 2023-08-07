@@ -7,9 +7,15 @@
 
 void LifeCycleManager::HandleCommandInfo(const std::string &cmd)
 {
+    //LOG(INFO) << "receive cmd : " << cmd;
     Json::Value root;
     Json::Reader reader;
-    reader.parse(cmd,root);
+    bool success = reader.parse(cmd,root);
+    if (!success)
+    {
+        LOG(ERROR) << "json parse error";
+        return;
+    }
     CommandInfo cmd_info;
     cmd_info.FromJson(root);
     LOG(INFO) << "handle the command info : " << cmd_info.toJson().toStyledString();
