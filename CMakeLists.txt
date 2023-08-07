@@ -106,7 +106,7 @@ target_link_libraries(testGetDevice stdc++)
 
 #生成testPostAbilityRequest可执行文件
 add_executable(testPostAbilityRequest test/test_post_abilityrequest.cpp)
-target_link_libraries(testPostAbilityRequest stdc++)
+target_link_libraries(testPostAbilityRequest stdc++ jsoncpp)
 
 add_executable(testResourceMgr test/resource_mgr_test/test_resourcemgr.cpp
     ${databasemgr}
