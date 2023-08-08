@@ -1,24 +1,11 @@
-#ifndef _SYSTEM_INTERFACE_H
-#define _SYSTEM_INTERFACE_H
+#ifndef DISCOVERYMGR_SYSTEM_INTERFACE_H_
+#define DISCOVERYMGR_SYSTEM_INTERFACE_H_
 
 #include <string>
 
-enum class SystemLoad
-{
-    Increasing,
-    Decreasing,
-    Stable,
-    Unknown
-};
+enum class SystemLoad { Increasing, Decreasing, Stable, Unknown };
 
-enum class SystemStatus
-{
-    Overloaded,
-    Busy,
-    Optimal,
-    Idle,
-    Unknown
-};
+enum class SystemStatus { Overloaded, Busy, Optimal, Idle, Unknown };
 
 std::string systemStatusToString(SystemStatus status);
 
@@ -30,4 +17,4 @@ SystemStatus getSystemStatus(double load1, double load15, int cpuCores);
 
 std::string get_system_status();
 
-#endif // _SYSTEM_INTERFACE_H
+#endif  // DISCOVERYMGR_SYSTEM_INTERFACE_H_

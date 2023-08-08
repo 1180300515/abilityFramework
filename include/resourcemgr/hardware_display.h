@@ -1,23 +1,24 @@
-#ifndef _HARDWARE_DISPLAY_H
-#define _HARDWARE_DISPLAY_H
+#ifndef RESOURCEMGR_HARDWARE_DISPLAY_H_
+#define RESOURCEMGR_HARDWARE_DISPLAY_H_
 
-#include "json/json.h"
+#include <json/json.h>
 
-class DisplayHardware
-{
-public:
-    int screen;
-    int x;
-    int y;
-    int width;
-    int height;
-    int mmWidth;
-    int mmHeight;
+#include <string>
 
-    Json::Value toJson() const;
-    void fromJson(const Json::Value &root);
-    std::string ToKeyValue(std::string hostname) const;
-    void print();
+class DisplayHardware {
+ public:
+  int screen;
+  int x;
+  int y;
+  int width;
+  int height;
+  int mmWidth;
+  int mmHeight;
+
+  Json::Value toJson() const;
+  void fromJson(const Json::Value &root);
+  std::string ToKeyValue(std::string hostname) const;
+  void print();
 };
 
-#endif // _HARDWARE_DISPLAY_H
+#endif  // RESOURCEMGR_HARDWARE_DISPLAY_H_

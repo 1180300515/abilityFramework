@@ -1,11 +1,8 @@
-#ifndef GLOBAL_VAR_H
-#define GLOBAL_VAR_H
+#ifndef UTILS_GLOBAL_VAR_H_
+#define UTILS_GLOBAL_VAR_H_
 
-#include <string>
 #include <cstdlib>
-
-#include "global_var.h"
-
+#include <string>
 
 // data package type
 #define CloudNotify "notify"
@@ -35,14 +32,14 @@
 #define CRD_FILE_PATH "resource/resource_file/crd"
 #define INSTANCE_FILE_PATH "resource/resource_file/device"
 #define ABILITY_FILE_PATH "resource/resource_file/ability"
-#define EDGE_SYNC_PORT 8001 //include tcp and udp
+#define EDGE_SYNC_PORT 8001  // include tcp and udp
 #define HTTP_SERVER_PORT 8080
-//command type
+// command type
 #define CMD_START "start"
 #define CMD_CONNECT "connect"
 #define CMD_DISCONNECT "disconnect"
 #define CMD_TERMINATE "terminate"
-//life status
+// life status
 #define STATUS_INIT "INIT"
 #define STATUS_STANDBY "STANDBY"
 #define STATUS_RUNNING "RUNNING"
@@ -51,4 +48,4 @@
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof *(a))
 
-#endif
+#endif  // UTILS_GLOBAL_VAR_H_

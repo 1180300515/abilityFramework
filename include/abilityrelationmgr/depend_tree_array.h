@@ -1,26 +1,27 @@
-#ifndef _DEPEND_TREE_ARRAY_H
-#define _DEPEND_TREE_ARRAY_H
+#ifndef ABILITYRELATIONMGR_DEPEND_TREE_ARRAY_H_
+#define ABILITYRELATIONMGR_DEPEND_TREE_ARRAY_H_
 
-#include "json/json.h"
+#include <json/json.h>
 
-#include "ability_instance_info_extract.h"
+#include <string>
+#include <vector>
 
-struct TreeNode
-{
-    AbilityInfoExtract ability;
-    std::vector<TreeNode> children;
-    int level;
+#include "abilityrelationmgr/ability_instance_info_extract.h"
 
-    Json::Value ToJson() const;
+struct TreeNode {
+  AbilityInfoExtract ability;
+  std::vector<TreeNode> children;
+  int level;
+
+  Json::Value ToJson() const;
 };
 
-class DependTreeArray
-{
-public:
-    std::vector<TreeNode> trees;
+class DependTreeArray {
+ public:
+  std::vector<TreeNode> trees;
 
-    bool hasAbility(const std::string &abilityName) const;
-    Json::Value ToJson() const;
+  bool hasAbility(const std::string &abilityName) const;
+  Json::Value ToJson() const;
 };
 
-#endif // _DEPEND_TREE_ARRAY_H
+#endif  // ABILITYRELATIONMGR_DEPEND_TREE_ARRAY_H_

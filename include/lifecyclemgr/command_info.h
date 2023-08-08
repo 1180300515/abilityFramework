@@ -1,23 +1,22 @@
-#ifndef _COMMAND_INFO_H
-#define _COMMAND_INFO_H
+#ifndef LIFECYCLEMGR_COMMAND_INFO_H_
+#define LIFECYCLEMGR_COMMAND_INFO_H_
 
-#include <string>
+#include <json/json.h>
+
 #include <iostream>
+#include <string>
 
-#include "json/json.h"
+struct CommandInfo {
+  int IPCPort;
+  std::string abilityName;
+  std::string cmd;
+  int connectPort;
+  std::string connectIP;
 
-struct CommandInfo
-{
-    int IPCPort;
-    std::string abilityName;
-    std::string cmd;
-    int connectPort;
-    std::string connectIP;
-    
-    Json::Value toJson() const;
-    void FromJson(const Json::Value &root);
+  Json::Value toJson() const;
+  void FromJson(const Json::Value &root);
 
-    void print();
+  void print();
 };
 
-#endif // _COMMAND_INFO_H
+#endif  // LIFECYCLEMGR_COMMAND_INFO_H_

@@ -31,11 +31,11 @@ include 储存头文件
 ├── discoverymgr
 ├── httpserver
 ├── lifecyclemgr
-├── protos
 ├── resourcemgr
 └── utils
 resource
 ├── db 储存数据库
+├── protos proto文件
 └── resource_file 储存各种资源文件
     ├── ability 能力资源文件
     ├── crd crd资源文件
@@ -47,7 +47,6 @@ src 源文件
 ├── discoverymgr
 ├── httpserver
 ├── lifecyclemgr
-├── protos
 ├── resourcemgr
 ├── utils
 └── main.cpp
