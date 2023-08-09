@@ -165,7 +165,7 @@ std::vector<AudioHardware> HardwareScan::getAudioList(const std::string &type) {
     command = "aplay";
     stream = SND_PCM_STREAM_PLAYBACK;
   } else {
-    LOG(ERROR) << "Wrong type." << std::endl;
+    LOG(ERROR) << "Wrong type.";
     return audioDevices;
   }
 

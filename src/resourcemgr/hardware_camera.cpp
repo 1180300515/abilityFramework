@@ -51,12 +51,14 @@ std::string CameraHardware::ToKeyValue(std::string hostname) const {
   return ss.str();
 }
 
-void CameraHardware::print() {
+void CameraHardware::print() const {
   std::cout << "device_path: " << device_path << std::endl;
   std::cout << "driver: " << driver << std::endl;
   std::cout << "card: " << card << std::endl;
   std::cout << "bus_info: " << bus_info << std::endl;
   std::cout << "formats: ";
-  for (const auto &format : formats) std::cout << format << " ";
+  for (const auto &format : formats) {
+    std::cout << "  " << format << " ";
+  }
   std::cout << std::endl << std::endl;
 }

@@ -35,7 +35,7 @@ class AudioHardware {
   void fromJson(const Json::Value &root);
   Json::Value toJson() const;
   std::string ToKeyValue(const std::string &hostname) const;
-  void print();
+  void print() const;
 };
 
 // global var define

@@ -20,7 +20,7 @@ class CameraHardware {
   Json::Value toJson() const;
   void fromJson(const Json::Value &root);
   std::string ToKeyValue(std::string hostname) const;
-  void print();
+  void print() const;
 };
 
 #endif  // RESOURCEMGR_HARDWARE_CAMERA_H_

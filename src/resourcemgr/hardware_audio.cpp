@@ -61,23 +61,24 @@ void AudioHardware::fromJson(const Json::Value &root) {
   deviceID = root["deviceID"].asString();
 }
 
-void AudioHardware::print() {
+void AudioHardware::print() const {
   std::cout << "name: " << name << std::endl;
   std::cout << "description: " << description << std::endl;
   std::cout << "sampleRate: " << std::endl;
   for (auto &i : sampleRate) {
-    std::cout << i << std::endl;
+    std::cout << "  " << i << std::endl;
   }
   std::cout << "channels: " << std::endl;
   for (auto &i : channels) {
-    std::cout << std::to_string(i) << std::endl;
+    std::cout << "  " << std::to_string(i) << std::endl;
   }
   std::cout << "format: " << std::endl;
   for (auto &i : format) {
-    std::cout << i << std::endl;
+    std::cout << "  " << i << std::endl;
   }
   std::cout << "cardID: " << cardID << std::endl;
   std::cout << "deviceID: " << deviceID << std::endl;
+  std::cout << std::endl << std::endl;
 }
 
 const unsigned int rates[13] = {

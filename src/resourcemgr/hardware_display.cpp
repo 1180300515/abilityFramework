@@ -37,7 +37,7 @@ std::string DisplayHardware::ToKeyValue(std::string hostname) const {
   return ss.str();
 }
 
-void DisplayHardware::print() {
+void DisplayHardware::print() const {
   std::cout << "screen: " << screen << std::endl;
   std::cout << "x: " << x << std::endl;
   std::cout << "y: " << y << std::endl;
@@ -45,4 +45,5 @@ void DisplayHardware::print() {
   std::cout << "height: " << height << std::endl;
   std::cout << "mmWidth: " << mmWidth << std::endl;
   std::cout << "mmHeight: " << mmHeight << std::endl;
+  std::cout << std::endl << std::endl;
 }
