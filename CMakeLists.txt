@@ -104,6 +104,7 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/src/utils utils)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/httpserver httpserver)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/test/base_function)
 
 #生成abilityframework可执行文件
 add_executable(${PROJECT_NAME} src/main.cpp 
@@ -124,21 +125,46 @@ target_link_libraries(AbilityFramework stdc++ sqlite3 jsoncpp glog yaml-cpp X11 
 add_executable(cameratest test/test_ability_lifecycle.cpp ${ability_proto_srcs} ${ability_grpc_srcs})
 target_link_libraries(cameratest stdc++ protobuf::libprotobuf gRPC::grpc++ )
 
-#生成testGetAbilityRunning可执行文件
-add_executable(testGetAbilityRunning test/test_get_abilityrunning.cpp)
-target_link_libraries(testGetAbilityRunning stdc++)
+#生成testCameraHardware可执行文件
+add_executable(testCameraHardware 
+    test/test_camera_hardware.cpp
+    test/base_function/src/get_camera_hardware.cpp)
+target_link_libraries(testCameraHardware stdc++ v4l2)
 
-#生成testGetAbilitySupport可执行文件
-add_executable(testGetAbilitySupport test/test_get_abilitysupport.cpp)
-target_link_libraries(testGetAbilitySupport stdc++)
+#生成testMicHardware可执行文件
+add_executable(testMicHardware 
+    test/test_mic_hardware.cpp
+    test/base_function/src/get_audio_hardware.cpp)
+target_link_libraries(testMicHardware stdc++ asound)
 
-#生成testGetDevice可执行文件
-add_executable(testGetDevice test/test_get_device.cpp)
-target_link_libraries(testGetDevice stdc++)
+#生成testSpeakerHardware可执行文件
+add_executable(testSpeakerHardware 
+    test/test_speaker_hardware.cpp
+    test/base_function/src/get_audio_hardware.cpp)
+target_link_libraries(testSpeakerHardware stdc++ asound)
 
-#生成testPostAbilityRequest可执行文件
-add_executable(testPostAbilityRequest test/test_post_abilityrequest.cpp)
-target_link_libraries(testPostAbilityRequest stdc++ jsoncpp)
+#生成testDisplayHardware可执行文件
+add_executable(testDisplayHardware 
+    test/test_display_hardware.cpp
+    test/base_function/src/get_display_hardware.cpp)
+target_link_libraries(testDisplayHardware stdc++ X11 Xrandr)
+
+#生成testHttpcommand可执行文件
+add_executable(testHttpCommand test/test_http_command.cpp)
+target_link_libraries(testHttpCommand stdc++ jsoncpp)
+
+#生成testAbilityDependTree可执行文件
+add_executable(testAbilityDependTree 
+    test/test_ability_depend_tree.cpp)
+target_link_libraries(testAbilityDependTree stdc++ jsoncpp yaml-cpp)
+
+#生成testAbilityDependTreeWithDevices可执行文件
+add_executable(testAbilityDependTreeWithDevices 
+    test/test_ability_depend_tree_with_devices.cpp
+    test/base_function/src/get_camera_hardware.cpp
+    test/base_function/src/get_audio_hardware.cpp
+    test/base_function/src/get_display_hardware.cpp)
+target_link_libraries(testAbilityDependTreeWithDevices stdc++ jsoncpp yaml-cpp X11 Xrandr asound v4l2)
 
 add_executable(testResourceMgr test/resource_mgr_test/test_resourcemgr.cpp
     ${databasemgr}
