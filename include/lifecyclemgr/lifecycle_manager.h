@@ -1,7 +1,9 @@
 #ifndef LIFECYCLEMGR_LIFECYCLE_MANAGER_H_
 #define LIFECYCLEMGR_LIFECYCLE_MANAGER_H_
 
+#include <future>  // NOLINT [build/c++11]
 #include <memory>
+#include <shared_mutex>
 #include <string>
 #include <thread>  // NOLINT [build/c++11]
 #include <unordered_map>
@@ -15,8 +17,10 @@ class LifeCycleManager {
   /**
    * @brief handle the command info
    * @param cmd_info
+   * 
+   * @return 1: ok , 0 : error , 2 : last operation has not ended
    */
-  void HandleCommandInfo(const CommandInfo &cmd_info);
+  int HandleCommandInfo(const CommandInfo &cmd_info);
   /**
    * @brief add a heart beart info
    * @param info
@@ -39,15 +43,16 @@ class LifeCycleManager {
   std::string GetHeartbeatMap();
 
  private:
-  // store IPCPort and ability lifecycle deal thread
-  std::unordered_map<int, std::thread> threads;
+  // store IPCPort and async thread
+  std::unordered_map<int, std::future<void>> threads;
+  std::shared_mutex thread_lock_;
   // store IPCPort and ability client (by grpc)
   std::unordered_map<int, std::shared_ptr<AbilityClient>> clients;
-  std::mutex clients_lock_;
+  std::shared_mutex clients_lock_;
 
   // IPCPort and the heart beat info
   std::unordered_map<int, HeartbeatInfo> heartbeat_map;
-  std::mutex heartbeat_map_lock;
+  std::shared_mutex heartbeat_map_lock;
 
   std::thread checkClientThread;
 
@@ -59,7 +64,9 @@ class LifeCycleManager {
 
   bool start_process(const std::string &abilityName);
 
-  void checkAbilityClientAndTimeout();
+  void checkTimeout();
+
+  void createClient(const std::string &name, int ipcport);
 };
 
 #endif  // LIFECYCLEMGR_LIFECYCLE_MANAGER_H_
