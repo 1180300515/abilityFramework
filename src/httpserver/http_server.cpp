@@ -30,7 +30,7 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_,
       int port;
       try {
         port = std::stoi(req.get_param_value("IPCPort"));
-        LOG(INFO) << BLUE << "Got heartbeat from port " << port << NONE;
+        // LOG(INFO) << BLUE << "Got heartbeat from port " << port << NONE;
       } catch (const std::exception &) {
         res.status = 400;  // Bad Request
         return;
@@ -41,7 +41,9 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_,
                                req.get_param_value("status"),
                                std::chrono::steady_clock::now()};
     }
+    LOG(INFO) << BLUE << "Got heartbeat from port " << new_info.IPCPort << NONE;
     this->lifecycle_manager_->AddHeartbeatInfo(new_info);
+    res.set_content("OK", "text/plain");
   });
 
   this->server->Get("/api/Devices", [this](const httplib::Request &req,
@@ -98,7 +100,16 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_,
     LOG(INFO) << L_BLUE
               << "httpserver receive: method: POST   URL: /api/AbilityRequest"
               << NONE;
-    this->lifecycle_manager_->HandleCommandInfo(cmd);
+    int result = lifecycle_manager_->HandleCommandInfo(cmd);
+    if (result == 1) {
+      res.set_content("OK", "text/plain");
+    } else if (result == 0) {
+      res.set_content("status scheduling fail", "text/plain");
+    } else {
+      res.set_content(
+          "Please wait for the last schedule with the same IPCPort to complete",
+          "text/plain");
+    }
   });
 }
 
