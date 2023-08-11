@@ -1,6 +1,7 @@
 #include <httplib.h>
 #include <json/json.h>
 
+#include <ctime>
 #include <iostream>
 
 void print_usage(const char* name) {
@@ -67,15 +68,24 @@ int main(int argc, char** argv) {
   }
   httplib::Client ccc("localhost", 8080);
   if (method == "POST") {
+    time_t now = time(0);
+    char Buf[50];
+    char* dt = ctime_r(&now, Buf);
+    std::cout << "send http time: " << dt << std::endl;
     auto res = ccc.Post(url, params);
-    if (res) {
+    if (res && res->status == 200) {
       std::cout << res->body << std::endl;
+    } else {
+      std::cout << "send error: " << res->status << std::endl;
     }
+
   } else if (method == "GET") {
     auto res2 = ccc.Get(url);
     if (res2 && res2->status == 200) {
       // 响应成功，解析 JSON
       std::cout << res2->body.c_str() << std::endl;
+    } else {
+      std::cout << "send error" << res2->status << std::endl;
     }
   }
 }

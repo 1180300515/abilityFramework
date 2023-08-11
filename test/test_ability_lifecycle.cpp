@@ -1,3 +1,4 @@
+#include <glog/logging.h>
 #include <grpcpp/grpcpp.h>
 #include <httplib.h>
 
@@ -21,6 +22,8 @@ using abilityUnit::Response;
 using abilityUnit::StartInfo;
 using abilityUnit::TerminateInfo;
 
+httplib::Client cli("localhost", 8080);
+
 // using grpcComputer::CameraService;
 // using grpcComputer::ImageFile;
 // using grpcComputer::Request;
@@ -41,7 +44,7 @@ using abilityUnit::TerminateInfo;
 extern int V_HEIGHT;
 extern int V_WIDTH;
 
-using namespace std; // NOLINT [build/namespace]
+using namespace std;  // NOLINT [build/namespace]
 
 typedef void (*CallbackFunc_t)(void);
 map<std::string, CallbackFunc_t> callbackMap;
@@ -175,23 +178,35 @@ class AbilityImpl : public Ability::Service {
   }
 };
 
+void sendStateMsg() {
+  httplib::Params params;
+  params.emplace("abilityName", "loudspeaker");
+  params.emplace("IPCPort", to_string(selected_port));
+  // params.emplace("port", "0");
+  // params.emplace("status", "good");
+  std::cout << "my post IPCPort: " << selected_port << std::endl;
+  std::cout << "my post status: " << GLOBAL_STATUS << std::endl;
+  std::cout << "my post abilityPort: " << abilityPort << std::endl;
+  params.emplace("status", global2string(GLOBAL_STATUS));
+  // string status = (GLOBAL_STATUS);
+  params.emplace("abilityPort", to_string(abilityPort));
+  LOG(INFO) << "主动post心跳";
+  auto res = cli.Post("/heartbeat", params);
+
+  if (res) {
+    LOG(INFO) << "成功";
+    std::cout << res->status << std::endl;
+    std::cout << res->body << std::endl;
+  } else {
+    LOG(ERROR) << "post失败";
+  }
+}
+
 void OnStart() {
   cout << "OnStart" << endl;
   GLOBAL_STATUS = STATUS_STANDBY;
+  sendStateMsg();
 }
-
-// void create_ability_server() {
-//     camera_server service2;
-//     ServerBuilder builder2;
-//     builder2.AddListeningPort(address, grpc::InsecureServerCredentials());
-//     cout << "add listening port" << endl;
-//     builder2.RegisterService(&service2);
-//     cout << "register service" << endl;
-//     ability_cq = builder2.AddCompletionQueue();
-//     ability_server = builder2.BuildAndStart();
-//     std::cout << "Server listening on port: " << address << std::endl;
-//     ability_server->Wait();
-// }
 
 void OnConnect() {
   cout << "OnConnect" << endl;
@@ -200,6 +215,7 @@ void OnConnect() {
   unsigned int local_seed = time(NULL);
   abilityPort = rand_r(&local_seed);
   GLOBAL_STATUS = STATUS_RUNNING;
+  sendStateMsg();
 }
 
 void OnDisconnect() {
@@ -207,11 +223,13 @@ void OnDisconnect() {
   // ability_server->Shutdown();
   // ability_cq->Shutdown();
   GLOBAL_STATUS = STATUS_SUSPEND;
+  sendStateMsg();
 }
 
 void OnTerminate() {
   cout << "OnTerminate" << endl;
   GLOBAL_STATUS = STATUS_TERMINATE;
+  sendStateMsg();
   exit(0);
 }
 
@@ -253,7 +271,6 @@ void CallbackRegisterAll() {
 }
 
 void heartbeat_loop() {
-  httplib::Client cli("localhost", 8080);
   // httplib::Client
   // cli("http://75d68bb1-2500-4cd5-97c9-fca0d20b169a.mock.pstmn.io");
 
@@ -262,8 +279,6 @@ void heartbeat_loop() {
   while (true) {
     params.emplace("abilityName", "cameratest");
     params.emplace("IPCPort", to_string(selected_port));
-    // params.emplace("port", "0");
-    // params.emplace("status", "good");
 
     // std::cout << "status: " << GLOBAL_STATUS << std::endl;
     params.emplace("status", global2string(GLOBAL_STATUS));
@@ -271,9 +286,9 @@ void heartbeat_loop() {
     params.emplace("abilityPort", to_string(abilityPort));
     auto res = cli.Post("/heartbeat", params);
 
-    if (res) {
-      // std::cout << res->status << std::endl;
-      // std::cout << res->body << std::endl;
+    if (res && res->status == 200) {
+      std::cout << res->status << std::endl;
+      std::cout << res->body << std::endl;
     } else {
       std::cout << "Failed to send request." << std::endl;
     }
@@ -302,6 +317,8 @@ std::string global2string(std::string GLOBAL_STATUS) {
 }
 
 int main() {
+  FLAGS_alsologtostderr = 1;
+  FLAGS_colorlogtostderr = 1;
   AbilityImpl service;
   ServerBuilder builder;
   CallbackRegisterAll();
