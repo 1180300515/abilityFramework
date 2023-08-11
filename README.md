@@ -17,10 +17,10 @@ sudo apt install libxrandr-dev
 sudo apt install libv4l-dev
 sudo apt install libx11-dev
 sudo apt install libpulse-dev
-sudo apt install libalsa-ocaml-dev 
+sudo apt install libasound2-dev
 ```
 ```
-apt install libunwind-dev sqlite3 libsqlite3-dev libyaml-cpp-dev  libgoogle-glog-dev libjsoncpp-dev rapidjson-dev libyaml-cpp-dev libxrandr-dev libv4l-dev libx11-dev libpulse-dev libalsa-ocaml-dev 
+apt install libunwind-dev sqlite3 libsqlite3-dev libyaml-cpp-dev  libgoogle-glog-dev libjsoncpp-dev rapidjson-dev libyaml-cpp-dev libxrandr-dev libv4l-dev libx11-dev libpulse-dev libasound2-dev 
 ```
 
 ## 目录结构
