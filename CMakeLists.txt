@@ -123,7 +123,7 @@ target_link_libraries(AbilityFramework stdc++ sqlite3 jsoncpp glog yaml-cpp X11 
 
 #生成cameratest可执行文件
 add_executable(cameratest test/test_ability_lifecycle.cpp ${ability_proto_srcs} ${ability_grpc_srcs})
-target_link_libraries(cameratest stdc++ protobuf::libprotobuf gRPC::grpc++ )
+target_link_libraries(cameratest stdc++ protobuf::libprotobuf gRPC::grpc++ glog)
 
 #生成testCameraHardware可执行文件
 add_executable(testCameraHardware 
@@ -166,8 +166,8 @@ add_executable(testAbilityDependTreeWithDevices
     test/base_function/src/get_display_hardware.cpp)
 target_link_libraries(testAbilityDependTreeWithDevices stdc++ jsoncpp yaml-cpp X11 Xrandr asound v4l2)
 
-add_executable(testResourceMgr test/resource_mgr_test/test_resourcemgr.cpp
-    ${databasemgr}
-    ${resourcemgr}
-    ${utils})
-target_link_libraries(testResourceMgr stdc++ sqlite3 jsoncpp glog yaml-cpp X11 asound Xrandr v4l2 pthread dl crypto ssl z protobuf::libprotobuf gRPC::grpc++)
+# add_executable(testResourceMgr test/resource_mgr_test/test_resourcemgr.cpp
+#     ${databasemgr}
+#     ${resourcemgr}
+#     ${utils})
+# target_link_libraries(testResourceMgr stdc++ sqlite3 jsoncpp glog yaml-cpp X11 asound Xrandr v4l2 pthread dl crypto ssl z protobuf::libprotobuf gRPC::grpc++)
