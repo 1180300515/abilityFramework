@@ -70,9 +70,6 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 # set(YAML_INCLUDE_DIR /usr/include/yaml-cpp)
 # set(YAML_LIB_DIR /usr/lib/)
 
-# set(PULSE_INCLUDE_DIR /usr/include/pulse)
-# set(PULSE_LIB_DIR /usr/lib/pulseaudio)
-
 # set(X11_INCLUDE_DIR /usr/include/X11)
 # set(X11_LIB_DIR /usr/lib/)
 

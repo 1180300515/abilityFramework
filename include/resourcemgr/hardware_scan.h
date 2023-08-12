@@ -1,8 +1,6 @@
 #ifndef RESOURCEMGR_HARDWARE_SCAN_H_
 #define RESOURCEMGR_HARDWARE_SCAN_H_
 
-#include <pulse/pulseaudio.h>
-
 #include <functional>
 #include <map>
 #include <mutex>  // NOLINT [build/c++11]
