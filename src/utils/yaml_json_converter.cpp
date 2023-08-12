@@ -32,7 +32,7 @@ bool YamlToJson(const YAML::Node &ynode, Json::Value *jnode,
       }
     }
   } catch (...) {
-    LOG(ERROR) << "convert error";
+    DLOG(ERROR) << "convert error";
     return false;
   }
   return true;
@@ -88,7 +88,7 @@ bool YamlToJsonForInstance(const YAML::Node &ynode, Json::Value *jnode,
       }
     }
   } catch (...) {
-    LOG(ERROR) << "convert error";
+    DLOG(ERROR) << "convert error";
     return false;
   }
   return true;
@@ -98,28 +98,28 @@ bool SchemaValidation(const std::string &schemajsonstring,
                       const std::string &inputstring) {
   rapidjson::Document sd;
   if (sd.Parse(schemajsonstring.c_str()).HasParseError()) {
-    LOG(INFO) << "jsonschema is not valid:" << schemajsonstring;
+    DLOG(INFO) << "jsonschema is not valid:" << schemajsonstring;
     return false;
   }
   rapidjson::SchemaDocument schema(sd);
   rapidjson::Document d;
   if (d.Parse(inputstring.c_str()).HasParseError()) {
-    LOG(INFO) << "input is not a valid json:" << inputstring;
+    DLOG(INFO) << "input is not a valid json:" << inputstring;
     return false;
   }
   rapidjson::SchemaValidator validator(schema);
   if (!d.Accept(validator)) {
-    // LOG(INFO) << "can't pass the validate, please check the instance file";
+    // DLOG(INFO) << "can't pass the validate, please check the instance file";
     rapidjson::StringBuffer sb;
     validator.GetInvalidSchemaPointer().StringifyUriFragment(sb);
-    LOG(INFO) << "Invalid schema: " << sb.GetString();
-    LOG(INFO) << "Invalid keyword: " << validator.GetInvalidSchemaKeyword();
+    DLOG(INFO) << "Invalid schema: " << sb.GetString();
+    DLOG(INFO) << "Invalid keyword: " << validator.GetInvalidSchemaKeyword();
     sb.Clear();
     validator.GetInvalidDocumentPointer().StringifyUriFragment(sb);
-    LOG(INFO) << "Invalid document: " << sb.GetString();
+    DLOG(INFO) << "Invalid document: " << sb.GetString();
     return false;
   } else {
-    // LOG(INFO) << "validate success";
+    // DLOG(INFO) << "validate success";
     return true;
   }
 }
@@ -133,13 +133,13 @@ std::string GetCrdSchemaPart(const Json::Value &jnode) {
         break;
       }
       if (i == tag.size() - 1) {
-        LOG(ERROR) << "format error can't excute schema";
+        DLOG(ERROR) << "format error can't excute schema";
       }
     }
     Json::FastWriter writer;
     return writer.write(tag);
   } else {
-    LOG(ERROR) << "json format is not correct";
+    DLOG(ERROR) << "json format is not correct";
     return "";
   }
 }

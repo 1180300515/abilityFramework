@@ -190,15 +190,15 @@ void sendStateMsg() {
   params.emplace("status", global2string(GLOBAL_STATUS));
   // string status = (GLOBAL_STATUS);
   params.emplace("abilityPort", to_string(abilityPort));
-  LOG(INFO) << "主动post心跳";
+  DLOG(INFO) << "主动post心跳";
   auto res = cli.Post("/heartbeat", params);
 
   if (res) {
-    LOG(INFO) << "成功";
+    DLOG(INFO) << "成功";
     std::cout << res->status << std::endl;
     std::cout << res->body << std::endl;
   } else {
-    LOG(ERROR) << "post失败";
+    DLOG(ERROR) << "post失败";
   }
 }
 

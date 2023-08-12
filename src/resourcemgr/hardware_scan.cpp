@@ -165,7 +165,7 @@ std::vector<AudioHardware> HardwareScan::getAudioList(const std::string &type) {
     command = "aplay";
     stream = SND_PCM_STREAM_PLAYBACK;
   } else {
-    LOG(ERROR) << "Wrong type.";
+    DLOG(ERROR) << "Wrong type.";
     return audioDevices;
   }
 
@@ -178,7 +178,7 @@ std::vector<AudioHardware> HardwareScan::getAudioList(const std::string &type) {
 
   card = -1;
   if (snd_card_next(&card) < 0 || card < 0) {
-    LOG(ERROR) << "No soundcards found...";
+    DLOG(ERROR) << "No soundcards found...";
     return audioDevices;
   }
   snd_pcm_stream_name(stream);
@@ -186,11 +186,11 @@ std::vector<AudioHardware> HardwareScan::getAudioList(const std::string &type) {
     char name[32];
     snprintf(name, sizeof(name), "hw:%d", card);
     if ((err = snd_ctl_open(&handle, name, 0)) < 0) {
-      LOG(ERROR) << "control open " << card << " error: " << snd_strerror(err);
+      DLOG(ERROR) << "control open " << card << " error: " << snd_strerror(err);
       goto next_card;
     }
     if ((err = snd_ctl_card_info(handle, info)) < 0) {
-      LOG(ERROR) << "control hardware info " << card
+      DLOG(ERROR) << "control hardware info " << card
                  << " error: " << snd_strerror(err);
       snd_ctl_close(handle);
       goto next_card;
@@ -206,7 +206,7 @@ std::vector<AudioHardware> HardwareScan::getAudioList(const std::string &type) {
       snd_pcm_info_set_stream(pcminfo, stream);
       if ((err = snd_ctl_pcm_info(handle, pcminfo)) < 0) {
         if (err != -ENOENT)
-          LOG(ERROR) << "control digital audio info (" << card
+          DLOG(ERROR) << "control digital audio info (" << card
                      << "): " << snd_strerror(err);
         continue;
       }
@@ -337,7 +337,7 @@ void HardwareScan::PrintMap() {
 }
 
 void HardwareScan::compareMap() {
-  LOG(INFO) << "compare old hardware and new hardware, delete the non-exist "
+  DLOG(INFO) << "compare old hardware and new hardware, delete the non-exist "
                "hardware,add new hardware record";
   for (auto &iter : hardware_instance_map) {
     bool delete_ = true;
@@ -375,7 +375,7 @@ void HardwareScan::compareMap() {
       hardware_instance_map[hw.name] = "";
     }
   }
-  LOG(INFO) << "compare finish";
+  DLOG(INFO) << "compare finish";
 }
 
 int HardwareScan::GenerateSerialNumber(const std::string &type) {
@@ -481,7 +481,7 @@ void HardwareScan::UnmatchedHardware(std::vector<CameraHardware> *camera,
 void HardwareScan::SetMap(const std::string &id, const std::string &key) {
   std::lock_guard<std::mutex> locker1(this->map_lock_);
   if (hardware_instance_map.at(id) != key) {
-    LOG(INFO) << "instance : " << key << " match with hardware : " << id;
+    DLOG(INFO) << "instance : " << key << " match with hardware : " << id;
   }
   hardware_instance_map[id] = key;
 }
@@ -497,7 +497,7 @@ void HardwareScan::Init(std::string hostname) {
 }
 
 void HardwareScan::LocalHardwareScan() {
-  LOG(INFO) << L_GREEN << "local hardware scan begin" << NONE;
+  DLOG(INFO) << L_GREEN << "local hardware scan begin" << NONE;
   std::lock_guard<std::mutex> locker1(this->map_lock_);
   std::lock_guard<std::mutex> locker2(camera_hardware_lock_);
   std::lock_guard<std::mutex> locker3(mic_hardware_lock_);
@@ -507,7 +507,7 @@ void HardwareScan::LocalHardwareScan() {
   getMicInfo();
   getSpeakerInfo();
   getDisplayHardware();
-  LOG(INFO) << "hardware scan finish : camera: "
+  DLOG(INFO) << "hardware scan finish : camera: "
             << this->profile.cameraDevices.size()
             << "  mic: " << this->profile.micDevices.size()
             << "  speaker: " << this->profile.speakerDevices.size()
@@ -544,7 +544,7 @@ std::optional<Json::Value> HardwareScan::GetHardware(const std::string &id,
         auto key_in_map = hardware_instance_map.at(id);
         if (key_in_map != "" && key_in_map != key &&
             !isAutogenInstance(key_in_map)) {
-          LOG(ERROR) << "the camera hardware: \"" << id
+          DLOG(ERROR) << "the camera hardware: \"" << id
                      << "\" already match with: " << key_in_map;
           return std::nullopt;
         } else {
@@ -560,7 +560,7 @@ std::optional<Json::Value> HardwareScan::GetHardware(const std::string &id,
         auto key_in_map = hardware_instance_map.at(id);
         if (key_in_map != "" && key_in_map != key &&
             !isAutogenInstance(key_in_map)) {
-          LOG(ERROR) << "the speaker hardware: \"" << id
+          DLOG(ERROR) << "the speaker hardware: \"" << id
                      << "\" already match with: " << key_in_map;
           return std::nullopt;
         } else {
@@ -576,7 +576,7 @@ std::optional<Json::Value> HardwareScan::GetHardware(const std::string &id,
         auto key_in_map = hardware_instance_map.at(id);
         if (key_in_map != "" && key_in_map != key &&
             !isAutogenInstance(key_in_map)) {
-          LOG(ERROR) << "the mic hardware: \"" << id
+          DLOG(ERROR) << "the mic hardware: \"" << id
                      << "\" already match with: " << key_in_map;
           return std::nullopt;
         } else {

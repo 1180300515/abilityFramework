@@ -17,7 +17,7 @@ void DatabaseManager::Init(std::string hostname, bool cleandb) {
   std::string search_sql = "select * from HOSTNAME;";
   rc = sqlite3_exec(db, search_sql.c_str(), hostname_callback, 0, &erroms);
   if (rc) {
-    LOG(ERROR) << "sql excute error: " << erroms;
+    DLOG(ERROR) << "sql excute error: " << erroms;
     return;
   }
   if (cleandb) {
@@ -29,12 +29,12 @@ void DatabaseManager::Init(std::string hostname, bool cleandb) {
         "insert into HOSTNAME (NAME) VALUES (\'" + hostname + "\');";
     rc = sqlite3_exec(db, insert_sql.c_str(), hostname_callback, 0, &erroms);
     if (rc) {
-      LOG(ERROR) << "sql excute error: " << erroms;
+      DLOG(ERROR) << "sql excute error: " << erroms;
       return;
     }
 
   } else if (strcmp(hostname.c_str(), host_name) != 0) {
-    LOG(WARNING) << "The hostname store in database : " << host_name
+    DLOG(WARNING) << "The hostname store in database : " << host_name
                  << " does not match with the local hostname : " << hostname
                  << " db will be cleared";
     DBCleanCRD();
@@ -45,7 +45,7 @@ void DatabaseManager::Init(std::string hostname, bool cleandb) {
         "insert into HOSTNAME (NAME) VALUES (\'" + hostname + "\');";
     rc = sqlite3_exec(db, insert_sql.c_str(), hostname_callback, 0, &erroms);
     if (rc) {
-      LOG(ERROR) << "sql excute error: " << erroms;
+      DLOG(ERROR) << "sql excute error: " << erroms;
       return;
     }
   } else {
@@ -59,14 +59,14 @@ bool DatabaseManager::RegistCrdFromFile(const std::string &filepath) {
   try {
     crd_yaml = YAML::LoadFile(filepath);
   } catch (YAML::ParserException e) {
-    LOG(ERROR) << "yaml is malformed.";
+    DLOG(ERROR) << "yaml is malformed.";
     return false;
   } catch (YAML::BadFile e) {
-    LOG(ERROR) << "file can't be load";
+    DLOG(ERROR) << "file can't be load";
     return false;
   }
   if (!YamlToJson(crd_yaml, &crd_json)) {
-    LOG(ERROR) << "convert the yaml file in: " << filepath << "error";
+    DLOG(ERROR) << "convert the yaml file in: " << filepath << "error";
     return false;
   }
   // get related value
@@ -85,10 +85,10 @@ bool DatabaseManager::RegistCrdFromFile(const std::string &filepath) {
   char *erroms = 0;
   rc = sqlite3_exec(db, sql.c_str(), crd_callback, 0, &erroms);
   if (rc) {
-    LOG(ERROR) << "sql excute error: " << erroms;
+    DLOG(ERROR) << "sql excute error: " << erroms;
     return false;
   }
-  LOG(INFO) << "register success with crd name: " << crd_key_name
+  DLOG(INFO) << "register success with crd name: " << crd_key_name
             << " in file: " << filepath;
 
   CrdDBStruct new_one;
@@ -122,10 +122,10 @@ bool DatabaseManager::RegistCrd(const std::string &data) {
   char *erroms = 0;
   rc = sqlite3_exec(db, sql.c_str(), crd_callback, 0, &erroms);
   if (rc) {
-    LOG(ERROR) << "sql excute error: " << erroms;
+    DLOG(ERROR) << "sql excute error: " << erroms;
     return false;
   }
-  LOG(INFO) << "register success with crd name: " << crd_key_name;
+  DLOG(INFO) << "register success with crd name: " << crd_key_name;
 
   CrdDBStruct new_one;
   new_one.key = crd_key_name;
@@ -144,10 +144,10 @@ bool DatabaseManager::UnregistCrd(const std::string &name) {
   std::string delete_sql = "DELETE FROM CRD WHERE KEY = " + name + ";";
   rc = sqlite3_exec(db, delete_sql.c_str(), ability_callback, 0, &erroms);
   if (rc) {
-    LOG(ERROR) << "sql excute error: " << erroms;
+    DLOG(ERROR) << "sql excute error: " << erroms;
     return false;
   }
-  LOG(INFO) << "db clean " << name << " crd resource success";
+  DLOG(INFO) << "db clean " << name << " crd resource success";
 
   this->regist_crd_list.erase(name);
 
@@ -164,7 +164,7 @@ bool DatabaseManager::DBGetDeviceInstances(
   char *erroms = 0;
   rc = sqlite3_exec(db, search_sql.c_str(), device_callback, 0, &erroms);
   if (rc) {
-    LOG(ERROR) << "sql: " << search_sql << "\nexcute error: " << erroms;
+    DLOG(ERROR) << "sql: " << search_sql << "\nexcute error: " << erroms;
     return false;
   }
   for (int i = 0; i < devicestructs.size(); i++) {
@@ -182,7 +182,7 @@ bool DatabaseManager::DBGetAbilityInstances(
   char *erroms = 0;
   rc = sqlite3_exec(db, search_sql.c_str(), ability_callback, 0, &erroms);
   if (rc) {
-    LOG(ERROR) << "sql: " << search_sql << "\nexcute error: " << erroms;
+    DLOG(ERROR) << "sql: " << search_sql << "\nexcute error: " << erroms;
     return false;
   }
   for (int i = 0; i < abilitystructs.size(); i++) {
@@ -234,10 +234,10 @@ bool DatabaseManager::DBUpdateDeviceInstance(const Json::Value &jnode) {
   char *erroms = 0;
   rc = sqlite3_exec(db, update_sql.c_str(), device_callback, 0, &erroms);
   if (rc) {
-    LOG(ERROR) << "sql excute error with: " << erroms;
+    DLOG(ERROR) << "sql excute error with: " << erroms;
     return false;
   }
-  LOG(INFO) << "db update device : " << instance_key << " success";
+  DLOG(INFO) << "db update device : " << instance_key << " success";
   return true;
 }
 
@@ -266,10 +266,10 @@ bool DatabaseManager::DBUpdateAbilityInstance(
   char *erroms2 = 0;
   rc2 = sqlite3_exec(db, update_sql.c_str(), ability_callback, 0, &erroms2);
   if (rc2) {
-    LOG(ERROR) << "sql excute error with: " << erroms2;
+    DLOG(ERROR) << "sql excute error with: " << erroms2;
     return false;
   }
-  LOG(INFO) << "DB update ability: " << instance_key << " success";
+  DLOG(INFO) << "DB update ability: " << instance_key << " success";
   return true;
 }
 
@@ -280,10 +280,10 @@ bool DatabaseManager::DBDelteDeviceInstance(const std::string &key) {
   std::string delete_sql = "DELETE FROM DEVICE WHERE KEY = \'" + key + "\';";
   rc = sqlite3_exec(db, delete_sql.c_str(), device_callback, 0, &erroms);
   if (rc) {
-    LOG(ERROR) << "sql excute error: " << erroms;
+    DLOG(ERROR) << "sql excute error: " << erroms;
     return false;
   }
-  LOG(INFO) << "db delete resource : " << key << " success";
+  DLOG(INFO) << "db delete resource : " << key << " success";
 
   return true;
 }
@@ -295,10 +295,10 @@ bool DatabaseManager::DBDeleteAbilityInstance(const std::string &key) {
   std::string delete_sql = "DELETE FROM ABILITY WHERE KEY = \'" + key + "\';";
   rc = sqlite3_exec(db, delete_sql.c_str(), ability_callback, 0, &erroms);
   if (rc) {
-    LOG(ERROR) << "sql excute error: " << erroms;
+    DLOG(ERROR) << "sql excute error: " << erroms;
     return false;
   }
-  LOG(INFO) << "db delete resource : " << key << " success";
+  DLOG(INFO) << "db delete resource : " << key << " success";
 
   return true;
 }
@@ -309,10 +309,10 @@ bool DatabaseManager::DBCleanDevice() {
   std::string delete_sql = "DELETE FROM DEVICE;";
   rc = sqlite3_exec(db, delete_sql.c_str(), device_callback, 0, &erroms);
   if (rc) {
-    LOG(ERROR) << "sql excute error: " << erroms;
+    DLOG(ERROR) << "sql excute error: " << erroms;
     return false;
   }
-  LOG(INFO) << "db clean instance resource success";
+  DLOG(INFO) << "db clean instance resource success";
 
   return true;
 }
@@ -323,10 +323,10 @@ bool DatabaseManager::DBCleanAbility() {
   std::string delete_sql = "DELETE FROM ABILITY;";
   rc = sqlite3_exec(db, delete_sql.c_str(), ability_callback, 0, &erroms);
   if (rc) {
-    LOG(ERROR) << "sql excute error: " << erroms;
+    DLOG(ERROR) << "sql excute error: " << erroms;
     return false;
   }
-  LOG(INFO) << "db clean ability resource success";
+  DLOG(INFO) << "db clean ability resource success";
 
   return true;
 }
@@ -337,10 +337,10 @@ bool DatabaseManager::DBCleanCRD() {
   std::string delete_sql = "DELETE FROM CRD;";
   rc = sqlite3_exec(db, delete_sql.c_str(), ability_callback, 0, &erroms);
   if (rc) {
-    LOG(ERROR) << "sql excute error: " << erroms;
+    DLOG(ERROR) << "sql excute error: " << erroms;
     return false;
   }
-  LOG(INFO) << "db clean crd resource success";
+  DLOG(INFO) << "db clean crd resource success";
 
   return true;
 }
@@ -351,10 +351,10 @@ bool DatabaseManager::DBCleanHostname() {
   std::string delete_sql = "DELETE FROM HOSTNAME;";
   rc = sqlite3_exec(db, delete_sql.c_str(), hostname_callback, 0, &erroms);
   if (rc) {
-    LOG(ERROR) << "sql excute error: " << erroms;
+    DLOG(ERROR) << "sql excute error: " << erroms;
     return false;
   }
-  LOG(INFO) << "db clean hostname success";
+  DLOG(INFO) << "db clean hostname success";
 
   return true;
 }
@@ -376,7 +376,7 @@ int DatabaseManager::crd_callback(void *unused, int columenCount,
     }
   }
   crdstructs.push_back(crd);
-  // LOG(INFO) << "crdcallback: find matched crd struct with key: " << crd.key;
+  // DLOG(INFO) << "crdcallback: find matched crd struct with key: " << crd.key;
   return SQLITE_OK;
 }
 
@@ -397,7 +397,7 @@ int DatabaseManager::device_callback(void *unused, int columenCount,
     }
   }
   devicestructs.push_back(instance);
-  // LOG(INFO) << "devicecallback: find instance:" << instance.key;
+  // DLOG(INFO) << "devicecallback: find instance:" << instance.key;
   return SQLITE_OK;
 }
 
@@ -418,14 +418,14 @@ int DatabaseManager::ability_callback(void *unused, int columenCount,
     }
   }
   abilitystructs.push_back(instance);
-  // LOG(INFO) << "abilitycallback: find ability:" << instance.key;
+  // DLOG(INFO) << "abilitycallback: find ability:" << instance.key;
   return SQLITE_OK;
 }
 
 int DatabaseManager::hostname_callback(void *unused, int columenCount,
                                        char **columnValue, char **columnName) {
   if (columnValue != NULL) {
-    // LOG(INFO) << columnValue[0];
+    // DLOG(INFO) << columnValue[0];
     // strcpy(host_name, columnValue[0]);
     snprintf(host_name, sizeof(host_name), "%s", columnValue[0]);
   }
@@ -438,13 +438,13 @@ DatabaseManager::DatabaseManager() {
   char *errormes = 0;
   rc = sqlite3_open(DATABASE_FILE_PATH, &db);
   if (rc) {
-    LOG(ERROR) << "open database in :" << DATABASE_FILE_PATH << "failed";
+    DLOG(ERROR) << "open database in :" << DATABASE_FILE_PATH << "failed";
     exit(0);
   } else {
     if (!access(DATABASE_FILE_PATH, R_OK)) {
-      LOG(INFO) << "db exist,open success";
+      DLOG(INFO) << "db exist,open success";
     } else {
-      LOG(INFO) << "db not exist,create new one,open success";
+      DLOG(INFO) << "db not exist,create new one,open success";
     }
   }
   // create related table
@@ -480,27 +480,27 @@ DatabaseManager::DatabaseManager() {
       "VERSION TEXT NOT NULL);";
   rc = sqlite3_exec(db, hostname_table_sql, hostname_callback, 0, &errormes);
   if (rc) {
-    LOG(ERROR) << "create table HOSTNAME fail with sql command: "
+    DLOG(ERROR) << "create table HOSTNAME fail with sql command: "
                << hostname_table_sql << "\nerror message : " << errormes;
     exit(0);
   }
   rc = sqlite3_exec(db, crd_table_sql, crd_callback, 0, &errormes);
   if (rc) {
-    LOG(ERROR) << "create table CRD fail with sql command: " << crd_table_sql
+    DLOG(ERROR) << "create table CRD fail with sql command: " << crd_table_sql
                << "\nerror message : " << errormes;
     exit(0);
   }
   rc = sqlite3_exec(db, device_table_sql, device_callback, 0, &errormes);
   if (rc) {
-    LOG(ERROR) << "create table DEVICE failed with: " << errormes;
+    DLOG(ERROR) << "create table DEVICE failed with: " << errormes;
     exit(0);
   }
   rc = sqlite3_exec(db, ability_table_sql, ability_callback, 0, &errormes);
   if (rc) {
-    LOG(ERROR) << "create table ABILITY failed with: " << errormes;
+    DLOG(ERROR) << "create table ABILITY failed with: " << errormes;
     exit(0);
   }
-  LOG(INFO) << "create table HOSTNAME,CRD,DEVICE,ABILITY success";
+  DLOG(INFO) << "create table HOSTNAME,CRD,DEVICE,ABILITY success";
 }
 
 void DatabaseManager::loadCRD() {
@@ -510,7 +510,7 @@ void DatabaseManager::loadCRD() {
   char *erroms = 0;
   rc = sqlite3_exec(db, search_sql.c_str(), crd_callback, 0, &erroms);
   if (rc) {
-    LOG(ERROR) << "sql: " << search_sql << "\nexcute error: " << erroms;
+    DLOG(ERROR) << "sql: " << search_sql << "\nexcute error: " << erroms;
     return;
   }
   for (const auto &iter : crdstructs) {
@@ -526,7 +526,7 @@ bool DatabaseManager::validateJson(const Json::Value &instance_json) const {
   std::string instance_kind = instance_json["kind"].asString();
 
   if (this->regist_crd_list.count(instance_kind + "." + instance_group) == 0) {
-    LOG(WARNING) << "no matched crd with : "
+    DLOG(WARNING) << "no matched crd with : "
                  << instance_kind + "." + instance_group
                  << ",please registe before add instance";
     return false;
@@ -535,10 +535,10 @@ bool DatabaseManager::validateJson(const Json::Value &instance_json) const {
       this->regist_crd_list.at(instance_kind + "." + instance_group).schema;
   std::string instance_validate = GetValidatePart(instance_json);
   if (!SchemaValidation(schema, instance_validate)) {
-    LOG(WARNING) << GetInstanceKey(instance_json) << "can't pass validate";
+    DLOG(WARNING) << GetInstanceKey(instance_json) << "can't pass validate";
     return false;
   }
-  // LOG(INFO) << "the instance : " << GetInstanceKey(instance_json) << " pass
+  // DLOG(INFO) << "the instance : " << GetInstanceKey(instance_json) << " pass
   // the validate";
   return true;
 }
@@ -567,10 +567,10 @@ bool DatabaseManager::storeDevice(const Json::Value &instance_json) const {
   char *erroms2 = 0;
   rc2 = sqlite3_exec(db, insert_sql.c_str(), device_callback, 0, &erroms2);
   if (rc2) {
-    LOG(ERROR) << "sql excute error with: " << erroms2;
+    DLOG(ERROR) << "sql excute error with: " << erroms2;
     return false;
   }
-  LOG(INFO) << "DB add device instance: " << instance_key << " success";
+  DLOG(INFO) << "DB add device instance: " << instance_key << " success";
 
   return true;
 }
@@ -599,9 +599,9 @@ bool DatabaseManager::storeAbility(const Json::Value &instance_json) const {
   char *erroms2 = 0;
   rc2 = sqlite3_exec(db, insert_sql.c_str(), ability_callback, 0, &erroms2);
   if (rc2) {
-    LOG(ERROR) << "sql excute error with: " << erroms2;
+    DLOG(ERROR) << "sql excute error with: " << erroms2;
     return false;
   }
-  LOG(INFO) << "DB add ability: " << instance_key << " success";
+  DLOG(INFO) << "DB add ability: " << instance_key << " success";
   return true;
 }

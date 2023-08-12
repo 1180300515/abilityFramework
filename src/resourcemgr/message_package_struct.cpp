@@ -9,7 +9,7 @@ bool UnMarshalMessageStruct(const std::string &data,
   Json::Value jnode;
   bool err = reader.parse(data, jnode);
   if (!err) {
-    LOG(ERROR) << "json unmarshal fail";
+    DLOG(ERROR) << "json unmarshal fail";
     return false;
   }
   for (int i = 0; i < jnode["data"].size(); i++) {

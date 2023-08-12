@@ -7,14 +7,14 @@
 void HttpServer::Init(std::shared_ptr<ResourceManager> resource_,
                       std::shared_ptr<LifeCycleManager> lifecycle_,
                       std::shared_ptr<AbilityRelationManager> relation_) {
-  LOG(INFO) << L_GREEN << "init http server" << NONE;
+  DLOG(INFO) << L_GREEN << "init http server" << NONE;
   this->server = std::make_shared<httplib::Server>();
   this->resource_manager_ = resource_;
   this->lifecycle_manager_ = lifecycle_;
   this->relation_manager_ = relation_;
   this->server->Post("/heartbeat", [this](const httplib::Request &req,
                                           httplib::Response &res) {
-    LOG(INFO) << L_BLUE << "httpserver receive: method: Post   URL: /heartbeat"
+    DLOG(INFO) << L_BLUE << "httpserver receive: method: Post   URL: /heartbeat"
               << NONE;
     HeartbeatInfo new_info;
     if (req.get_header_value("Content-Type") == "application/json") {
@@ -22,7 +22,7 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_,
       Json::Value root;
       bool success = reader.parse(req.body, root);
       if (!success) {
-        LOG(ERROR) << "json parse fail";
+        DLOG(ERROR) << "json parse fail";
         return;
       }
       new_info.FromJson(root);
@@ -30,7 +30,7 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_,
       int port;
       try {
         port = std::stoi(req.get_param_value("IPCPort"));
-        // LOG(INFO) << BLUE << "Got heartbeat from port " << port << NONE;
+        // DLOG(INFO) << BLUE << "Got heartbeat from port " << port << NONE;
       } catch (const std::exception &) {
         res.status = 400;  // Bad Request
         return;
@@ -41,14 +41,14 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_,
                                req.get_param_value("status"),
                                std::chrono::steady_clock::now()};
     }
-    LOG(INFO) << BLUE << "Got heartbeat from port " << new_info.IPCPort << NONE;
+    DLOG(INFO) << BLUE << "Got heartbeat from port " << new_info.IPCPort << NONE;
     this->lifecycle_manager_->AddHeartbeatInfo(new_info);
     res.set_content("OK", "text/plain");
   });
 
   this->server->Get("/api/Devices", [this](const httplib::Request &req,
                                            httplib::Response &res) {
-    LOG(INFO) << L_BLUE << "httpserver receive: method: GET   URL: /api/Devices"
+    DLOG(INFO) << L_BLUE << "httpserver receive: method: GET   URL: /api/Devices"
               << NONE;
     res.set_content(this->resource_manager_->GetHardwareDeviceInfo(true),
                     "application/json");
@@ -56,7 +56,7 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_,
 
   this->server->Get("/api/AbilityRunning", [this](const httplib::Request &req,
                                                   httplib::Response &res) {
-    LOG(INFO) << L_BLUE
+    DLOG(INFO) << L_BLUE
               << "httpserver receive: method: GET   URL: /api/AbilityRunning"
               << NONE;
     res.set_content(this->lifecycle_manager_->GetHeartbeatMap(),
@@ -65,7 +65,7 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_,
 
   this->server->Get("/api/AbilitySupport", [this](const httplib::Request &req,
                                                   httplib::Response &res) {
-    LOG(INFO) << L_BLUE
+    DLOG(INFO) << L_BLUE
               << "httpserver receive: method: GET   URL: /api/AbilitySupport"
               << NONE;
     res.set_content(this->relation_manager_->GetAbilitySupport(),
@@ -74,14 +74,14 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_,
 
   this->server->Post("/api/AbilityRequest", [this](const httplib::Request &req,
                                                    httplib::Response &res) {
-    // LOG(INFO) << req.get_header_value("Content-Type");
+    // DLOG(INFO) << req.get_header_value("Content-Type");
     CommandInfo cmd;
     if (req.get_header_value("Content-Type") == "application/json") {
       Json::Value root;
       Json::Reader reader;
       bool success = reader.parse(req.body, root);
       if (!success) {
-        LOG(ERROR) << "json parse error";
+        DLOG(ERROR) << "json parse error";
         return;
       }
       cmd.FromJson(root);
@@ -97,7 +97,7 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_,
         return;
       }
     }
-    LOG(INFO) << L_BLUE
+    DLOG(INFO) << L_BLUE
               << "httpserver receive: method: POST   URL: /api/AbilityRequest"
               << NONE;
     int result = lifecycle_manager_->HandleCommandInfo(cmd);
@@ -114,6 +114,6 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_,
 }
 
 void HttpServer::Run() {
-  LOG(INFO) << L_GREEN << "http server start" << NONE;
+  DLOG(INFO) << L_GREEN << "http server start" << NONE;
   this->server->listen("0.0.0.0", 8080);
 }

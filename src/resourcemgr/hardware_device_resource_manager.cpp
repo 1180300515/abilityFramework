@@ -17,7 +17,7 @@ void HardwareResourceManager::EndAddressResult(
   compareOldAndNew(result);
   if (this->hardware_resources.size() == 0) {
     // the manager first start
-    LOG(INFO) << "Insert all host device profile";
+    DLOG(INFO) << "Insert all host device profile";
     for (const auto &iter : result) {
       if (iter.first == this->hostname_) {
         std::string data = this->resource_manager->GetHardwareDeviceInfo();
@@ -36,7 +36,7 @@ void HardwareResourceManager::EndAddressResult(
     change = true;
   } else if (std::chrono::steady_clock::now() - this->last_update >
              std::chrono::minutes(5)) {
-    LOG(INFO) << "Update all host device profile";
+    DLOG(INFO) << "Update all host device profile";
     // beyond the time limit
     for (const auto &iter : result) {
       if (iter.first == this->hostname_) {
@@ -58,7 +58,7 @@ void HardwareResourceManager::EndAddressResult(
     // only get the new host deviceprofile
     for (const auto &iter : result) {
       if (this->hardware_resources.count(iter.first) == 0) {
-        LOG(INFO) << "new host: " << iter.first
+        DLOG(INFO) << "new host: " << iter.first
                   << " will get the host device profile";
         auto dp = getDeviceProfileFromHost(iter.second);
         hardware_resources[iter.first] = dp;
@@ -135,7 +135,7 @@ void HardwareResourceManager::compareOldAndNew(
   for (auto iter = hardware_resources.begin();
        iter != hardware_resources.end();) {
     if (new_.count(iter->first) == 0) {
-      LOG(INFO) << "host: " << iter->first
+      DLOG(INFO) << "host: " << iter->first
                 << " is offline, the device profile will be deleted";
       hardware_resources.erase(iter++);
       change = true;

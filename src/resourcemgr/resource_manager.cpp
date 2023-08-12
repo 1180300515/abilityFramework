@@ -38,14 +38,14 @@ bool ResourceManager::AddAbilityInstance(const std::string &data,
     try {
       instance_yaml = YAML::LoadFile(data);
     } catch (YAML::ParserException e) {
-      LOG(ERROR) << "yaml is malformed.";
+      DLOG(ERROR) << "yaml is malformed.";
       return false;
     } catch (YAML::BadFile e) {
-      LOG(ERROR) << "file can't be load";
+      DLOG(ERROR) << "file can't be load";
       return false;
     }
     if (!YamlToJson(instance_yaml, &instance_json)) {
-      LOG(ERROR) << "convert the yaml file in: " << data
+      DLOG(ERROR) << "convert the yaml file in: " << data
                  << " to json format fail";
       return false;
     }
@@ -60,10 +60,10 @@ bool ResourceManager::AddAbilityInstance(const std::string &data,
     resource->FromJson(instance_json);
     std::string key = GetInstanceKey(instance_json);
     abilities_[key] = resource;
-    LOG(INFO) << "resource manager add ability instance : " << key;
+    DLOG(INFO) << "resource manager add ability instance : " << key;
     return true;
   } else {
-    LOG(ERROR) << "resource manager add ability instance fail";
+    DLOG(ERROR) << "resource manager add ability instance fail";
     return false;
   }
   return false;
@@ -77,10 +77,10 @@ bool ResourceManager::UpdateAbilityInstance(const std::string &data) {
     std::lock_guard<std::mutex> locker(abilities_lock_);
     std::string key = GetInstanceKey(instance_json);
     abilities_[key]->updateAbility(instance_json);
-    LOG(INFO) << "resource manager update ability instance : " << key;
+    DLOG(INFO) << "resource manager update ability instance : " << key;
     return true;
   } else {
-    LOG(ERROR) << "resource manager update ability instance fail";
+    DLOG(ERROR) << "resource manager update ability instance fail";
     return false;
   }
   return false;
@@ -88,16 +88,16 @@ bool ResourceManager::UpdateAbilityInstance(const std::string &data) {
 
 bool ResourceManager::DeleteAbilityInstance(const std::string &key) {
   if (abilities_.count(key) == 0) {
-    LOG(INFO) << "the instance : " << key << " is not exist";
+    DLOG(INFO) << "the instance : " << key << " is not exist";
     return true;
   } else {
     if (DatabaseManager::getInstance().DBDeleteAbilityInstance(key)) {
       std::lock_guard<std::mutex> locker(abilities_lock_);
       abilities_.erase(key);
-      LOG(INFO) << "resource manager delete ability instance : " << key;
+      DLOG(INFO) << "resource manager delete ability instance : " << key;
       return true;
     } else {
-      LOG(ERROR) << "resource manager delete ability instance fail";
+      DLOG(ERROR) << "resource manager delete ability instance fail";
     }
   }
 
@@ -112,14 +112,14 @@ bool ResourceManager::AddDeviceInstance(const std::string &data,
     try {
       instance_yaml = YAML::LoadFile(data);
     } catch (YAML::ParserException e) {
-      LOG(ERROR) << "yaml is malformed.";
+      DLOG(ERROR) << "yaml is malformed.";
       return false;
     } catch (YAML::BadFile e) {
-      LOG(ERROR) << "file can't be load";
+      DLOG(ERROR) << "file can't be load";
       return false;
     }
     if (!YamlToJsonForInstance(instance_yaml, &instance_json)) {
-      LOG(ERROR) << "convert the yaml file in: " << data
+      DLOG(ERROR) << "convert the yaml file in: " << data
                  << " to json format fail";
       return false;
     }
@@ -153,17 +153,17 @@ bool ResourceManager::AddDeviceInstance(const std::string &data,
     auto key = GetInstanceKey(instance_json);
     if (!DatabaseManager::getInstance().DBStoreDeviceInstance(
             new_device->ToJson())) {
-      LOG(ERROR) << "resource manager add device instance : " << key
+      DLOG(ERROR) << "resource manager add device instance : " << key
                  << " type: " << device_kind << " fail";
       return false;
     }
 
     devices_[key] = new_device;
-    LOG(INFO) << "resource manager add device instance : " << key
+    DLOG(INFO) << "resource manager add device instance : " << key
               << " type: " << device_kind;
     return true;
   } else {
-    LOG(ERROR) << "unkonown resource type : " << device_kind;
+    DLOG(ERROR) << "unkonown resource type : " << device_kind;
     return false;
   }
   auto key = GetInstanceKey(instance_json);
@@ -183,7 +183,7 @@ bool ResourceManager::AddDeviceInstance(const std::string &data,
     }
   }
   devices_[key] = new_device;
-  LOG(INFO) << "resource manager add device instance : " << key
+  DLOG(INFO) << "resource manager add device instance : " << key
             << " type: " << device_kind;
   return true;
 }
@@ -200,36 +200,36 @@ bool ResourceManager::UpdateDeviceInstance(const std::string &data) {
       auto new_device =
           std::dynamic_pointer_cast<CameraInstance>(devices_[key]);
       new_device->updateInstance(instance_json);
-      LOG(INFO) << "resource manager update device instance : " << key
+      DLOG(INFO) << "resource manager update device instance : " << key
                 << " type: " << device_kind;
       return true;
     } else if (device_kind == LoudspeakerDeviceResourcetype) {
       auto new_device =
           std::dynamic_pointer_cast<LoudspeakerInstance>(devices_[key]);
       new_device->updateInstance(instance_json);
-      LOG(INFO) << "resource manager update device instance : " << key
+      DLOG(INFO) << "resource manager update device instance : " << key
                 << " type: " << device_kind;
       return true;
     } else if (device_kind == MicrophoneDeviceResourcetype) {
       auto new_device =
           std::dynamic_pointer_cast<MicrophoneInstance>(devices_[key]);
       new_device->updateInstance(instance_json);
-      LOG(INFO) << "resource manager update device instance : " << key
+      DLOG(INFO) << "resource manager update device instance : " << key
                 << " type: " << device_kind;
       return true;
     } else if (device_kind == SensorDeviceResourcetype) {
       auto new_device =
           std::dynamic_pointer_cast<SensorInstance>(devices_[key]);
       new_device->updateInstance(instance_json);
-      LOG(INFO) << "resource manager update device instance : " << key
+      DLOG(INFO) << "resource manager update device instance : " << key
                 << " type: " << device_kind;
       return true;
     } else {
-      LOG(ERROR) << "unkonown resource type : " << device_kind;
+      DLOG(ERROR) << "unkonown resource type : " << device_kind;
       return false;
     }
   } else {
-    LOG(ERROR) << "resource manager update device instance fail";
+    DLOG(ERROR) << "resource manager update device instance fail";
     return false;
   }
   return false;
@@ -258,7 +258,7 @@ std::string ResourceManager::isLocalResource(std::string key) {
 
 bool ResourceManager::AbilityExistJudge(const std::string &key) {
   std::string wait_for_check = "default/" + key;
-  LOG(INFO) << L_BLUE << "check ability exist : " << wait_for_check << NONE;
+  DLOG(INFO) << L_BLUE << "check ability exist : " << wait_for_check << NONE;
   for (const auto &iter : abilities_) {
     if (wait_for_check == iter.first) {
       return true;
@@ -277,13 +277,13 @@ void ResourceManager::LoadLocalResourceFromDB() {
   DatabaseManager::getInstance().DBGetAbilityInstances(&data);
   if (data.size() != 0) {
     for (const auto &iter : data) {
-      LOG(INFO) << "add resource : " << iter.first;
+      DLOG(INFO) << "add resource : " << iter.first;
       auto new_ability = std::make_shared<AbilityInstanceInfo>();
       new_ability->UnMarshal(iter.second);
       this->abilities_[iter.first] = new_ability;
     }
   } else {
-    LOG(INFO) << "ability instance in database is empty";
+    DLOG(INFO) << "ability instance in database is empty";
   }
   data.clear();
   DatabaseManager::getInstance().DBGetDeviceInstances(CameraDeviceResourcetype,
@@ -295,7 +295,7 @@ void ResourceManager::LoadLocalResourceFromDB() {
       this->devices_[iter.first] = new_device;
     }
   } else {
-    LOG(INFO) << "camera device instance in database is empty";
+    DLOG(INFO) << "camera device instance in database is empty";
   }
   data.clear();
   DatabaseManager::getInstance().DBGetDeviceInstances(
@@ -307,7 +307,7 @@ void ResourceManager::LoadLocalResourceFromDB() {
       this->devices_[iter.first] = new_device;
     }
   } else {
-    LOG(INFO) << "microphone device instance in database is empty";
+    DLOG(INFO) << "microphone device instance in database is empty";
   }
   data.clear();
   DatabaseManager::getInstance().DBGetDeviceInstances(
@@ -319,7 +319,7 @@ void ResourceManager::LoadLocalResourceFromDB() {
       this->devices_[iter.first] = new_device;
     }
   } else {
-    LOG(INFO) << "loudspeaker device instance in database is empty";
+    DLOG(INFO) << "loudspeaker device instance in database is empty";
   }
   data.clear();
   DatabaseManager::getInstance().DBGetDeviceInstances(SensorDeviceResourcetype,
@@ -331,12 +331,12 @@ void ResourceManager::LoadLocalResourceFromDB() {
       this->devices_[iter.first] = new_device;
     }
   } else {
-    LOG(INFO) << "sensor device instance in database is empty";
+    DLOG(INFO) << "sensor device instance in database is empty";
   }
 }
 
 void ResourceManager::Init(bool cleandb) {
-  LOG(INFO) << L_GREEN << "init resource manager" << NONE;
+  DLOG(INFO) << L_GREEN << "init resource manager" << NONE;
   getHostName();
 
   DatabaseManager::getInstance().Init(this->hostname_, cleandb);
@@ -414,7 +414,7 @@ std::vector<std::string> ResourceManager::GetHardWareResourceList(
 void ResourceManager::getHostName() {
   char hostname[256];
   if (gethostname(hostname, sizeof(hostname)) != 0) {
-    LOG(ERROR) << "get hostname fail";
+    DLOG(ERROR) << "get hostname fail";
   } else {
     hostname[sizeof(hostname) - 1] = '\0';
     hostname_ = std::string(hostname);
@@ -431,7 +431,7 @@ bool ResourceManager::handleHostname(Json::Value *instance_json) {
   if ((*instance_json)["spec"].isMember("hostname")) {
     if ((*instance_json)["spec"]["hostname"] != this->hostname_ &&
         (*instance_json)["spec"]["hostname"] != "") {
-      LOG(ERROR) << "the " << (*instance_json)["spec"]["hostname"]
+      DLOG(ERROR) << "the " << (*instance_json)["spec"]["hostname"]
                  << " is not the local hostname";
       return false;
     }
@@ -442,17 +442,17 @@ bool ResourceManager::handleHostname(Json::Value *instance_json) {
 
 bool ResourceManager::deleteDeviceInstance(const std::string &key) {
   if (devices_.count(key) == 0) {
-    LOG(INFO) << "the instance : " << key << " is not exist";
+    DLOG(INFO) << "the instance : " << key << " is not exist";
     return true;
   } else {
     if (DatabaseManager::getInstance().DBDelteDeviceInstance(key)) {
       std::lock_guard<std::mutex> locker(devices_lock_);
       devices_.erase(key);
 
-      LOG(INFO) << "resource manager delete device instance : " << key;
+      DLOG(INFO) << "resource manager delete device instance : " << key;
       return true;
     } else {
-      LOG(ERROR) << "resource manager delete device instance fail";
+      DLOG(ERROR) << "resource manager delete device instance fail";
       return false;
     }
   }
@@ -460,7 +460,7 @@ bool ResourceManager::deleteDeviceInstance(const std::string &key) {
 }
 
 void ResourceManager::resourceMatching() {
-  LOG(INFO) << "begin resource match with hardware";
+  DLOG(INFO) << "begin resource match with hardware";
   std::vector<std::string> wait_for_delete;
   std::lock_guard<std::mutex> locker(devices_lock_);
   for (auto &iter : this->devices_) {
@@ -491,7 +491,7 @@ void ResourceManager::resourceMatching() {
     if (change) {
       DatabaseManager::getInstance().DBUpdateDeviceInstance(
           iter.second->ToJson());
-      LOG(INFO) << "device instance : " << iter.first
+      DLOG(INFO) << "device instance : " << iter.first
                 << " update hardware info";
     }
     if (hardware_->isAutogenInstance(old_key)) {
@@ -502,13 +502,13 @@ void ResourceManager::resourceMatching() {
   for (const auto &iter : wait_for_delete) {
     DatabaseManager::getInstance().DBDelteDeviceInstance(iter);
     devices_.erase(iter);
-    LOG(INFO) << "resource manager delete autogen CR : " << iter;
+    DLOG(INFO) << "resource manager delete autogen CR : " << iter;
   }
-  LOG(INFO) << "finish match";
+  DLOG(INFO) << "finish match";
 }
 
 void ResourceManager::autoGenerateCR() {
-  LOG(INFO) << "begin autogen CR";
+  DLOG(INFO) << "begin autogen CR";
   std::vector<CameraHardware> camera;
   std::vector<AudioHardware> mic;
   std::vector<AudioHardware> speaker;
@@ -544,7 +544,7 @@ void ResourceManager::autoGenerateCR() {
     instance.status.occupancy = false;
     std::string data = instance.Marshal();
     if (!AddDeviceInstance(data)) {
-      LOG(ERROR) << "autogen CR: " << instance.metadata.name << " add fail";
+      DLOG(ERROR) << "autogen CR: " << instance.metadata.name << " add fail";
       continue;
     }
     hardware_->SetMap(iter.bus_info, instance.metadata.namespace_name + "/" +
@@ -579,11 +579,11 @@ void ResourceManager::autoGenerateCR() {
 
     std::string data = instance.Marshal();
     if (!AddDeviceInstance(data)) {
-      LOG(ERROR) << "autogen CR: " << instance.metadata.name << " add fail";
+      DLOG(ERROR) << "autogen CR: " << instance.metadata.name << " add fail";
       continue;
     }
 
-    // LOG(INFO) << "add device instance : " << instance.metadata.name << "
+    // DLOG(INFO) << "add device instance : " << instance.metadata.name << "
     // success";
     hardware_->SetMap(iter.name, instance.metadata.namespace_name + "/" +
                                      instance.metadata.name);
@@ -620,15 +620,15 @@ void ResourceManager::autoGenerateCR() {
 
     std::string data = instance.Marshal();
     if (!AddDeviceInstance(data)) {
-      LOG(ERROR) << "autogen CR: " << instance.metadata.name << " add fail";
+      DLOG(ERROR) << "autogen CR: " << instance.metadata.name << " add fail";
       continue;
     }
-    // LOG(INFO) << "add device instance : " << instance.metadata.name << "
+    // DLOG(INFO) << "add device instance : " << instance.metadata.name << "
     // success";
     hardware_->SetMap(iter.name, instance.metadata.namespace_name + "/" +
                                      instance.metadata.name);
   }
-  LOG(INFO) << "finish autogen CR";
+  DLOG(INFO) << "finish autogen CR";
 }
 
 void ResourceManager::periodicScanThread() {

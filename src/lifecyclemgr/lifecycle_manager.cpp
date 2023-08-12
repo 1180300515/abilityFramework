@@ -6,22 +6,22 @@
 #include "utils/global_var.h"
 
 int LifeCycleManager::HandleCommandInfo(const CommandInfo &cmd_info) {
-  // LOG(INFO) << "receive cmd : " << cmd;
-  LOG(INFO) << "handle the command info : "
+  // DLOG(INFO) << "receive cmd : " << cmd;
+  DLOG(INFO) << "handle the command info : "
             << cmd_info.toJson().toStyledString();
   if (!resourcemgr_checkexist(cmd_info.abilityName)) {
-    LOG(ERROR) << "the ability : " << cmd_info.abilityName << " is not exist";
+    DLOG(ERROR) << "the ability : " << cmd_info.abilityName << " is not exist";
     return 0;
   }
   if (cmd_info.IPCPort == 0 && cmd_info.cmd != CMD_START) {
-    LOG(ERROR) << "the cmd info must specify the port number";
+    DLOG(ERROR) << "the cmd info must specify the port number";
     return 0;
   }
   // a new process will be start
   if (cmd_info.IPCPort == 0 && cmd_info.cmd == CMD_START) {
-    LOG(INFO) << "ready for start : " << cmd_info.abilityName << " process";
+    DLOG(INFO) << "ready for start : " << cmd_info.abilityName << " process";
     if (!start_process(cmd_info.abilityName)) {
-      LOG(ERROR) << "start the " << cmd_info.abilityName << " fail";
+      DLOG(ERROR) << "start the " << cmd_info.abilityName << " fail";
       return 0;
     }
     return 1;
@@ -29,11 +29,11 @@ int LifeCycleManager::HandleCommandInfo(const CommandInfo &cmd_info) {
   std::shared_lock<std::shared_mutex> lock(clients_lock_);
   std::shared_lock<std::shared_mutex> lock1(heartbeat_map_lock);
   if (cmd_info.IPCPort != 0 && this->clients.count(cmd_info.IPCPort) == 0) {
-    LOG(ERROR) << "no ability client matching the port : " << cmd_info.IPCPort;
+    DLOG(ERROR) << "no ability client matching the port : " << cmd_info.IPCPort;
     return 0;
   }
   if (heartbeat_map.count(cmd_info.IPCPort) == 0) {
-    LOG(ERROR) << "the IPCPort: " << cmd_info.IPCPort << " is not exist";
+    DLOG(ERROR) << "the IPCPort: " << cmd_info.IPCPort << " is not exist";
     return 0;
   }
   if (heartbeat_map.at(cmd_info.IPCPort).abilityName == cmd_info.abilityName) {
@@ -41,7 +41,7 @@ int LifeCycleManager::HandleCommandInfo(const CommandInfo &cmd_info) {
     std::future_status status =
         threads.at(cmd_info.IPCPort).wait_for(std::chrono::seconds(0));
     if (status != std::future_status::ready) {
-      LOG(ERROR) << "The last operation has not ended in IPCPort: "
+      DLOG(ERROR) << "The last operation has not ended in IPCPort: "
                  << cmd_info.IPCPort;
       return 2;
     }
@@ -56,7 +56,7 @@ int LifeCycleManager::HandleCommandInfo(const CommandInfo &cmd_info) {
 
 bool LifeCycleManager::AddHeartbeatInfo(HeartbeatInfo info) {
   if (info.IPCPort == 0) {
-    LOG(ERROR) << "the heartbeat info IPCPort is illegal";
+    DLOG(ERROR) << "the heartbeat info IPCPort is illegal";
     return false;
   }
   {
@@ -78,7 +78,7 @@ bool LifeCycleManager::AddHeartbeatInfo(HeartbeatInfo info) {
 }
 
 void LifeCycleManager::Init(std::function<bool(std::string)> callback) {
-  LOG(INFO) << L_GREEN << "init lifecycle manager" << NONE;
+  DLOG(INFO) << L_GREEN << "init lifecycle manager" << NONE;
   this->resourcemgr_checkexist = callback;
   // this->resourcemgr_checkexist("camera");
 }
@@ -102,8 +102,8 @@ std::string LifeCycleManager::GetHeartbeatMap() {
 void LifeCycleManager::lifeCycleDeal(std::shared_ptr<AbilityClient> client,
                                      const HeartbeatInfo &hbinfo,
                                      const CommandInfo &cmdinfo) {
-  LOG(INFO) << RED << "Adjust life cycle" << NONE;
-  LOG(INFO) << RED << "Now the Ability : " << cmdinfo.abilityName
+  DLOG(INFO) << RED << "Adjust life cycle" << NONE;
+  DLOG(INFO) << RED << "Now the Ability : " << cmdinfo.abilityName
             << " in port: " << hbinfo.IPCPort << " status is :" << hbinfo.status
             << NONE << std::endl;
   if (hbinfo.status == STATUS_INIT) {
@@ -112,7 +112,7 @@ void LifeCycleManager::lifeCycleDeal(std::shared_ptr<AbilityClient> client,
       start_info.set_timestamp(time(0));
       client->Start(start_info);
     } else {
-      LOG(ERROR) << "illegal cmd : " << cmdinfo.cmd
+      DLOG(ERROR) << "illegal cmd : " << cmdinfo.cmd
                  << " in status: " << hbinfo.status;
     }
   } else if (hbinfo.status == STATUS_STANDBY) {
@@ -127,7 +127,7 @@ void LifeCycleManager::lifeCycleDeal(std::shared_ptr<AbilityClient> client,
       terminate_info.set_timestamp(time(0));
       client->Terminate(terminate_info);
     } else {
-      LOG(ERROR) << "illegal cmd : " << cmdinfo.cmd
+      DLOG(ERROR) << "illegal cmd : " << cmdinfo.cmd
                  << " in status: " << hbinfo.status;
     }
   } else if (hbinfo.status == STATUS_RUNNING) {
@@ -140,7 +140,7 @@ void LifeCycleManager::lifeCycleDeal(std::shared_ptr<AbilityClient> client,
       terminate_info.set_timestamp(time(0));
       client->Terminate(terminate_info);
     } else {
-      LOG(ERROR) << "illegal cmd : " << cmdinfo.cmd
+      DLOG(ERROR) << "illegal cmd : " << cmdinfo.cmd
                  << " in status: " << hbinfo.status;
     }
   } else if (hbinfo.status == STATUS_SUSPEND) {
@@ -159,13 +159,13 @@ void LifeCycleManager::lifeCycleDeal(std::shared_ptr<AbilityClient> client,
       start_info.set_timestamp(time(0));
       client->Start(start_info);
     } else {
-      LOG(ERROR) << "illegal cmd : " << cmdinfo.cmd
+      DLOG(ERROR) << "illegal cmd : " << cmdinfo.cmd
                  << " in status: " << hbinfo.status;
     }
   } else if (hbinfo.status == STATUS_TERMINATE) {
-    LOG(INFO) << "status : " << hbinfo.status << " is uncontrollable";
+    DLOG(INFO) << "status : " << hbinfo.status << " is uncontrollable";
   }
-  LOG(INFO) << RED << "Finished life cycle adjust" << NONE;
+  DLOG(INFO) << RED << "Finished life cycle adjust" << NONE;
 }
 
 bool LifeCycleManager::start_process(const std::string &abilityName) {
@@ -178,7 +178,7 @@ bool LifeCycleManager::start_process(const std::string &abilityName) {
     // 我们在父进程中，pid是子进程的PID
   } else {
     std::string program_path = abilityName;
-    LOG(INFO) << "start process : " << abilityName;
+    DLOG(INFO) << "start process : " << abilityName;
     // 我们在子进程中，启动新的程序
     execl(("bin/" + program_path).c_str(), program_path.c_str(),
           reinterpret_cast<char *>(NULL));
@@ -212,13 +212,13 @@ void LifeCycleManager::checkTimeout() {
         } else {
           if (threads.at(iter).wait_for(std::chrono::seconds(1)) !=
               std::future_status::ready) {
-            LOG(ERROR) << "the thread which bind in IPCPort: " << iter
+            DLOG(ERROR) << "the thread which bind in IPCPort: " << iter
                        << " cant't finish";
           }
           threads.erase(iter);
         }
         clients.erase(iter);  // this process has ended, clean up the client
-        LOG(INFO) << "the ability : " << heartbeat_map.at(iter).abilityName
+        DLOG(INFO) << "the ability : " << heartbeat_map.at(iter).abilityName
                   << "on IPCPort : " << heartbeat_map.at(iter).IPCPort
                   << "  timeout, already clean";
         heartbeat_map.erase(iter);  // timeout, delete the record
@@ -233,7 +233,7 @@ void LifeCycleManager::createClient(const std::string &name, int ipcport) {
         grpc::CreateChannel("localhost:" + std::to_string(ipcport),
                             grpc::InsecureChannelCredentials()));
   }
-  LOG(INFO) << "create ability client for ability : " << name
+  DLOG(INFO) << "create ability client for ability : " << name
             << " in IPCPort : " << ipcport;
   abilityUnit::StartInfo start_info;
   start_info.set_timestamp(time(0));

@@ -11,7 +11,7 @@
 void AbilityRelationManager::Init(
     std::function<std::vector<AbilityInfoExtract>()> callback_1,
     std::function<std::vector<std::string>(std::string)> callback_2) {
-  LOG(INFO) << L_GREEN << "init abilityrelation manager" << NONE;
+  DLOG(INFO) << L_GREEN << "init abilityrelation manager" << NONE;
   this->abilityinfoextract_callback_ = callback_1;
   this->hardwaredevicelist_callback_ = callback_2;
 }
@@ -19,7 +19,7 @@ void AbilityRelationManager::Init(
 std::string AbilityRelationManager::GetAbilitySupport() {
   auto list = this->abilityinfoextract_callback_();
   for (const auto &iter : list) {
-    LOG(INFO) << iter.name;
+    DLOG(INFO) << iter.name;
   }
   auto treearray = this->generateDependTreeArray(list);
   auto treearraywithdevice =

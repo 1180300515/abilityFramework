@@ -12,7 +12,7 @@ std::string CameraInstance::GetHardwareIdentifier() const {
 }
 
 bool CameraInstance::UpdateHardwareInfo(const Json::Value &info) {
-  // LOG(INFO) << "camera hardware info \n" << info.toStyledString();
+  // DLOG(INFO) << "camera hardware info \n" << info.toStyledString();
   bool changeornot = false;
   CameraHardware hardware;
   hardware.fromJson(info);
@@ -45,7 +45,7 @@ bool CameraInstance::UpdateHardwareInfo(const Json::Value &info) {
       }
     }
   } else {
-    LOG(ERROR) << "this camera hardware bus_info: \"" << hardware.bus_info
+    DLOG(ERROR) << "this camera hardware bus_info: \"" << hardware.bus_info
                << "\" don't match this hardwareidentifier: \""
                << spec.hardwareidentifier << "\"";
   }

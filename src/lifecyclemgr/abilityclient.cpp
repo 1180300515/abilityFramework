@@ -8,7 +8,7 @@ void AbilityClient::Start(const abilityUnit::StartInfo &start_info) {
   Status status = stub_->Start(&context, start_info, &response);
   // Handle status and response here...
   if (!status.ok()) {
-    LOG(ERROR) << "start error : " << status.error_message();
+    DLOG(ERROR) << "start error : " << status.error_message();
   }
 }
 
@@ -18,7 +18,7 @@ void AbilityClient::Connect(const abilityUnit::ConnectInfo &connect_info) {
   Status status = stub_->Connect(&context, connect_info, &response);
   // Handle status and response here...
   if (!status.ok()) {
-    LOG(ERROR) << "connect error : " << status.error_message();
+    DLOG(ERROR) << "connect error : " << status.error_message();
   }
 }
 
@@ -29,7 +29,7 @@ void AbilityClient::Disconnect(
   Status status = stub_->Disconnect(&context, disconnect_info, &response);
   // Handle status and response here...
   if (!status.ok()) {
-    LOG(ERROR) << "disconnect error : " << status.error_message();
+    DLOG(ERROR) << "disconnect error : " << status.error_message();
   }
 }
 
@@ -40,6 +40,6 @@ void AbilityClient::Terminate(
   Status status = stub_->Terminate(&context, terminate_info, &response);
   // Handle status and response here...
   if (!status.ok()) {
-    LOG(ERROR) << "terminate error : " << status.error_message();
+    DLOG(ERROR) << "terminate error : " << status.error_message();
   }
 }

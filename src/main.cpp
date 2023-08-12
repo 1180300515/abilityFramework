@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
           continue;
         }
         crd_file_names.emplace_back(ent->d_name);
-        // LOG(INFO) << ent->d_name;
+        // DLOG(INFO) << ent->d_name;
       }
       closedir(dir);
       // add data into crd table
@@ -77,12 +77,12 @@ int main(int argc, char **argv) {
         std::string file_path =
             std::string(CRD_FILE_PATH) + "/" + crd_file_names[i];
         if (!resource_manager->RegistCrd(file_path, true)) {
-          LOG(ERROR) << "register fail";
+          DLOG(ERROR) << "register fail";
           exit(0);
         }
       }
     } else {
-      LOG(ERROR) << "Could not open directory : " << CRD_FILE_PATH;
+      DLOG(ERROR) << "Could not open directory : " << CRD_FILE_PATH;
     }
   }
   if (loaddevice) {
@@ -98,11 +98,11 @@ int main(int argc, char **argv) {
         std::string file_path =
             std::string(INSTANCE_FILE_PATH) + "/" + instance_file_names[i];
         if (!resource_manager->AddDeviceInstance(file_path, true)) {
-          LOG(ERROR) << "add instance fail from file : " << file_path;
+          DLOG(ERROR) << "add instance fail from file : " << file_path;
         }
       }
     } else {
-      LOG(ERROR) << "Could not open directory : " << INSTANCE_FILE_PATH;
+      DLOG(ERROR) << "Could not open directory : " << INSTANCE_FILE_PATH;
     }
   }
   if (loadability) {
@@ -118,11 +118,11 @@ int main(int argc, char **argv) {
         std::string file_path =
             std::string(ABILITY_FILE_PATH) + "/" + ability_file_names[i];
         if (!resource_manager->AddAbilityInstance(file_path, true)) {
-          LOG(ERROR) << "add ability fail from file : " << file_path;
+          DLOG(ERROR) << "add ability fail from file : " << file_path;
         }
       }
     } else {
-      LOG(ERROR) << "Could not open directory : " << ABILITY_FILE_PATH;
+      DLOG(ERROR) << "Could not open directory : " << ABILITY_FILE_PATH;
     }
   }
 

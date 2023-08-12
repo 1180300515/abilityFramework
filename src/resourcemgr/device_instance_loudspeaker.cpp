@@ -43,7 +43,7 @@ bool LoudspeakerInstance::UpdateHardwareInfo(const Json::Value &info) {
       changeornot = true;
     }
   } else {
-    LOG(ERROR) << "this hardware info don't match this instance";
+    DLOG(ERROR) << "this hardware info don't match this instance";
   }
   return changeornot;
 }
