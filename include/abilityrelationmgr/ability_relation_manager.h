@@ -1,3 +1,16 @@
+/*
+ * Copyright (C), 2022-2023, Soochow University & OPPO Mobile Comm Corp., Ltd.
+ *
+ * File: ability_relation_manager.h
+ * Description: ability_relation_manager.h
+ * Version: V1.0.0
+ * Date: 2023/08/24
+ * Author: Soochow University
+ * Revision History:
+ *   Version       Date          Author         Revision Description
+ *  V1.0.0        2023/08/24    Soochow University       Create and initialize
+ */
+
 #ifndef ABILITYRELATIONMGR_ABILITY_RELATION_MANAGER_H_
 #define ABILITYRELATIONMGR_ABILITY_RELATION_MANAGER_H_
 

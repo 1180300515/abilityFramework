@@ -1,18 +1,18 @@
 apiVersion: "stable.example.com/v1"
 kind: Ability
 metadata:
-  name: loudspeaker
+  name: mic
 
 level: "1"
-abilityname: loudspeaker
-description: this is a loudspeaker
+abilityname: mic
+description: this is a mic
 followed: default
 version: "1.0"
 depends:
   abilities:
     - none
   devices:
-    - speaker
+    - mic
 spec:
   sampleRates: "48000"
   channelNumber: 2
@@ -22,11 +22,11 @@ ApiList:
   - ApiType: RPC
     ApiName: open
     inputparam:
-      - paramname: playSession
+      - paramname: recordSession
         paramtype: message
         index: "1"
     returnparam:
-      - paramname: playResult
+      - paramname: recordResult
         paramtype: message
         index: "1"
   - ApiType: RPC
@@ -36,36 +36,36 @@ ApiList:
         paramtype: message
         index: "1"
     returnparam:
-      - paramname: playResult
+      - paramname: recordResult
         paramtype: message
         index: "1"
   - ApiType: RPC
-    ApiName: play
+    ApiName: record
     inputparam:
-      - paramname: playRequest
+      - paramname: recordRequest
         paramtype: message
         index: "1"
     returnparam:
-      - paramname: playResult
+      - paramname: recordResult
         paramtype: message
         index: "1"
   - ApiType: RPC
     ApiName: configure
     inputparam:
-      - paramname: playSession
+      - paramname: recordSession
         paramtype: message
         index: "1"
     returnparam:
-      - paramname: playResult
+      - paramname: recordResult
         paramtype: message
         index: "1"
   - ApiType: RPC
     ApiName: startRtsp
     inputparam:
-      - paramname: playRequset
+      - paramname: recordRequset
         paramtype: message
         index: "1"
     returnparam:
-      - paramname: playResult
+      - paramname: recordResult
         paramtype: message
         index: "1"

@@ -1,3 +1,16 @@
+/*
+ * Copyright (C), 2022-2023, Soochow University & OPPO Mobile Comm Corp., Ltd.
+ *
+ * File: depend_tree_array.cpp
+ * Description: depend_tree_array.cpp
+ * Version: V1.0.0
+ * Date: 2023/08/24
+ * Author: Soochow University
+ * Revision History:
+ *   Version       Date          Author         Revision Description
+ *  V1.0.0        2023/08/24    Soochow University       Create and initialize
+ */
+
 #include "abilityrelationmgr/depend_tree_array.h"
 
 bool DependTreeArray::hasAbility(const std::string& abilityName) const {

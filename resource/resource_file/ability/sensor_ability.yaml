@@ -1,71 +1,55 @@
 apiVersion: "stable.example.com/v1"
 kind: Ability
 metadata:
-  name: loudspeaker
+  name: sensor
 
 level: "1"
-abilityname: loudspeaker
-description: this is a loudspeaker
+abilityname: sensor
+description: this is a sensor
 followed: default
 version: "1.0"
-depends:
-  abilities:
-    - none
-  devices:
-    - speaker
 spec:
-  sampleRates: "48000"
-  channelNumber: 2
-  bitWidth: 16
+  location: home
+  vendor: oppo
   interface: standardinterface
 ApiList:
   - ApiType: RPC
     ApiName: open
     inputparam:
-      - paramname: playSession
+      - paramname: null
         paramtype: message
         index: "1"
     returnparam:
-      - paramname: playResult
+      - paramname: null
         paramtype: message
         index: "1"
   - ApiType: RPC
     ApiName: close
     inputparam:
-      - paramname: deviceID
+      - paramname: null
         paramtype: message
         index: "1"
     returnparam:
-      - paramname: playResult
+      - paramname: null
         paramtype: message
         index: "1"
   - ApiType: RPC
-    ApiName: play
+    ApiName: read
     inputparam:
-      - paramname: playRequest
+      - paramname: null
         paramtype: message
         index: "1"
     returnparam:
-      - paramname: playResult
+      - paramname: value
         paramtype: message
         index: "1"
   - ApiType: RPC
     ApiName: configure
     inputparam:
-      - paramname: playSession
+      - paramname: value
         paramtype: message
         index: "1"
     returnparam:
-      - paramname: playResult
-        paramtype: message
-        index: "1"
-  - ApiType: RPC
-    ApiName: startRtsp
-    inputparam:
-      - paramname: playRequset
-        paramtype: message
-        index: "1"
-    returnparam:
-      - paramname: playResult
+      - paramname: null
         paramtype: message
         index: "1"

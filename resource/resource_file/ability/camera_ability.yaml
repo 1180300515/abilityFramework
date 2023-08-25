@@ -1,10 +1,10 @@
 apiVersion: "stable.example.com/v1"
 kind: Ability
 metadata:
-  name: cameratest
+  name: camera
 
 level: "1"
-abilityname: cameratest
+abilityname: camera
 description: this is a camera
 followed: default
 version: "1"
@@ -23,28 +23,62 @@ spec:
   interface: standardinterface
 ApiList:
   - ApiType: RPC
-    ApiName: GetCameraVideo
+    ApiName: getCameraInfo
     inputparam:
-      - paramname: param1
-        paramtype: string
+      - paramname: cameraInfoRequest
+        paramtype: message
         index: "1"
-      - paramname: param2
-        paramtype: string
-        index: "2"
     returnparam:
-      - paramname: param3
-        paramtype: string
+      - paramname: cameraInfoResult
+        paramtype: message
         index: "1"
   - ApiType: RPC
-    ApiName: SetCameraResolution
+    ApiName: open
     inputparam:
-      - paramname: param1
-        paramtype: string
+      - paramname: cameraSession
+        paramtype: message
         index: "1"
-      - paramname: param2
-        paramtype: string
-        index: "2"
     returnparam:
-      - paramname: param3
-        paramtype: string
+      - paramname: cameraResult
+        paramtype: message
+        index: "1"
+  - ApiType: RPC
+    ApiName: close
+    inputparam:
+      - paramname: deviceId
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: cameraResult
+        paramtype: message
+        index: "1"
+  - ApiType: RPC
+    ApiName: capture
+    inputparam:
+      - paramname: captureRequest
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: captureResult
+        paramtype: message
+        index: "1"
+  - ApiType: RPC
+    ApiName: configure
+    inputparam:
+      - paramname: cameraSession
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: cameraResult
+        paramtype: message
+        index: "1"
+  - ApiType: RPC
+    ApiName: startRtsp
+    inputparam:
+      - paramname: captureRequest
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: rtspUrl
+        paramtype: message
         index: "1"
