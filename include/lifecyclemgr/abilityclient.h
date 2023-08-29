@@ -26,20 +26,19 @@ using grpc::ClientContext;
 using grpc::Status;
 
 class AbilityClient {
- public:
-  explicit AbilityClient(std::shared_ptr<Channel> channel)
-      : stub_(abilityUnit::Ability::NewStub(channel)) {}
+   public:
+    explicit AbilityClient(std::shared_ptr<Channel> channel) : stub_(abilityUnit::Ability::NewStub(channel)) {}
 
-  void Start(const abilityUnit::StartInfo &start_info);
+    void Start(const abilityUnit::StartInfo &start_info);
 
-  void Connect(const abilityUnit::ConnectInfo &connect_info);
+    void Connect(const abilityUnit::ConnectInfo &connect_info);
 
-  void Disconnect(const abilityUnit::DisconnectInfo &disconnect_info);
+    void Disconnect(const abilityUnit::DisconnectInfo &disconnect_info);
 
-  void Terminate(const abilityUnit::TerminateInfo &terminate_info);
+    void Terminate(const abilityUnit::TerminateInfo &terminate_info);
 
- private:
-  std::unique_ptr<abilityUnit::Ability::Stub> stub_;
+   private:
+    std::unique_ptr<abilityUnit::Ability::Stub> stub_;
 };
 
 #endif  // LIFECYCLEMGR_ABILITYCLIENT_H_

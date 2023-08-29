@@ -23,32 +23,31 @@
 #include "discoverymgr/discovery_device_info.h"
 
 class LANIPV4Discovery {
- private:
-  std::function<void(DiscoveryDeviceInfo)>
-      callback;  // return the discovery device info to the discovery manager
+   private:
+    std::function<void(DiscoveryDeviceInfo)> callback;  // return the discovery device info to the discovery manager
 
-  std::string getHostName();
+    std::string getHostName();
 
-  void udp_broadcast_receiver();
+    void udp_broadcast_receiver();
 
-  std::string discoverySource = "LAN-IPV4-Discovery";
+    std::string discoverySource = "LAN-IPV4-Discovery";
 
-  std::thread receiver_thread;
+    std::thread receiver_thread;
 
- public:
-  /**
-   * register the discovery manager callback function to store the discovery
-   * result
-   */
-  void RegisterCallback(std::function<void(DiscoveryDeviceInfo)> callback);
-  /**
-   * start a broadcast
-   */
-  void BroadcastSender();
-  /**
-   * start broadcast receiver thread
-   */
-  void RunBroadcastReceiver();
+   public:
+    /**
+     * register the discovery manager callback function to store the discovery
+     * result
+     */
+    void RegisterCallback(std::function<void(DiscoveryDeviceInfo)> callback);
+    /**
+     * start a broadcast
+     */
+    void BroadcastSender();
+    /**
+     * start broadcast receiver thread
+     */
+    void RunBroadcastReceiver();
 };
 
 #endif  // DISCOVERYMGR_LAN_IPV4_DISCOVERY_H_

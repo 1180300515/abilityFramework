@@ -20,16 +20,16 @@
 #include <string>
 
 struct CommandInfo {
-  int IPCPort;
-  std::string abilityName;
-  std::string cmd;
-  int connectPort;
-  std::string connectIP;
+    int IPCPort;
+    std::string abilityName;
+    std::string cmd;
+    int connectPort;
+    std::string connectIP;
 
-  Json::Value toJson() const;
-  void FromJson(const Json::Value &root);
+    Json::Value toJson() const;
+    void FromJson(const Json::Value &root);
 
-  void print();
+    void print();
 };
 
 #endif  // LIFECYCLEMGR_COMMAND_INFO_H_

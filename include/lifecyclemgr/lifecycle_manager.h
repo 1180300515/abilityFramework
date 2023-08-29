@@ -26,60 +26,59 @@
 #include "lifecyclemgr/heartbeat_info.h"
 
 class LifeCycleManager {
- public:
-  /**
-   * @brief handle the command info
-   * @param cmd_info
-   * 
-   * @return 1: ok , 0 : error , 2 : last operation has not ended
-   */
-  int HandleCommandInfo(const CommandInfo &cmd_info);
-  /**
-   * @brief add a heart beart info
-   * @param info
-   * @return
-   */
-  bool AddHeartbeatInfo(HeartbeatInfo info);
-  /**
-   * @brief
-   * @param callback
-   */
-  void Init(std::function<bool(std::string)> callback);
-  /**
-   * @brief start lifecycle manager
-   */
-  void Run();
-  /**
-   * @brief get the heart beat map
-   * @return
-   */
-  std::string GetHeartbeatMap();
+   public:
+    /**
+     * @brief handle the command info
+     * @param cmd_info
+     *
+     * @return 1: ok , 0 : error , 2 : last operation has not ended
+     */
+    int HandleCommandInfo(const CommandInfo &cmd_info);
+    /**
+     * @brief add a heart beart info
+     * @param info
+     * @return
+     */
+    bool AddHeartbeatInfo(HeartbeatInfo info);
+    /**
+     * @brief
+     * @param callback
+     */
+    void Init(std::function<bool(std::string)> callback);
+    /**
+     * @brief start lifecycle manager
+     */
+    void Run();
+    /**
+     * @brief get the heart beat map
+     * @return
+     */
+    std::string GetHeartbeatMap();
 
- private:
-  // store IPCPort and async thread
-  std::unordered_map<int, std::future<void>> threads;
-  std::shared_mutex thread_lock_;
-  // store IPCPort and ability client (by grpc)
-  std::unordered_map<int, std::shared_ptr<AbilityClient>> clients;
-  std::shared_mutex clients_lock_;
+   private:
+    // store IPCPort and async thread
+    std::unordered_map<int, std::future<void>> threads;
+    std::shared_mutex thread_lock_;
+    // store IPCPort and ability client (by grpc)
+    std::unordered_map<int, std::shared_ptr<AbilityClient>> clients;
+    std::shared_mutex clients_lock_;
 
-  // IPCPort and the heart beat info
-  std::unordered_map<int, HeartbeatInfo> heartbeat_map;
-  std::shared_mutex heartbeat_map_lock;
+    // IPCPort and the heart beat info
+    std::unordered_map<int, HeartbeatInfo> heartbeat_map;
+    std::shared_mutex heartbeat_map_lock;
 
-  std::thread checkClientThread;
+    std::thread checkClientThread;
 
-  // resource manager check resource exist function
-  std::function<bool(std::string)> resourcemgr_checkexist;
+    // resource manager check resource exist function
+    std::function<bool(std::string)> resourcemgr_checkexist;
 
-  void lifeCycleDeal(std::shared_ptr<AbilityClient> client,
-                     const HeartbeatInfo &hbinfo, const CommandInfo &cmdinfo);
+    void lifeCycleDeal(std::shared_ptr<AbilityClient> client, const HeartbeatInfo &hbinfo, const CommandInfo &cmdinfo);
 
-  bool start_process(const std::string &abilityName);
+    bool start_process(const std::string &abilityName);
 
-  void checkTimeout();
+    void checkTimeout();
 
-  void createClient(const std::string &name, int ipcport);
+    void createClient(const std::string &name, int ipcport);
 };
 
 #endif  // LIFECYCLEMGR_LIFECYCLE_MANAGER_H_

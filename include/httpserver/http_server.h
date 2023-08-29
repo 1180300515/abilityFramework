@@ -23,17 +23,16 @@
 #include "resourcemgr/resource_manager.h"
 
 class HttpServer {
- public:
-  void Init(std::shared_ptr<ResourceManager> resource_,
-            std::shared_ptr<LifeCycleManager> lifecycle_,
-            std::shared_ptr<AbilityRelationManager> relation_);
-  void Run();
+   public:
+    void Init(std::shared_ptr<ResourceManager> resource_, std::shared_ptr<LifeCycleManager> lifecycle_,
+              std::shared_ptr<AbilityRelationManager> relation_);
+    void Run();
 
- private:
-  std::shared_ptr<httplib::Server> server;
-  std::shared_ptr<ResourceManager> resource_manager_;
-  std::shared_ptr<LifeCycleManager> lifecycle_manager_;
-  std::shared_ptr<AbilityRelationManager> relation_manager_;
+   private:
+    std::shared_ptr<httplib::Server> server;
+    std::shared_ptr<ResourceManager> resource_manager_;
+    std::shared_ptr<LifeCycleManager> lifecycle_manager_;
+    std::shared_ptr<AbilityRelationManager> relation_manager_;
 };
 
 #endif  // HTTPSERVER_HTTP_SERVER_H_

@@ -11,12 +11,13 @@
  *  V1.0.0        2023/08/24    Soochow University       Create and initialize
  */
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "include/get_audio_hardware.h"
 
-int main(int argc, char **argv) {
-  std::vector<AudioHardwareForTest> mic = getAudioList("record");
-  print(mic);
+int main(int argc, char **argv)
+{
+    std::vector<AudioHardwareForTest> mic = getAudioList("record");
+    print(mic);
 }

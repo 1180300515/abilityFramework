@@ -22,33 +22,27 @@
 #include <vector>
 
 class AudioHardware {
- public:
-  std::string name;
-  std::string description;
-  std::vector<uint32_t> sampleRate;
-  std::vector<uint8_t> channels;
-  std::vector<std::string> format;
-  std::string cardID;
-  std::string deviceID;
+   public:
+    std::string name;
+    std::string description;
+    std::vector<uint32_t> sampleRate;
+    std::vector<uint8_t> channels;
+    std::vector<std::string> format;
+    std::string cardID;
+    std::string deviceID;
 
-  AudioHardware() = default;
-  AudioHardware(const std::string &name, const std::string &description,
-                const std::vector<uint32_t> &sampleRate,
-                const std::vector<uint8_t> &channels,
-                const std::vector<std::string> &format,
-                const std::string &cardID, const std::string &deviceID)
-      : name(name),
-        description(description),
-        sampleRate(sampleRate),
-        channels(channels),
-        format(format),
-        cardID(cardID),
-        deviceID(deviceID) {}
+    AudioHardware() = default;
+    AudioHardware(const std::string &name, const std::string &description, const std::vector<uint32_t> &sampleRate,
+                  const std::vector<uint8_t> &channels, const std::vector<std::string> &format, const std::string &cardID,
+                  const std::string &deviceID)
+        : name(name), description(description), sampleRate(sampleRate), channels(channels), format(format), cardID(cardID), deviceID(deviceID)
+    {
+    }
 
-  void fromJson(const Json::Value &root);
-  Json::Value toJson() const;
-  std::string ToKeyValue(const std::string &hostname) const;
-  void print() const;
+    void fromJson(const Json::Value &root);
+    Json::Value toJson() const;
+    std::string ToKeyValue(const std::string &hostname) const;
+    void print() const;
 };
 
 // global var define

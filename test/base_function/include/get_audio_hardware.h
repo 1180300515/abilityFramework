@@ -22,31 +22,25 @@
 #include <vector>
 
 class AudioHardwareForTest {
- public:
-  std::string name;
-  std::string description;
-  std::vector<uint32_t> sampleRate;
-  std::vector<uint8_t> channels;
-  std::vector<std::string> format;
-  std::string cardID;
-  std::string deviceID;
+   public:
+    std::string name;
+    std::string description;
+    std::vector<uint32_t> sampleRate;
+    std::vector<uint8_t> channels;
+    std::vector<std::string> format;
+    std::string cardID;
+    std::string deviceID;
 
-  AudioHardwareForTest() = default;
-  AudioHardwareForTest(const std::string &name, const std::string &description,
-                const std::vector<uint32_t> &sampleRate,
-                const std::vector<uint8_t> &channels,
-                const std::vector<std::string> &format,
-                const std::string &cardID, const std::string &deviceID)
-      : name(name),
-        description(description),
-        sampleRate(sampleRate),
-        channels(channels),
-        format(format),
-        cardID(cardID),
-        deviceID(deviceID) {}
+    AudioHardwareForTest() = default;
+    AudioHardwareForTest(const std::string &name, const std::string &description, const std::vector<uint32_t> &sampleRate,
+                         const std::vector<uint8_t> &channels, const std::vector<std::string> &format, const std::string &cardID,
+                         const std::string &deviceID)
+        : name(name), description(description), sampleRate(sampleRate), channels(channels), format(format), cardID(cardID), deviceID(deviceID)
+    {
+    }
 
-  std::string ToKeyValue(std::string hostname) const;
-  void print() const;
+    std::string ToKeyValue(std::string hostname) const;
+    void print() const;
 };
 
 extern const unsigned int rates[13];

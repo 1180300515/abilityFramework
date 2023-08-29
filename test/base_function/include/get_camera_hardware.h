@@ -18,18 +18,17 @@
 #include <vector>
 
 class CameraHardwareForTest {
- public:
-  std::string identifier;
-  std::string device_path;
-  std::string driver;
-  std::string card;
-  std::string bus_info;
-  std::vector<std::string> formats;
-  // ...更多属性和方法...
+   public:
+    std::string identifier;
+    std::string device_path;
+    std::string driver;
+    std::string card;
+    std::string bus_info;
+    std::vector<std::string> formats;
 
-  CameraHardwareForTest &operator=(const CameraHardwareForTest &other);
-  std::string ToKeyValue(std::string hostname) const;
-  void print() const;
+    CameraHardwareForTest &operator=(const CameraHardwareForTest &other);
+    std::string ToKeyValue(std::string hostname) const;
+    void print() const;
 };
 
 std::vector<CameraHardwareForTest> getCameraInfo();

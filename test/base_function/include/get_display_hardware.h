@@ -18,17 +18,17 @@
 #include <vector>
 
 class DisplayHardwareForTest {
- public:
-  int screen;
-  int x;
-  int y;
-  int width;
-  int height;
-  int mmWidth;
-  int mmHeight;
+   public:
+    int screen;
+    int x;
+    int y;
+    int width;
+    int height;
+    int mmWidth;
+    int mmHeight;
 
-  std::string ToKeyValue(std::string hostname) const;
-  void print() const;
+    std::string ToKeyValue(std::string hostname) const;
+    void print() const;
 };
 
 std::vector<DisplayHardwareForTest> getDisplayInfo();
