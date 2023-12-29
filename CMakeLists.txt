@@ -116,7 +116,7 @@ add_executable(${PROJECT_NAME} src/main.cpp
     ${utils}
     ${httpserver}
 )
-target_link_libraries(AbilityFramework stdc++ sqlite3 jsoncpp glog yaml-cpp X11 asound Xrandr v4l2 pthread dl crypto ssl z protobuf::libprotobuf gRPC::grpc++ )
+target_link_libraries(AbilityFramework stdc++ sqlite3 jsoncpp glog yaml-cpp::yaml-cpp X11 asound Xrandr v4l2 pthread dl crypto ssl z protobuf::libprotobuf gRPC::grpc++ )
 
 #生成cameratest可执行文件
 add_executable(cameratest test/test_ability_lifecycle.cpp ${ability_proto_srcs} ${ability_grpc_srcs})
@@ -153,7 +153,7 @@ target_link_libraries(testHttpCommand stdc++ jsoncpp)
 #生成testAbilityDependTree可执行文件
 add_executable(testAbilityDependTree 
     test/test_ability_depend_tree.cpp)
-target_link_libraries(testAbilityDependTree stdc++ jsoncpp yaml-cpp)
+target_link_libraries(testAbilityDependTree stdc++ jsoncpp yaml-cpp::yaml-cpp)
 
 #生成testAbilityDependTreeWithDevices可执行文件
 add_executable(testAbilityDependTreeWithDevices 
@@ -161,7 +161,10 @@ add_executable(testAbilityDependTreeWithDevices
     test/base_function/src/get_camera_hardware.cpp
     test/base_function/src/get_audio_hardware.cpp
     test/base_function/src/get_display_hardware.cpp)
-target_link_libraries(testAbilityDependTreeWithDevices stdc++ jsoncpp yaml-cpp X11 Xrandr asound v4l2)
+target_link_libraries(testAbilityDependTreeWithDevices stdc++ jsoncpp yaml-cpp::yaml-cpp X11 Xrandr asound v4l2)
+
+add_executable(testHash
+    test/test_ability_hash.cpp)
 
 # add_executable(testResourceMgr test/resource_mgr_test/test_resourcemgr.cpp
 #     ${databasemgr}

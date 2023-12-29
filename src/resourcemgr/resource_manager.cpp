@@ -358,7 +358,18 @@ void ResourceManager::Run()
 
 void ResourceManager::Wait() { periodic_scan_thread.join(); }
 
-std::string ResourceManager::GetHardwareDeviceInfo(bool format) { return hardware_->GetHardwareDeviceProfile(format); }
+std::string ResourceManager::GetHardwareDeviceInfo(bool format) { 
+    // Json::Value root;
+    // for(const auto &item : devices_) {
+    //     root[isLocalResource(item.first)].append(item.second->ToJson());
+    // }
+    // if (format) {
+    //     return root.toStyledString();
+    // }
+    // Json::FastWriter writer;
+    // return writer.write(root);
+    return hardware_->GetHardwareDeviceProfile(format);
+}
 
 std::shared_ptr<DeviceInstanceInfo> ResourceManager::GetDeviceInstance(const std::string &key)
 {
