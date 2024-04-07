@@ -1,0 +1,16 @@
+apiVersion: stable.example.com/v1
+kind: MobileDevice
+metadata:
+  name: "mobile robot"
+
+spec:
+  version: "1.0"
+  hostname: ""
+  hardwareidentifier: ""
+  kind: mobile
+  properties:
+    wheel_r: 20
+    width: 50
+    length: 50
+status:
+  occupancy: false

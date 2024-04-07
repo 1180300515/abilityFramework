@@ -25,6 +25,8 @@ struct CommandInfo {
     std::string cmd;
     int connectPort;
     std::string connectIP;
+    unsigned long abilityId;
+    unsigned long abilityInstanceId;
 
     Json::Value toJson() const;
     void FromJson(const Json::Value &root);

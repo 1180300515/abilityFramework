@@ -52,9 +52,36 @@ void HardwareScan::getCameraInfo()
         fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         char fourcc[5] = {0};
         std::vector<std::string> formats;
+        std::vector<std::string> resolutions;
         while (ioctl(fd, VIDIOC_ENUM_FMT, &fmt) == 0) {
             strncpy(fourcc, reinterpret_cast<const char *>(&fmt.pixelformat), 4);
             formats.push_back(fourcc);
+            if (fmt.pixelformat != V4L2_PIX_FMT_YUYV)
+            {
+                fmt.index++;
+                continue;
+            }
+            /* 查询该图像格式所支持的分辨率 */
+            struct v4l2_frmsizeenum frmsize;
+            frmsize.pixel_format = fmt.pixelformat;
+            frmsize.index = 0;
+            while (ioctl(fd, VIDIOC_ENUM_FRAMESIZES, &frmsize) == 0) {
+                struct v4l2_frmivalenum frmival;
+                frmival.pixel_format = fmt.pixelformat;
+                frmival.width = frmsize.discrete.width;
+                frmival.height = frmsize.discrete.height;
+                frmival.index = 0;
+                while (ioctl(fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) == 0) {
+                    std::stringstream ss;
+                    ss << frmsize.discrete.width << "," << frmsize.discrete.height << "," << frmival.discrete.denominator;
+                    std::string resolution;
+                    ss >> resolution;
+                    resolutions.push_back(resolution);
+                    frmival.index++;
+                    //std::cout << resolution << std::endl;
+                }
+                frmsize.index++;
+            }
             fmt.index++;
         }
 
@@ -64,6 +91,7 @@ void HardwareScan::getCameraInfo()
         device.card = reinterpret_cast<const char *>(cap.card);
         device.bus_info = reinterpret_cast<const char *>(cap.bus_info);
         device.formats = formats;
+        device.resolutions = resolutions;
         // camera_devices.push_back(device);
 
         bool device_exists = false;

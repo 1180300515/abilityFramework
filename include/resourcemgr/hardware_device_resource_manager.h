@@ -68,6 +68,7 @@ class HardwareResourceManager {
     std::vector<std::string> speakerDevices;
     std::vector<std::string> cameraDevices;
     std::vector<std::string> displayDevices;
+    std::map<std::string,std::vector<std::string>> generalDevices;
     std::mutex locker_;
 
     std::string hostname_;

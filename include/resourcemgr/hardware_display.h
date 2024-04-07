@@ -30,7 +30,7 @@ class DisplayHardware {
 
     Json::Value toJson() const;
     void fromJson(const Json::Value &root);
-    std::string ToKeyValue(std::string hostname) const;
+    std::string ToKeyValue(std::string hostname, std::string ip) const;
     void print() const;
 };
 

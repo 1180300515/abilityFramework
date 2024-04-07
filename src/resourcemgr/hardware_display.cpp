@@ -39,10 +39,11 @@ void DisplayHardware::fromJson(const Json::Value &root)
     mmHeight = root["mmHeight"].asInt();
 }
 
-std::string DisplayHardware::ToKeyValue(std::string hostname) const
+std::string DisplayHardware::ToKeyValue(std::string hostname, std::string ip) const
 {
     std::stringstream ss;
     ss << "hostname:" << hostname << ",";
+    ss << "ip" << ip << ",";
     ss << "screen:" << screen << ",";
     ss << "x:" << x << ",";
     ss << "y:" << y << ",";
@@ -50,7 +51,17 @@ std::string DisplayHardware::ToKeyValue(std::string hostname) const
     ss << "height:" << height << ",";
     ss << "mmWidth:" << mmWidth << ",";
     ss << "mmHeight:" << mmHeight;
-    return ss.str();
+    Json::Value device;
+    device["hostname"] = hostname;
+    device["ip"] = ip;
+    device["screen"] = screen;
+    device["x"] = x;
+    device["y"] = y;
+    device["width"] = width;
+    device["height"] = height;
+    device["mmWidth"] = mmWidth;
+    device["mmHeight"] = mmHeight;
+    return device.toStyledString();
 }
 
 void DisplayHardware::print() const

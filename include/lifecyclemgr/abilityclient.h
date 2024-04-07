@@ -17,6 +17,8 @@
 #include <grpcpp/grpcpp.h>
 
 #include <memory>
+#include <future>  // NOLINT [build/c++11]
+#include <thread>  // NOLINT [build/c++11]
 
 #include "abilityProto.grpc.pb.h"
 #include "abilityProto.pb.h"
@@ -38,7 +40,9 @@ class AbilityClient {
     void Terminate(const abilityUnit::TerminateInfo &terminate_info);
 
    private:
-    std::unique_ptr<abilityUnit::Ability::Stub> stub_;
+    std::shared_ptr<abilityUnit::Ability::Stub> stub_;
+    // std::unordered_map<std::string, std::future<Status>> threads;
+    // std::unordered_map<std::string, std::thread> threads;
 };
 
 #endif  // LIFECYCLEMGR_ABILITYCLIENT_H_

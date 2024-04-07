@@ -44,7 +44,7 @@ class LifeCycleManager {
      * @brief
      * @param callback
      */
-    void Init(std::function<bool(std::string)> callback);
+    void Init(std::function<bool(std::string)> callback1, std::function<bool(unsigned long)> callback2);
     /**
      * @brief start lifecycle manager
      */
@@ -71,10 +71,11 @@ class LifeCycleManager {
 
     // resource manager check resource exist function
     std::function<bool(std::string)> resourcemgr_checkexist;
+    std::function<bool(unsigned long)> relationmgr_checkexist;
 
     void lifeCycleDeal(std::shared_ptr<AbilityClient> client, const HeartbeatInfo &hbinfo, const CommandInfo &cmdinfo);
 
-    bool start_process(const std::string &abilityName);
+    bool start_process(const std::string &abilityName, unsigned long abilityId, unsigned long abilityInstanceId);
 
     void checkTimeout();
 

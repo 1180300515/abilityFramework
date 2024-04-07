@@ -21,6 +21,8 @@ Json::Value CommandInfo::toJson() const
     root["cmd"] = cmd;
     root["connectPort"] = connectPort;
     root["connectIP"] = connectIP;
+    root["abilityId"] = abilityId;
+    root["abilityInstanceId"] = abilityInstanceId;
     return root;
 }
 
@@ -31,6 +33,8 @@ void CommandInfo::FromJson(const Json::Value &root)
     cmd = root["cmd"].asString();
     connectPort = root["connectPort"].asInt();
     connectIP = root["connectIP"].asString();
+    abilityId = root["abilityId"].asUInt64();
+    abilityInstanceId = root["abilityInstanceId"].asUInt64();
 }
 
 void CommandInfo::print()
@@ -40,4 +44,5 @@ void CommandInfo::print()
     std::cout << "cmd: " << cmd << std::endl;
     std::cout << "connectPort: " << connectPort << std::endl;
     std::cout << "connectIP: " << connectIP << std::endl;
+    std::cout << "abilityId:" << abilityId << std::endl;
 }

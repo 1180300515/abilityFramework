@@ -21,11 +21,14 @@
 #include "abilityrelationmgr/ability_relation_manager.h"
 #include "lifecyclemgr/lifecycle_manager.h"
 #include "resourcemgr/resource_manager.h"
+#include "controllermgr/controller_manager.h"
+#include "abilitystatusmgr/ability_status_manager.h"
 
 class HttpServer {
    public:
     void Init(std::shared_ptr<ResourceManager> resource_, std::shared_ptr<LifeCycleManager> lifecycle_,
-              std::shared_ptr<AbilityRelationManager> relation_);
+              std::shared_ptr<AbilityRelationManager> relation_, std::shared_ptr<ControllerManager> controller_,
+              std::shared_ptr<AbilityStatusManager> status_);
     void Run();
 
    private:
@@ -33,6 +36,8 @@ class HttpServer {
     std::shared_ptr<ResourceManager> resource_manager_;
     std::shared_ptr<LifeCycleManager> lifecycle_manager_;
     std::shared_ptr<AbilityRelationManager> relation_manager_;
+    std::shared_ptr<ControllerManager> controller_manager_;
+    std::shared_ptr<AbilityStatusManager> status_manager_;
 };
 
 #endif  // HTTPSERVER_HTTP_SERVER_H_

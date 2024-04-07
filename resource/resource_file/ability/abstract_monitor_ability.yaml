@@ -1,0 +1,54 @@
+apiVersion: "stable.example.com/v1"
+kind: Ability
+metadata:
+  name: abstract_monitor
+level: "1"
+abilityname: abstract_monitor
+description: this is a abstract_monitor
+followed: default
+version: "1.0"
+spec:
+  location: home
+  vendor: oppo
+  interface: standardinterface
+ApiList:
+  - ApiType: RPC
+    ApiName: open
+    inputparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+  - ApiType: RPC
+    ApiName: close
+    inputparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+  - ApiType: RPC
+    ApiName: read
+    inputparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: value
+        paramtype: message
+        index: "1"
+  - ApiType: RPC
+    ApiName: configure
+    inputparam:
+      - paramname: value
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"

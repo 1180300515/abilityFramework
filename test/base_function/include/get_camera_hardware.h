@@ -25,6 +25,7 @@ class CameraHardwareForTest {
     std::string card;
     std::string bus_info;
     std::vector<std::string> formats;
+    std::vector<std::string> resolutions;
 
     CameraHardwareForTest &operator=(const CameraHardwareForTest &other);
     std::string ToKeyValue(std::string hostname) const;

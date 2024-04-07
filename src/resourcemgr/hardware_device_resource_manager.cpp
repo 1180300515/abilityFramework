@@ -34,10 +34,13 @@ void HardwareResourceManager::EndAddressResult(std::map<std::string, std::string
         for (const auto &iter : result) {
             if (iter.first == this->hostname_) {
                 std::string data = this->resource_manager->GetHardwareDeviceInfo();
+                //DLOG(INFO) << data ;
                 DeviceProfile dp;
                 Json::Value jnode;
                 Json::Reader reader;
                 reader.parse(data, jnode);
+                jnode["ip"] = iter.second;
+                //DLOG(INFO) << jnode.toStyledString();
                 dp.FromJson2Profile(jnode);
                 hardware_resources[iter.first] = dp;
             } else {
@@ -93,10 +96,15 @@ void HardwareResourceManager::EndAddressResult(std::map<std::string, std::string
                 speakerDevices.emplace_back(speakerDevice.ToKeyValue(item.first));
             }
             for (const auto &cameraDevice : item.second.cameraDevices) {
-                cameraDevices.emplace_back(cameraDevice.ToKeyValue(item.first));
+                cameraDevices.emplace_back(cameraDevice.ToKeyValue(item.first, item.second.ip));
             }
             for (const auto &displayDevice : item.second.displayDevices) {
-                displayDevices.emplace_back(displayDevice.ToKeyValue(item.first));
+                displayDevices.emplace_back(displayDevice.ToKeyValue(item.first, item.second.ip));
+            }
+            for (const auto &device : item.second.generalDevices) {
+                DLOG(INFO) << device.spec["kind"].asString();
+                generalDevices[device.spec["kind"].asString()].emplace_back(device.spec.toStyledString());
+                // DLOG(INFO) << device.ToJson().toStyledString();
             }
         }
         change = false;
@@ -113,8 +121,15 @@ std::vector<std::string> HardwareResourceManager::GetHardwareResourceList(std::s
     } else if (type == "display") {
         return displayDevices;
     } else if (type == "camera") {
-        return cameraDevices;
+        std::vector<std::string> CameraDevices;
+        // CameraDevices.insert(CameraDevices.end(), cameraDevices.begin(), cameraDevices.end());
+        CameraDevices.insert(CameraDevices.end(), generalDevices["camera"].begin(), generalDevices["camera"].end());
+        return CameraDevices;
+    } else
+    {
+        return generalDevices[type];
     }
+    
     return std::vector<std::string>();
 }
 
@@ -133,6 +148,7 @@ DeviceProfile HardwareResourceManager::getDeviceProfileFromHost(const std::strin
         if (!parsingSuccessful) {
             throw std::runtime_error("Failed to parse JSON: " + errs);
         }
+        root["ip"] = ip;
         dp.FromJson2Profile(root);
     }
     return dp;

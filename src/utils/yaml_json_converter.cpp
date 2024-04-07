@@ -51,11 +51,36 @@ bool YamlToJson(const YAML::Node &ynode, Json::Value *jnode, std::string name)
     return true;
 }
 
+Json::Value convertScalar(const YAML::Node &node)
+{
+    if (node.as<std::string>() == "true" || node.as<std::string>() == "false") {
+        return Json::Value(node.as<bool>());
+    } else {
+        // 尝试转换为整数
+        try {
+            int intValue = node.as<int>();
+            return Json::Value(intValue);
+        } catch (...) {
+            // 尝试转换为浮点数
+            try {
+                double doubleValue = node.as<double>();
+                DLOG(INFO) << "is double";
+                return Json::Value(doubleValue);
+            } catch (...) {
+                // 默认为字符串
+                DLOG(INFO) << "is string";
+                return Json::Value(node.Scalar());
+            }
+        }
+    }
+}
+
 bool YamlToJsonForInstance(const YAML::Node &ynode, Json::Value *jnode, std::string name)
 {
     try {
         if (ynode.IsScalar()) {
             Json::Value v(ynode.Scalar());
+            //DLOG(INFO) << v.toStyledString();
             jnode->swapPayload(v);
             return true;
         }

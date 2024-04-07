@@ -21,6 +21,8 @@ Json::Value HeartbeatInfo::toJson() const
     j["last_update"] = std::chrono::duration_cast<std::chrono::milliseconds>(last_update.time_since_epoch()).count();
     j["abilityPort"] = abilityPort;
     j["IPCPort"] = IPCPort;
+    j["abilityId"] = abilityId;
+    j["abilityInstanceId"] = abilityInstanceId;
     return j;
 }
 
@@ -30,6 +32,8 @@ void HeartbeatInfo::FromJson(const Json::Value &root)
     IPCPort = root["IPCPort"].asInt();
     status = root["status"].asString();
     abilityPort = root["abilityPort"].asInt();
+    abilityId = root["abilityId"].asUInt64();
+    abilityInstanceId = root["abilityInstanceId"].asUInt64();
     last_update = std::chrono::steady_clock::now();
 }
 

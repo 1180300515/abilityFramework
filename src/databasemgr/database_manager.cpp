@@ -536,7 +536,7 @@ bool DatabaseManager::validateJson(const Json::Value &instance_json) const
     int flag = apiVersion.find("/");
     std::string instance_group = apiVersion.substr(0, flag);
     std::string instance_kind = instance_json["kind"].asString();
-
+    // DLOG(INFO) << instance_kind + "." + instance_group;
     if (this->regist_crd_list.count(instance_kind + "." + instance_group) == 0) {
         DLOG(WARNING) << "no matched crd with : " << instance_kind + "." + instance_group << ",please registe before add instance";
         return false;

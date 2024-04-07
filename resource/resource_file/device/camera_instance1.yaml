@@ -1,23 +1,13 @@
 apiVersion: stable.example.com/v1
 kind: CameraDevice
 metadata:
-  name: "camera1"
+  name: "robot_camera"
 
 spec:
   version: "1.0"
   hostname: ""
   hardwareidentifier: ""
   kind: camera
-  capability1:
-    - name: WideAngleCamera
-      api:
-        - Getwideanglecamera
-        - Setwideanglecamera
-  capability2:
-    - name: XiaomiCamera1
-      api:
-        - Getxiaomicamera1
-        - Setxiaomicamera1
   properties:
     vendor: oppo
     resolution: "720"
@@ -26,55 +16,12 @@ spec:
     focusMethod: FF
     telephoto: false
     interface: standardinterface
+    fov : 26.99147
+    aspect : 1.333333
+    viewDistance : 500
+    rotation : 90
+    x : 1500
+    y : 0
+    z : 400
 status:
   occupancy: false
-api:
-  function:
-    - name: Getwideanglecamera
-      param:
-        - name: param1
-          type: string
-          index: "1"
-        - name: param2
-          type: string
-          index: "2"
-      returnparam:
-        - name: param3
-          type: string
-          index: "1"
-    - name: Setwideanglecamera
-      param:
-        - name: param1
-          type: string
-          index: "1"
-        - name: param2
-          type: string
-          index: "2"
-      returnparam:
-        - name: param3
-          type: string
-          index: "1"
-    - name: Getxiaomicamera1
-      param:
-        - name: param1
-          type: string
-          index: "1"
-        - name: param2
-          type: string
-          index: "2"
-      returnparam:
-        - name: param3
-          type: string
-          index: "1"
-    - name: Setxiaomicamera1
-      param:
-        - name: param1
-          type: string
-          index: "1"
-        - name: param2
-          type: string
-          index: "2"
-      returnparam:
-        - name: param3
-          type: string
-          index: "1"

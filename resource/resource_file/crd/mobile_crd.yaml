@@ -1,7 +1,7 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: cameradevices.stable.example.com
+  name: mobiledevices.stable.example.com
 spec:
   group: stable.example.com
   versions:
@@ -10,7 +10,7 @@ spec:
       storage: true
       schema:
         openAPIV3Schema:
-          description: define camera spec
+          description: define mobile spec
           type: object
           required:
             - spec
@@ -63,38 +63,15 @@ spec:
                 properties:
                   type: object
                   required:
-                    - location
-                    - wideAngle
-                    - focusMethod
-                    - resolution
-                    - telephoto
-                    - interface
+                    - wheel_r
+                    - width
+                    - length
                   properties:
-                    vendor:
+                    wheel_r:
                       type: string
-                    resolution:
+                    width: 
                       type: string
-                    location:
-                      type: string
-                    wideAngle:
-                      type: integer
-                    focusMethod:
-                      type: string
-                    telephoto:
-                      type: boolean
-                    interface:
-                      type: string
-                    fov:
-                      type: string
-                    aspect:
-                      type: string
-                    viewDistance:
-                      type: string
-                    x:
-                      type: string
-                    y:
-                      type: string
-                    z:
+                    length:      
                       type: string
             status:
               type: object
@@ -164,6 +141,6 @@ spec:
                     type: string
   scope: Namespaced
   names:
-    kind: CameraDevice
-    singular: cameradevice
-    plural: cameradevices
+    kind: MobileDevice
+    singular: mobiledevice
+    plural: mobiledevices

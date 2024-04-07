@@ -32,6 +32,13 @@ struct CameraProperties {
     std::string focusMethod;
     bool telephoto;
     std::string interface;
+    std::string fov;
+    std::string aspect;
+    std::string viewDistance;
+    std::string rotation;
+    std::string x;
+    std::string y;
+    std::string z;
     // get from the hardware
     std::string devicePath;
     std::string driverName;

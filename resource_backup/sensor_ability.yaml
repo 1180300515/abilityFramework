@@ -1,0 +1,60 @@
+apiVersion: "stable.example.com/v1"
+kind: Ability
+metadata:
+  name: sensor
+
+level: "1"
+abilityname: sensor
+description: this is a sensor
+followed: default
+version: "1.0"
+depends:
+  abilities:
+    - none
+  devices:
+    - sensor
+spec:
+  location: home
+  vendor: oppo
+  interface: standardinterface
+ApiList:
+  - ApiType: RPC
+    ApiName: open
+    inputparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+  - ApiType: RPC
+    ApiName: close
+    inputparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+  - ApiType: RPC
+    ApiName: read
+    inputparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: value
+        paramtype: message
+        index: "1"
+  - ApiType: RPC
+    ApiName: configure
+    inputparam:
+      - paramname: value
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"

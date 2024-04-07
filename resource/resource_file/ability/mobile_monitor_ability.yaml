@@ -1,13 +1,16 @@
 apiVersion: "stable.example.com/v1"
 kind: Ability
 metadata:
-  name: sensor
-
+  name: mobile_monitor
 level: "1"
-abilityname: sensor
-description: this is a sensor
+abilityname: mobile_monitor
+description: this is a mobile_monitor
 followed: default
 version: "1.0"
+depends:
+  abilities:
+    - monitor
+    - mobile
 spec:
   location: home
   vendor: oppo
@@ -16,27 +19,27 @@ ApiList:
   - ApiType: RPC
     ApiName: open
     inputparam:
-      - paramname: null
+      - paramname: param1
         paramtype: message
         index: "1"
     returnparam:
-      - paramname: null
+      - paramname: param1
         paramtype: message
         index: "1"
   - ApiType: RPC
     ApiName: close
     inputparam:
-      - paramname: null
+      - paramname: param1
         paramtype: message
         index: "1"
     returnparam:
-      - paramname: null
+      - paramname: param1
         paramtype: message
         index: "1"
   - ApiType: RPC
     ApiName: read
     inputparam:
-      - paramname: null
+      - paramname: param1
         paramtype: message
         index: "1"
     returnparam:
@@ -50,6 +53,6 @@ ApiList:
         paramtype: message
         index: "1"
     returnparam:
-      - paramname: null
+      - paramname: param1
         paramtype: message
         index: "1"

@@ -9,8 +9,6 @@ description: this is a camera
 followed: default
 version: "1"
 depends:
-  abilities:
-    - none
   devices:
     - camera
 spec:

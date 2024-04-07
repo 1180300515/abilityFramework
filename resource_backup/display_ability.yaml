@@ -9,10 +9,9 @@ description: this is a display
 followed: default
 version: "1.0"
 depends:
-  abilities:
-    - none
   devices:
     - display
+    - camera
 spec:
   vendor: oppo
   resolution: 720

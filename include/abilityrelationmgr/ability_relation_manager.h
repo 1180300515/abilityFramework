@@ -32,8 +32,14 @@ class AbilityRelationManager {
      * @return result
      */
     std::string GetAbilitySupport();
+    bool abilityInstanceExists(unsigned long abilityId);
 
    private:
+    // 确定能力等级
+    void determineLevel(
+        std::vector<AbilityInfoExtract> list,
+        std::unordered_map<std::string, int> &result,
+        std::unordered_map<std::string, std::vector<std::string>> &devices);
     /**
      * @brief get the abilityinfo extract list
      */

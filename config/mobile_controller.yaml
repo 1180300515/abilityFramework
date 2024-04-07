@@ -1,0 +1,2 @@
+pipe : "../pipe/robot_diff"
+socket : "unix:/tmp/robot_command"

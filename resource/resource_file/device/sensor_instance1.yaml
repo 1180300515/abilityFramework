@@ -6,14 +6,6 @@ spec:
   kind: sensor
   version: "1.0"
   hostname: ""
-  capability1:
-    - name: temperature
-      api:
-        - Gettemperature
-  capability2:
-    - name: XiaomiTemperature
-      api:
-        - GetXiaomiTemperature
   properties:
     location: home
     vendor: oppo

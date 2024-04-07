@@ -79,7 +79,7 @@ void LANIPV4Discovery::udp_broadcast_receiver()
         std::time_t timestamp = std::stoll(timestamp_str);
 
         std::string ip = inet_ntoa(remote_addr.sin_addr);
-        DLOG(INFO) << GREEN << message << " ip" << ip << NONE;
+        //DLOG(INFO) << GREEN << message << " ip" << ip << NONE;
         auto newdevice = DiscoveryDeviceInfo{hostname, ip, this->discoverySource, timestamp, 0, status};
         callback(newdevice);
     }

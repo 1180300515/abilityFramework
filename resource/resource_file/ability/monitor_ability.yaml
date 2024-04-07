@@ -1,0 +1,57 @@
+apiVersion: "stable.example.com/v1"
+kind: Ability
+metadata:
+  name: monitor
+level: "1"
+abilityname: monitor
+description: this is a monitor
+followed: default
+version: "1.0"
+depends:
+  devices:
+    - camera
+spec:
+  location: home
+  vendor: oppo
+  interface: standardinterface
+ApiList:
+  - ApiType: RPC
+    ApiName: open
+    inputparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+  - ApiType: RPC
+    ApiName: close
+    inputparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+  - ApiType: RPC
+    ApiName: read
+    inputparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: value
+        paramtype: message
+        index: "1"
+  - ApiType: RPC
+    ApiName: configure
+    inputparam:
+      - paramname: value
+        paramtype: message
+        index: "1"
+    returnparam:
+      - paramname: param1
+        paramtype: message
+        index: "1"

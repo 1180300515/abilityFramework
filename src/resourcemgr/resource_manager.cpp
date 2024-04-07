@@ -23,6 +23,7 @@
 #include "resourcemgr/device_instance_loudspeaker.h"
 #include "resourcemgr/device_instance_microphone.h"
 #include "resourcemgr/device_instance_sensor.h"
+#include "resourcemgr/device_instance_general.h"
 #include "resourcemgr/message_package_struct.h"
 #include "utils/color.h"
 #include "utils/global_var.h"
@@ -72,6 +73,7 @@ bool ResourceManager::AddAbilityInstance(const std::string &data, bool from_file
         std::string key = GetInstanceKey(instance_json);
         abilities_[key] = resource;
         DLOG(INFO) << "resource manager add ability instance : " << key;
+        // DLOG(INFO) << "ability instance" << resource->Marshal();
         return true;
     } else {
         DLOG(ERROR) << "resource manager add ability instance fail";
@@ -143,6 +145,7 @@ bool ResourceManager::AddDeviceInstance(const std::string &data, bool from_file)
         return false;
     }
     handleNamespace(&instance_json);
+    // DLOG(INFO) << instance_json;
     if (!DatabaseManager::getInstance().validateJson(instance_json)) {
         return false;
     }
@@ -171,11 +174,17 @@ bool ResourceManager::AddDeviceInstance(const std::string &data, bool from_file)
         devices_[key] = new_device;
         DLOG(INFO) << "resource manager add device instance : " << key << " type: " << device_kind;
         return true;
+    // } else if (device_kind == NormalDeviceResourcetype) {
+    //     new_device = std::make_shared<GeneralDeviceInstance>();
+    //     new_device->FromJson(instance_json);
     } else {
-        DLOG(ERROR) << "unkonown resource type : " << device_kind;
-        return false;
+        // DLOG(ERROR) << "unkonown resource type : " << device_kind;
+        new_device = std::make_shared<GeneralDeviceInstance>();
+        new_device->FromJson(instance_json);
+        // return true;
     }
     auto key = GetInstanceKey(instance_json);
+    // DLOG(INFO) << key;
     std::string id = new_device->GetHardwareIdentifier();
     auto hw = this->hardware_->GetHardware(id, key, new_device->kind);
     if (hw != std::nullopt) {
@@ -185,6 +194,7 @@ bool ResourceManager::AddDeviceInstance(const std::string &data, bool from_file)
         }
         this->hardware_->SetMap(id, key);
     } else {
+        // DLOG(INFO) << new_device->ToJson();
         if (!DatabaseManager::getInstance().DBStoreDeviceInstance(new_device->ToJson())) {
             return false;
         }
@@ -223,9 +233,17 @@ bool ResourceManager::UpdateDeviceInstance(const std::string &data)
             new_device->updateInstance(instance_json);
             DLOG(INFO) << "resource manager update device instance : " << key << " type: " << device_kind;
             return true;
+        // } else if (device_kind == NormalDeviceResourcetype) {
+        //     auto new_device = std::dynamic_pointer_cast<GeneralDeviceInstance>(devices_[key]);
+        //     new_device->updateInstance(instance_json);
+        //     DLOG(INFO) << "resource manager update device instance : " << key << " type: " << device_kind;
+        //     return true;
         } else {
-            DLOG(ERROR) << "unkonown resource type : " << device_kind;
-            return false;
+            // DLOG(ERROR) << "unkonown resource type : " << device_kind;
+            auto new_device = std::dynamic_pointer_cast<GeneralDeviceInstance>(devices_[key]);
+            new_device->updateInstance(instance_json);
+            DLOG(INFO) << "resource manager update device instance : " << key << " type: " << device_kind;
+            return true;
         }
     } else {
         DLOG(ERROR) << "resource manager update device instance fail";
@@ -358,17 +376,27 @@ void ResourceManager::Run()
 
 void ResourceManager::Wait() { periodic_scan_thread.join(); }
 
-std::string ResourceManager::GetHardwareDeviceInfo(bool format) { 
-    // Json::Value root;
-    // for(const auto &item : devices_) {
-    //     root[isLocalResource(item.first)].append(item.second->ToJson());
-    // }
-    // if (format) {
-    //     return root.toStyledString();
-    // }
-    // Json::FastWriter writer;
-    // return writer.write(root);
-    return hardware_->GetHardwareDeviceProfile(format);
+std::string ResourceManager::GetHardwareDeviceInfo(bool format) {
+    Json::Reader reader;
+    Json::Value root;
+    reader.parse(hardware_->GetHardwareDeviceProfile(format), root);
+    // DLOG(INFO) << root.toStyledString();
+    for(const auto &item : devices_) {
+        // DLOG(INFO) << isLocalResource(item.first) << item.second->ToJson();
+        std::string device_type = isLocalResource(item.first);
+        if (item.second->GetHardwareIdentifier() != "")
+        {
+            // DLOG(INFO) << device_type << item.second->GetHardwareIdentifier();
+            continue;
+        }
+        root[device_type].append(item.second->ToJson());
+    }
+    if (format) {
+        return root.toStyledString();
+    }
+    Json::FastWriter writer;
+    return writer.write(root);
+    // return hardware_->GetHardwareDeviceProfile(format);
 }
 
 std::shared_ptr<DeviceInstanceInfo> ResourceManager::GetDeviceInstance(const std::string &key)
@@ -411,6 +439,7 @@ std::vector<AbilityInfoExtract> ResourceManager::GetAbilityInfoExtractList()
         AbilityInfoExtract info;
         info.name = StripSlashPrefix(iter.first);
         info.depends.abilities = iter.second->depends.abilities;
+        // DLOG(INFO) << iter.first << "depends:" << iter.second->depends.abilities.at(0);
         info.depends.devices = iter.second->depends.devices;
         result.emplace_back(info);
     }

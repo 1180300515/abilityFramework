@@ -101,6 +101,13 @@ Json::Value CameraInstance::ToJson() const
     jnode["spec"]["properties"]["driverName"] = spec.properties.driverName;
     jnode["spec"]["properties"]["card"] = spec.properties.card;
     jnode["spec"]["properties"]["busInfo"] = spec.properties.busInfo;
+    jnode["spec"]["properties"]["fov"] = spec.properties.fov;
+    jnode["spec"]["properties"]["aspect"] = spec.properties.aspect;
+    jnode["spec"]["properties"]["viewDistance"] = spec.properties.viewDistance;
+    jnode["spec"]["properties"]["rotation"] = spec.properties.rotation;
+    jnode["spec"]["properties"]["x"] = spec.properties.x;
+    jnode["spec"]["properties"]["y"] = spec.properties.y;
+    jnode["spec"]["properties"]["z"] = spec.properties.z;
     for (int i = 0; i < spec.properties.supportFormat.size(); i++) {
         jnode["spec"]["properties"]["supportFormat"].append(spec.properties.supportFormat[i]);
     }
@@ -210,6 +217,13 @@ bool CameraInstance::FromJson(const Json::Value &jnode)
     spec.properties.driverName = jnode["spec"]["properties"]["driverName"].asString();
     spec.properties.card = jnode["spec"]["properties"]["card"].asString();
     spec.properties.busInfo = jnode["spec"]["properties"]["busInfo"].asString();
+    spec.properties.fov = jnode["spec"]["properties"]["fov"].asString();
+    spec.properties.aspect = jnode["spec"]["properties"]["aspect"].asString();
+    spec.properties.viewDistance = jnode["spec"]["properties"]["viewDistance"].asString();
+    spec.properties.rotation = jnode["spec"]["properties"]["rotation"].asString();
+    spec.properties.x = jnode["spec"]["properties"]["x"].asString();
+    spec.properties.y = jnode["spec"]["properties"]["y"].asString();
+    spec.properties.z = jnode["spec"]["properties"]["z"].asString();
     for (int i = 0; i < jnode["spec"]["properties"]["supportFormat"].size(); i++) {
         spec.properties.supportFormat.emplace_back(jnode["spec"]["properties"]["supportFormat"][i].asString());
     }

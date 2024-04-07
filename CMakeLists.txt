@@ -51,34 +51,6 @@ add_custom_command(
     DEPENDS "${ability_proto}")
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
-# set(YAML_INCLUDE_DIR  /usr/include/yaml-cpp)
-# set(YAML_LIB_DIR /usr/lib/)
-
-# set(GLOG_INCLUDE_DIR /usr/include/glog)
-# set(GLOG_LIB_DIR /usr/lib/)
-
-# set(JSON_CPP_INCLUDE_DIR /usr/include/jsoncpp)
-# set(JSON_CPP_LIB_DIR /usr/lib/)
-
-# set(RAPIDJSON_INCLUDE_DIR /usr/include/rapidjson)
-# Macos specific
-# set(YAML_DIR /opt/homebrew/Cellar/yaml-cpp/0.7.0)
-# set(YAML_INCLUDE_DIR  ${YAML_DIR}/include/yaml-cpp)
-# set(YAML_LIB_DIR ${YAML_DIR}/lib)
-
-# Linux specific
-# set(YAML_INCLUDE_DIR /usr/include/yaml-cpp)
-# set(YAML_LIB_DIR /usr/lib/)
-
-# set(X11_INCLUDE_DIR /usr/include/X11)
-# set(X11_LIB_DIR /usr/lib/)
-
-# set(XRANDR_INCLUDE_DIR /usr/include/X11/extensions)
-# set(XRANDR_LIB_DIR /usr/lib/)
-
-# set(V4L2_INCLUDE_DIR /usr/include/linux)
-# set(V4L2_LIB_DIR /usr/lib/)
-
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
@@ -99,6 +71,8 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/src/lifecyclemgr lifecyclemgr)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/resourcemgr resourcemgr)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/utils utils)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/httpserver httpserver)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/controllermgr controllermgr)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/abilitystatusmgr abilitystatusmgr)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/test/base_function)
@@ -113,6 +87,8 @@ add_executable(${PROJECT_NAME} src/main.cpp
     ${discoverymgr}
     ${lifecyclemgr}
     ${resourcemgr}
+    ${controllermgr}
+    ${abilitystatusmgr}
     ${utils}
     ${httpserver}
 )

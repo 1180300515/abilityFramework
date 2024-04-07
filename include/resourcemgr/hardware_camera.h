@@ -27,11 +27,12 @@ class CameraHardware {
     std::string card;
     std::string bus_info;
     std::vector<std::string> formats;
+    std::vector<std::string> resolutions;
 
     CameraHardware &operator=(const CameraHardware &other);
     Json::Value toJson() const;
     void fromJson(const Json::Value &root);
-    std::string ToKeyValue(std::string hostname) const;
+    std::string ToKeyValue(std::string hostname, std::string ip) const;
     void print() const;
 };
 

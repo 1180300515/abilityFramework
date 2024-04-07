@@ -17,7 +17,7 @@
 
 #include "utils/color.h"
 #include "utils/global_var.h"
-
+std::string GetCurrentTimeStamp(int time_stamp_type = 0);
 int LifeCycleManager::HandleCommandInfo(const CommandInfo &cmd_info)
 {
     // DLOG(INFO) << "receive cmd : " << cmd;
@@ -26,14 +26,38 @@ int LifeCycleManager::HandleCommandInfo(const CommandInfo &cmd_info)
         DLOG(ERROR) << "the ability : " << cmd_info.abilityName << " is not exist";
         return 0;
     }
+    if (!relationmgr_checkexist(cmd_info.abilityId))
+    {
+        DLOG(ERROR) << "the ability id : " << cmd_info.abilityId << " is not support";
+        return 0;
+    }
     if (cmd_info.IPCPort == 0 && cmd_info.cmd != CMD_START) {
         DLOG(ERROR) << "the cmd info must specify the port number";
+        return 0;
+    }
+    if (cmd_info.abilityId == 0 && cmd_info.cmd == CMD_START)
+    {
+        DLOG(ERROR) << "the cmd info must specify abilityId";
+        return 0;
+    }
+    if (cmd_info.abilityInstanceId == 0 && cmd_info.cmd != CMD_START)
+    {
+        DLOG(ERROR) << "the cmd info must specify abilityInstanceId";
         return 0;
     }
     // a new process will be start
     if (cmd_info.IPCPort == 0 && cmd_info.cmd == CMD_START) {
         DLOG(INFO) << "ready for start : " << cmd_info.abilityName << " process";
-        if (!start_process(cmd_info.abilityName)) {
+        unsigned long abilityInstanceId = cmd_info.abilityInstanceId;
+        if (abilityInstanceId == 0)
+        {
+            std::string abilityInstancestr = GetCurrentTimeStamp(1);
+            abilityInstancestr.append(std::to_string(cmd_info.abilityId));
+            DLOG(INFO) << "generate instance : " << abilityInstancestr;
+            std::hash<std::string> hash;
+            abilityInstanceId = hash(abilityInstancestr);
+        }
+        if (!start_process(cmd_info.abilityName, cmd_info.abilityId, abilityInstanceId)) {
             DLOG(ERROR) << "start the " << cmd_info.abilityName << " fail";
             return 0;
         }
@@ -65,8 +89,9 @@ int LifeCycleManager::HandleCommandInfo(const CommandInfo &cmd_info)
 
 bool LifeCycleManager::AddHeartbeatInfo(HeartbeatInfo info)
 {
-    if (info.IPCPort == 0) {
-        DLOG(ERROR) << "the heartbeat info IPCPort is illegal";
+    //DLOG(INFO) << info.toJson();
+    if (info.IPCPort == 0 || info.abilityId == 0 || info.abilityInstanceId == 0) {
+        DLOG(ERROR) << "the heartbeat info is illegal";
         return false;
     }
     {
@@ -85,11 +110,11 @@ bool LifeCycleManager::AddHeartbeatInfo(HeartbeatInfo info)
     return true;
 }
 
-void LifeCycleManager::Init(std::function<bool(std::string)> callback)
+void LifeCycleManager::Init(std::function<bool(std::string)> callback1, std::function<bool(unsigned long)> callback2)
 {
     DLOG(INFO) << L_GREEN << "init lifecycle manager" << NONE;
-    this->resourcemgr_checkexist = callback;
-    // this->resourcemgr_checkexist("camera");
+    this->resourcemgr_checkexist = callback1;
+    this->relationmgr_checkexist = callback2;
 }
 
 void LifeCycleManager::Run() { this->checkClientThread = std::thread(&LifeCycleManager::checkTimeout, this); }
@@ -105,6 +130,52 @@ std::string LifeCycleManager::GetHeartbeatMap()
         data.append(iter.second.toJson());
     }
     return data.toStyledString();
+}
+
+
+std::string GetCurrentTimeStamp(int time_stamp_type)
+{
+	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+
+	std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
+	std::tm* now_tm = std::localtime(&now_time_t);
+
+	char buffer[128];
+	strftime(buffer, sizeof(buffer), "%F %T", now_tm);
+
+	std::ostringstream ss;
+	ss.fill('0');
+
+	std::chrono::milliseconds ms;
+	std::chrono::microseconds cs;
+	std::chrono::nanoseconds ns;
+	
+	switch (time_stamp_type)
+	{
+	case 0:
+		ss << buffer;
+		break;
+	case 1:
+		ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+		ss << buffer << ":" << ms.count();
+		break;
+	case 2:
+		ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+		cs = std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()) % 1000000;
+		ss << buffer << ":" << ms.count() << ":" << cs.count() % 1000;
+		break;
+	case 3:
+		ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+		cs = std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()) % 1000000;
+		ns = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()) % 1000000000;
+		ss << buffer << ":" << ms.count() << ":" << cs.count() % 1000 << ":" << ns.count() % 1000;
+		break;
+	default:
+		ss << buffer;
+		break;
+	}
+
+	return ss.str();
 }
 
 void LifeCycleManager::lifeCycleDeal(std::shared_ptr<AbilityClient> client, const HeartbeatInfo &hbinfo, const CommandInfo &cmdinfo)
@@ -170,7 +241,7 @@ void LifeCycleManager::lifeCycleDeal(std::shared_ptr<AbilityClient> client, cons
     DLOG(INFO) << RED << "Finished life cycle adjust" << NONE;
 }
 
-bool LifeCycleManager::start_process(const std::string &abilityName)
+bool LifeCycleManager::start_process(const std::string &abilityName, unsigned long abilityId, unsigned long abilityInstanceId)
 {
     pid_t pid = fork();
 
@@ -180,7 +251,7 @@ bool LifeCycleManager::start_process(const std::string &abilityName)
     } else {
         std::string program_path = abilityName;
         DLOG(INFO) << "start process : " << abilityName;
-        execl(("bin/" + program_path).c_str(), program_path.c_str(), reinterpret_cast<char *>(NULL));
+        execl(("bin/" + program_path).c_str(), program_path.c_str(), std::to_string(abilityId).c_str(), std::to_string(abilityInstanceId).c_str(), reinterpret_cast<char *>(NULL));
         perror("execl fail : ");
         exit(0);
     }
@@ -231,6 +302,6 @@ void LifeCycleManager::createClient(const std::string &name, int ipcport)
     DLOG(INFO) << "create ability client for ability : " << name << " in IPCPort : " << ipcport;
     abilityUnit::StartInfo start_info;
     start_info.set_timestamp(time(0));
-    std::shared_lock<std::shared_mutex> locker(clients_lock_);
+    // std::shared_lock<std::shared_mutex> locker(clients_lock_);
     this->clients[ipcport]->Start(start_info);
 }

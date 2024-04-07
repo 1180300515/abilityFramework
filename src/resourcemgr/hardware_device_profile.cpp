@@ -28,6 +28,11 @@ Json::Value DeviceProfile::toJson() const
     for (const auto &speaker : speakerDevices) {
         root["speakerDevices"].append(speaker.toJson());
     }
+    for (const auto &device : generalDevices)
+    {
+        root[device.kind].append(device.ToJson());
+    }
+    
     return root;
 }
 
@@ -53,24 +58,69 @@ void DeviceProfile::print()
 
 void DeviceProfile::FromJson2Profile(const Json::Value &root)
 {
-    for (const auto &cam : root["cameraDevices"]) {
-        CameraHardware hw;
-        hw.fromJson(cam);
-        cameraDevices.emplace_back(hw);
+    ip = root["ip"].asString();
+    // for (auto cam : root["cameraDevices"]) {
+    //     CameraHardware hw;
+    //     hw.fromJson(cam);
+    //     cameraDevices.emplace_back(hw);
+    // }
+    // for (auto disp : root["displayDevices"]) {
+    //     DisplayHardware hw;
+    //     hw.fromJson(disp);
+    //     displayDevices.emplace_back(hw);
+    // }
+    // for (auto mic : root["micDevices"]) {
+    //     AudioHardware hw;
+    //     hw.fromJson(mic);
+    //     micDevices.emplace_back(hw);
+    // }
+    // for (auto speaker : root["speakerDevices"]) {
+    //     AudioHardware hw;
+    //     hw.fromJson(speaker);
+    //     speakerDevices.emplace_back(hw);
+    // }
+    for (auto it = root.begin(); it != root.end(); ++it) {
+        if (it.key().asString() == "cameraDevices")
+        {
+            for (auto cam : *it) {
+                CameraHardware hw;
+                hw.fromJson(cam);
+                cameraDevices.emplace_back(hw);
+            }
+        }
+        else if (it.key().asString() == "displayDevices")
+        {
+            for (auto disp : *it) {
+                DisplayHardware hw;
+                hw.fromJson(disp);
+                displayDevices.emplace_back(hw);
+            }
+        }
+        else if (it.key().asString() == "micDevices")
+        {
+            for (auto mic : *it) {
+                AudioHardware hw;
+                hw.fromJson(mic);
+                micDevices.emplace_back(hw);
+            }
+        }
+        else if (it.key().asString() == "speakerDevices")
+        {
+            for (auto speaker : *it) {
+                AudioHardware hw;
+                hw.fromJson(speaker);
+                speakerDevices.emplace_back(hw);
+            }
+        }
+        else
+        {
+            for (auto device : *it) {
+                GeneralDeviceInstance instance;
+                instance.FromJson(device);
+                generalDevices.emplace_back(instance);
+            }
+        }
+        
     }
-    for (const auto &disp : root["displayDevices"]) {
-        DisplayHardware hw;
-        hw.fromJson(disp);
-        displayDevices.emplace_back(hw);
-    }
-    for (const auto &mic : root["micDevices"]) {
-        AudioHardware hw;
-        hw.fromJson(mic);
-        micDevices.emplace_back(hw);
-    }
-    for (const auto &speaker : root["speakerDevices"]) {
-        AudioHardware hw;
-        hw.fromJson(speaker);
-        speakerDevices.emplace_back(hw);
-    }
+    
 }

@@ -23,6 +23,8 @@
 #include "httpserver/http_server.h"
 #include "lifecyclemgr/lifecycle_manager.h"
 #include "resourcemgr/resource_manager.h"
+#include "controllermgr/controller_manager.h"
+#include "abilitystatusmgr/ability_status_manager.h"
 #include "utils/color.h"
 #include "utils/global_var.h"
 
@@ -58,13 +60,19 @@ int main(int argc, char **argv)
     auto http_server = std::make_shared<HttpServer>();
     auto discovery_manager = std::make_shared<DiscoveryManager>();
     auto ability_relation_manager = std::make_shared<AbilityRelationManager>();
+    auto controller_manager = std::make_shared<ControllerManager>();
+    auto ability_status_manager = std::make_shared<AbilityStatusManager>();
 
     resource_manager->Init(cleandb);
-    lifecycle_manager->Init(std::bind(&ResourceManager::AbilityExistJudge, resource_manager, std::placeholders::_1));
+    lifecycle_manager->Init(std::bind(&ResourceManager::AbilityExistJudge, resource_manager, std::placeholders::_1),
+                            std::bind(&AbilityRelationManager::abilityInstanceExists, ability_relation_manager, std::placeholders::_1));
     discovery_manager->Init(std::bind(&ResourceManager::EndAddressDiscoveryResult, resource_manager, std::placeholders::_1));
     ability_relation_manager->Init(std::bind(&ResourceManager::GetAbilityInfoExtractList, resource_manager),
                                    std::bind(&ResourceManager::GetHardWareResourceList, resource_manager, std::placeholders::_1));
-    http_server->Init(resource_manager, lifecycle_manager, ability_relation_manager);
+    controller_manager->init(std::bind(&ResourceManager::GetAbilityInfoExtractList, resource_manager));
+    ability_status_manager->Init(std::bind(&LifeCycleManager::GetHeartbeatMap, lifecycle_manager),
+                                 std::bind(&ControllerManager::getControllerInfo, controller_manager));
+    http_server->Init(resource_manager, lifecycle_manager, ability_relation_manager, controller_manager, ability_status_manager);
 
     std::vector<std::string> crd_file_names;
     std::vector<std::string> instance_file_names;
@@ -135,6 +143,7 @@ int main(int argc, char **argv)
     resource_manager->Run();
     discovery_manager->Run();
     lifecycle_manager->Run();
+    controller_manager->run();
     http_server->Run();
     return 0;
 }
