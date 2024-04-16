@@ -60,6 +60,7 @@ void HardwareResourceManager::EndAddressResult(std::map<std::string, std::string
                 Json::Value jnode;
                 Json::Reader reader;
                 reader.parse(data, jnode);
+                jnode["ip"] = iter.second;
                 dp.FromJson2Profile(jnode);
                 hardware_resources[iter.first] = dp;
             } else {
@@ -88,6 +89,7 @@ void HardwareResourceManager::EndAddressResult(std::map<std::string, std::string
         speakerDevices.clear();
         displayDevices.clear();
         cameraDevices.clear();
+        generalDevices.clear();
         for (const auto &item : hardware_resources) {
             for (const auto &micDevice : item.second.micDevices) {
                 micDevices.emplace_back(micDevice.ToKeyValue(item.first));

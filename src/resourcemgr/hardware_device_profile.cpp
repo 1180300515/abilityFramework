@@ -116,6 +116,7 @@ void DeviceProfile::FromJson2Profile(const Json::Value &root)
         {
             for (auto device : *it) {
                 GeneralDeviceInstance instance;
+                device["ip"] = ip;
                 instance.FromJson(device);
                 generalDevices.emplace_back(instance);
             }

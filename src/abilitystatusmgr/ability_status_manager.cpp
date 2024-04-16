@@ -20,7 +20,7 @@ Json::Value AbilityStatusManager::GetAbilityStatusById(unsigned long abilityInst
     if (abilityPort != 0)
     {
         httplib::Client abilityCli("127.0.0.1", abilityPort);
-        auto res = abilityCli.Get("/api/StatusGet");
+        auto res = abilityCli.Get("/api/status");
         if (res)
         {
             Json::Reader reader;
@@ -38,7 +38,9 @@ Json::Value AbilityStatusManager::GetAbilityStatusById(unsigned long abilityInst
 
     int controllerPort = GetControllerPort(abilityInstanceId);
     httplib::Client controllerCli("127.0.0.1", controllerPort);
-    auto res = controllerCli.Get("/api/DesireGet");
+    std::stringstream ss;
+    ss << "GET /api/desire" << "?" << "abilityInstanceId=" << abilityInstanceId;
+    auto res = controllerCli.Get(ss.str());
     Json::Value desire;
     if (res)
     {
@@ -77,7 +79,8 @@ int AbilityStatusManager::UpdateAbilityDesireById(std::string req)
     Json::Value desire;
     desire["desire"] = request["desire"];
     desire["abilityPort"] = abilityPort;
-    auto res = controllerCli.Post("/api/DesirePost", desire.toStyledString(), "application/json");
+    desire["abilityInstanceId"] = abilityInstanceId;
+    auto res = controllerCli.Post("/api/desire", desire.toStyledString(), "application/json");
     if (res)
     {
         DLOG(INFO) << "post new desire to controller port: " << controllerPort;

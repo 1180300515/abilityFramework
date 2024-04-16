@@ -37,6 +37,7 @@ bool GeneralDeviceInstance::FromJson(const Json::Value &jnode)
     DeviceInstanceInfo::FromJson(jnode);
     info = jnode;
     spec = jnode["spec"];
+    spec["ip"] = jnode["ip"].asString();
     return true;
 }
 
