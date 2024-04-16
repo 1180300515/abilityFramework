@@ -39,7 +39,7 @@ Json::Value AbilityStatusManager::GetAbilityStatusById(unsigned long abilityInst
     int controllerPort = GetControllerPort(abilityInstanceId);
     httplib::Client controllerCli("127.0.0.1", controllerPort);
     std::stringstream ss;
-    ss << "GET /api/desire" << "?" << "abilityInstanceId=" << abilityInstanceId;
+    ss << "/api/desire" << "?" << "abilityInstanceId=" << abilityInstanceId;
     auto res = controllerCli.Get(ss.str());
     Json::Value desire;
     if (res)
