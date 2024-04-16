@@ -80,7 +80,7 @@ int AbilityStatusManager::UpdateAbilityDesireById(std::string req)
     desire["desire"] = request["desire"];
     desire["abilityPort"] = abilityPort;
     desire["abilityInstanceId"] = abilityInstanceId;
-    auto res = controllerCli.Post("/api/desire", desire.toStyledString(), "application/json");
+    auto res = controllerCli.Put("/api/desire", desire.toStyledString(), "application/json");
     if (res)
     {
         DLOG(INFO) << "post new desire to controller port: " << controllerPort;
