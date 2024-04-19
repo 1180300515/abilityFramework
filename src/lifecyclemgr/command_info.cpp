@@ -16,7 +16,6 @@
 Json::Value CommandInfo::toJson() const
 {
     Json::Value root;
-    root["IPCPort"] = IPCPort;
     root["abilityName"] = abilityName;
     root["cmd"] = cmd;
     root["connectPort"] = connectPort;
@@ -28,7 +27,6 @@ Json::Value CommandInfo::toJson() const
 
 void CommandInfo::FromJson(const Json::Value &root)
 {
-    IPCPort = root["IPCPort"].asInt();
     abilityName = root["abilityName"].asString();
     cmd = root["cmd"].asString();
     connectPort = root["connectPort"].asInt();
@@ -39,7 +37,6 @@ void CommandInfo::FromJson(const Json::Value &root)
 
 void CommandInfo::print()
 {
-    std::cout << "IPCPort: " << IPCPort << std::endl;
     std::cout << "abilityName: " << abilityName << std::endl;
     std::cout << "cmd: " << cmd << std::endl;
     std::cout << "connectPort: " << connectPort << std::endl;

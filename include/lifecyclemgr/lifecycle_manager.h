@@ -56,15 +56,15 @@ class LifeCycleManager {
     std::string GetHeartbeatMap();
 
    private:
-    // store IPCPort and async thread
-    std::unordered_map<int, std::future<void>> threads;
+    // store abilityInstanceId and async thread
+    std::unordered_map<size_t, std::future<void>> threads;
     std::shared_mutex thread_lock_;
-    // store IPCPort and ability client (by grpc)
-    std::unordered_map<int, std::shared_ptr<AbilityClient>> clients;
+    // store abilityInstanceId and ability client (by grpc)
+    std::unordered_map<size_t, std::shared_ptr<AbilityClient>> clients;
     std::shared_mutex clients_lock_;
 
-    // IPCPort and the heart beat info
-    std::unordered_map<int, HeartbeatInfo> heartbeat_map;
+    // abilityInstance and the heart beat info
+    std::unordered_map<size_t, HeartbeatInfo> heartbeat_map;
     std::shared_mutex heartbeat_map_lock;
 
     std::thread checkClientThread;
@@ -79,7 +79,7 @@ class LifeCycleManager {
 
     void checkTimeout();
 
-    void createClient(const std::string &name, int ipcport);
+    void createClient(const std::string &name, int ipcport, unsigned long abilityInstanceId);
 };
 
 #endif  // LIFECYCLEMGR_LIFECYCLE_MANAGER_H_

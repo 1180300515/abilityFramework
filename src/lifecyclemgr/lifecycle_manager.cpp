@@ -31,11 +31,7 @@ int LifeCycleManager::HandleCommandInfo(const CommandInfo &cmd_info)
         DLOG(ERROR) << "the ability id : " << cmd_info.abilityId << " is not support";
         return 0;
     }
-    if (cmd_info.IPCPort == 0 && cmd_info.cmd != CMD_START) {
-        DLOG(ERROR) << "the cmd info must specify the port number";
-        return 0;
-    }
-    if (cmd_info.abilityId == 0 && cmd_info.cmd == CMD_START)
+    if (cmd_info.abilityId == 0)
     {
         DLOG(ERROR) << "the cmd info must specify abilityId";
         return 0;
@@ -46,7 +42,16 @@ int LifeCycleManager::HandleCommandInfo(const CommandInfo &cmd_info)
         return 0;
     }
     // a new process will be start
-    if (cmd_info.IPCPort == 0 && cmd_info.cmd == CMD_START) {
+    if (cmd_info.cmd == CMD_START) {
+        {
+            std::shared_lock<std::shared_mutex> lock_heartbeat(heartbeat_map_lock);
+            if (heartbeat_map.count(cmd_info.abilityInstanceId) != 0)
+            {
+                DLOG(ERROR) << "failed to start an ability because abilityInstanceId: " << cmd_info.abilityInstanceId << "exist";
+                return 0;
+            }
+            
+        }
         DLOG(INFO) << "ready for start : " << cmd_info.abilityName << " process";
         unsigned long abilityInstanceId = cmd_info.abilityInstanceId;
         if (abilityInstanceId == 0)
@@ -65,23 +70,23 @@ int LifeCycleManager::HandleCommandInfo(const CommandInfo &cmd_info)
     }
     std::shared_lock<std::shared_mutex> lock(clients_lock_);
     std::shared_lock<std::shared_mutex> lock1(heartbeat_map_lock);
-    if (cmd_info.IPCPort != 0 && this->clients.count(cmd_info.IPCPort) == 0) {
-        DLOG(ERROR) << "no ability client matching the port : " << cmd_info.IPCPort;
+    if (cmd_info.abilityInstanceId != 0 && this->clients.count(cmd_info.abilityInstanceId) == 0) {
+        DLOG(ERROR) << "no ability client matching the abilityInstanceId : " << cmd_info.abilityInstanceId;
         return 0;
     }
-    if (heartbeat_map.count(cmd_info.IPCPort) == 0) {
-        DLOG(ERROR) << "the IPCPort: " << cmd_info.IPCPort << " is not exist";
+    if (heartbeat_map.count(cmd_info.abilityInstanceId) == 0) {
+        DLOG(ERROR) << "the abilityInstance: " << cmd_info.abilityInstanceId << " is not exist";
         return 0;
     }
-    if (heartbeat_map.at(cmd_info.IPCPort).abilityName == cmd_info.abilityName) {
+    if (heartbeat_map.at(cmd_info.abilityInstanceId).abilityName == cmd_info.abilityName) {
         std::unique_lock<std::shared_mutex> lock1(thread_lock_);
-        std::future_status status = threads.at(cmd_info.IPCPort).wait_for(std::chrono::seconds(0));
+        std::future_status status = threads.at(cmd_info.abilityInstanceId).wait_for(std::chrono::seconds(0));
         if (status != std::future_status::ready) {
-            DLOG(ERROR) << "The last operation has not ended in IPCPort: " << cmd_info.IPCPort;
+            DLOG(ERROR) << "The last operation has not ended for abilityInstance: " << cmd_info.abilityInstanceId;
             return 2;
         }
-        threads.at(cmd_info.IPCPort) = std::async(std::launch::async, &LifeCycleManager::lifeCycleDeal, this, clients[cmd_info.IPCPort],
-                                                  this->heartbeat_map.at(cmd_info.IPCPort), cmd_info);
+        threads.at(cmd_info.abilityInstanceId) = std::async(std::launch::async, &LifeCycleManager::lifeCycleDeal, this, clients[cmd_info.abilityInstanceId],
+                                                  this->heartbeat_map.at(cmd_info.abilityInstanceId), cmd_info);
         return 1;
     }
     return 0;
@@ -96,16 +101,17 @@ bool LifeCycleManager::AddHeartbeatInfo(HeartbeatInfo info)
     }
     {
         std::unique_lock<std::shared_mutex> locker(heartbeat_map_lock);
-        heartbeat_map[info.IPCPort] = info;
+        heartbeat_map[info.abilityInstanceId] = info;
     }
     bool tag = false;
     {
         std::shared_lock<std::shared_mutex> lock(clients_lock_);
-        tag = (clients.count(info.IPCPort) == 0);
+        tag = (clients.count(info.abilityInstanceId) == 0);
     }
     if (tag) {
         std::unique_lock<std::shared_mutex> lock1(thread_lock_);
-        threads[info.IPCPort] = std::async(std::launch::async, &LifeCycleManager::createClient, this, info.abilityName, info.IPCPort);
+        threads[info.abilityInstanceId] = std::async(std::launch::async, &LifeCycleManager::createClient, this, 
+                                            info.abilityName, info.IPCPort, info.abilityInstanceId);
     }
     return true;
 }
@@ -181,7 +187,8 @@ std::string GetCurrentTimeStamp(int time_stamp_type)
 void LifeCycleManager::lifeCycleDeal(std::shared_ptr<AbilityClient> client, const HeartbeatInfo &hbinfo, const CommandInfo &cmdinfo)
 {
     DLOG(INFO) << RED << "Adjust life cycle" << NONE;
-    DLOG(INFO) << RED << "Now the Ability : " << cmdinfo.abilityName << " in port: " << hbinfo.IPCPort << " status is :" << hbinfo.status << NONE
+    DLOG(INFO) << RED << "Now the Ability : " << cmdinfo.abilityName << " instanceId: " << hbinfo.abilityInstanceId
+               << " in port: " << hbinfo.IPCPort << " status is :" << hbinfo.status << NONE
                << std::endl;
     if (hbinfo.status == STATUS_INIT) {
         if (cmdinfo.cmd == CMD_START) {
@@ -262,7 +269,7 @@ void LifeCycleManager::checkTimeout()
 {
     while (true) {
         std::this_thread::sleep_for(std::chrono::seconds(5));
-        std::vector<int> timeoutList;
+        std::vector<size_t> timeoutList;
         {
             std::shared_lock<std::shared_mutex> locker(this->heartbeat_map_lock);
             for (const auto &iter : this->heartbeat_map) {
@@ -280,28 +287,28 @@ void LifeCycleManager::checkTimeout()
                     threads.erase(iter);
                 } else {
                     if (threads.at(iter).wait_for(std::chrono::seconds(1)) != std::future_status::ready) {
-                        DLOG(ERROR) << "the thread which bind in IPCPort: " << iter << " cant't finish";
+                        DLOG(ERROR) << "the thread which bind with abilityInstanceId: " << iter << " cant't finish";
                     }
                     threads.erase(iter);
                 }
                 clients.erase(iter);  // this process has ended, clean up the client
-                DLOG(INFO) << "the ability : " << heartbeat_map.at(iter).abilityName << "on IPCPort : " << heartbeat_map.at(iter).IPCPort
+                DLOG(INFO) << "the ability : " << heartbeat_map.at(iter).abilityName << " instanceId : " << heartbeat_map.at(iter).abilityInstanceId
                            << "  timeout, already clean";
                 heartbeat_map.erase(iter);  // timeout, delete the record
             }
         }
     }
 }
-void LifeCycleManager::createClient(const std::string &name, int ipcport)
+void LifeCycleManager::createClient(const std::string &name, int ipcport, size_t abilityInstanceId)
 {
     {
         std::unique_lock<std::shared_mutex> locker(clients_lock_);
-        clients[ipcport] =
+        clients[abilityInstanceId] =
             std::make_unique<AbilityClient>(grpc::CreateChannel("localhost:" + std::to_string(ipcport), grpc::InsecureChannelCredentials()));
     }
-    DLOG(INFO) << "create ability client for ability : " << name << " in IPCPort : " << ipcport;
+    DLOG(INFO) << "create ability client for ability : " << name << " instanceId: " << abilityInstanceId << " in IPCPort : " << ipcport;
     abilityUnit::StartInfo start_info;
     start_info.set_timestamp(time(0));
     // std::shared_lock<std::shared_mutex> locker(clients_lock_);
-    this->clients[ipcport]->Start(start_info);
+    this->clients[abilityInstanceId]->Start(start_info);
 }

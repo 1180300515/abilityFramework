@@ -20,7 +20,6 @@
 #include <string>
 
 struct CommandInfo {
-    int IPCPort;
     std::string abilityName;
     std::string cmd;
     int connectPort;

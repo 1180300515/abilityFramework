@@ -130,7 +130,7 @@ void HttpServer::Init(std::shared_ptr<ResourceManager> resource_, std::shared_pt
             cmd.FromJson(root);
         } else {
             try {
-                cmd = CommandInfo{std::stoi(req.get_param_value("IPCPort")), req.get_param_value("abilityName"), req.get_param_value("cmd"),
+                cmd = CommandInfo{req.get_param_value("abilityName"), req.get_param_value("cmd"),
                                   std::stoi(req.get_param_value("connectPort")), req.get_param_value("connectIP"), 
                                   std::stoul(req.get_param_value("abilityId")), std::stoul(req.get_param_value("abilityInstanceId"))};
             } catch (const std::exception &) {
