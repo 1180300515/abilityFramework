@@ -1,149 +1,53 @@
-/*
- * Copyright (C), 2022-2023, Soochow University & OPPO Mobile Comm Corp., Ltd.
- *
- * File: main.cpp
- * Description: main.cpp
- * Version: V1.0.0
- * Date: 2023/08/24
- * Author: Soochow University
- * Revision History:
- *   Version       Date          Author         Revision Description
- *  V1.0.0        2023/08/24    Soochow University       Create and initialize
- */
-
-#include <dirent.h>
-#include <glog/logging.h>
-#include <yaml-cpp/yaml.h>
 
 #include <iostream>
-#include <thread>  // NOLINT [build/c++11]
 
-#include "abilityrelationmgr/ability_relation_manager.h"
-#include "discoverymgr/discovery_manager.h"
-#include "httpserver/http_server.h"
-#include "lifecyclemgr/lifecycle_manager.h"
-#include "resourcemgr/resource_manager.h"
-#include "controllermgr/controller_manager.h"
-#include "abilitystatusmgr/ability_status_manager.h"
-#include "utils/color.h"
-#include "utils/global_var.h"
+#include "ability_manager.h"
+#include "http_server.h"
+#include "lifecycle_manager.h"
+#include "resource_manager.h"
+#include "broadcast_manager.h"
 
-int main(int argc, char **argv)
-{
-    std::cout << RED << "Load Config From File" << NONE << std::endl;
-    std::string config_file_path = "config/start_config.yaml";
-    YAML::Node config;
-    try {
-        config = YAML::LoadFile(config_file_path);
-    } catch (YAML::ParserException e) {
-        std::cout << "config yaml is malformed." << std::endl;
-        exit(0);
-    } catch (YAML::BadFile e) {
-        std::cout << "file can't be load" << std::endl;
-        exit(0);
-    }
-    bool loadcrd = config["LoadCrdFile"].as<bool>();
-    bool loaddevice = config["LoadDeviceFile"].as<bool>();
-    bool loadability = config["LoadAbilityFile"].as<bool>();
-    bool cleandb = config["CleanDB"].as<bool>();
-    bool logintofile = config["LogIntoFile"].as<bool>();
+int main() {
+  resourceManager resource_mgr;
+  abilityManager ability_mgr;
+  lifeCycleManager lifeCycle_mgr;
+  broadcastManager broadcast_mgr;
+  httpServer http_svr;
 
-    if (logintofile) {
-        FLAGS_log_dir = LOG_FILE_PATH;
-    }
-    FLAGS_alsologtostderr = 1;
-    FLAGS_colorlogtostderr = 1;
-    google::InitGoogleLogging("abiltyframework-cpp");
+  resource_mgr.Init();
+  ability_mgr.Init(
+      [&lifeCycle_mgr](const std::string &name) -> std::string {
+        return lifeCycle_mgr.getState(name);
+      },
+      [&lifeCycle_mgr](const std::string &name) -> int {
+        return lifeCycle_mgr.getAbilityPort(name);
+      },
+      [&lifeCycle_mgr](const AbilityMessage::AbilityCommand &cmd) {
+        lifeCycle_mgr.lifeCycleCommand(cmd);
+      },
+      [&resource_mgr]() -> std::unordered_map<std::string, Ability> {
+        return resource_mgr.getAbilityList();
+      });
+  lifeCycle_mgr.Init();
+  http_svr.Init(
+      [&lifeCycle_mgr](const Json::Value &value) -> bool {
+        return lifeCycle_mgr.handleAbilityHeartbeat(
+            value); // Return true on success, false on failure
+      },
+      [&ability_mgr](const Json::Value &value) -> auto {
+        // Implement ability command processing logic here
+        // ...
+        return ability_mgr.handleAbilityCommand(value);
+      },
+      [&ability_mgr]() -> auto { return ability_mgr.handleAbilityList(); },
+      [&ability_mgr](const std::string &name) {
+        return ability_mgr.handleAbilityStatus(name);
+      });
 
-    auto resource_manager = std::make_shared<ResourceManager>();
-    auto lifecycle_manager = std::make_shared<LifeCycleManager>();
-    auto http_server = std::make_shared<HttpServer>();
-    auto discovery_manager = std::make_shared<DiscoveryManager>();
-    auto ability_relation_manager = std::make_shared<AbilityRelationManager>();
-    auto controller_manager = std::make_shared<ControllerManager>();
-    auto ability_status_manager = std::make_shared<AbilityStatusManager>();
-
-    resource_manager->Init(cleandb);
-    lifecycle_manager->Init(std::bind(&ResourceManager::AbilityExistJudge, resource_manager, std::placeholders::_1),
-                            std::bind(&AbilityRelationManager::abilityInstanceExists, ability_relation_manager, std::placeholders::_1));
-    discovery_manager->Init(std::bind(&ResourceManager::EndAddressDiscoveryResult, resource_manager, std::placeholders::_1));
-    ability_relation_manager->Init(std::bind(&ResourceManager::GetAbilityInfoExtractList, resource_manager),
-                                   std::bind(&ResourceManager::GetHardWareResourceList, resource_manager, std::placeholders::_1));
-    controller_manager->init(std::bind(&ResourceManager::GetAbilityInfoExtractList, resource_manager));
-    ability_status_manager->Init(std::bind(&LifeCycleManager::GetHeartbeatMap, lifecycle_manager),
-                                 std::bind(&ControllerManager::getControllerInfo, controller_manager));
-    http_server->Init(resource_manager, lifecycle_manager, ability_relation_manager, controller_manager, ability_status_manager);
-
-    std::vector<std::string> crd_file_names;
-    std::vector<std::string> instance_file_names;
-    std::vector<std::string> ability_file_names;
-    DIR *dir;
-    struct dirent *ent;
-    if (loadcrd) {
-        if ((dir = opendir(CRD_FILE_PATH)) != NULL) {
-            while ((ent = readdir(dir)) != NULL) {
-                if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
-                    continue;
-                }
-                crd_file_names.emplace_back(ent->d_name);
-                // DLOG(INFO) << ent->d_name;
-            }
-            closedir(dir);
-            // add data into crd table
-            for (int i = 0; i < crd_file_names.size(); i++) {
-                std::string file_path = std::string(CRD_FILE_PATH) + "/" + crd_file_names[i];
-                if (!resource_manager->RegistCrd(file_path, true)) {
-                    DLOG(ERROR) << "register fail";
-                    exit(0);
-                }
-            }
-        } else {
-            DLOG(ERROR) << "Could not open directory : " << CRD_FILE_PATH;
-        }
-    }
-    if (loaddevice) {
-        if ((dir = opendir(INSTANCE_FILE_PATH)) != NULL) {
-            while ((ent = readdir(dir)) != NULL) {
-                if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
-                    continue;
-                }
-                instance_file_names.emplace_back(ent->d_name);
-            }
-            closedir(dir);
-            for (int i = 0; i < instance_file_names.size(); i++) {
-                std::string file_path = std::string(INSTANCE_FILE_PATH) + "/" + instance_file_names[i];
-                if (!resource_manager->AddDeviceInstance(file_path, true)) {
-                    DLOG(ERROR) << "add instance fail from file : " << file_path;
-                }
-            }
-        } else {
-            DLOG(ERROR) << "Could not open directory : " << INSTANCE_FILE_PATH;
-        }
-    }
-    if (loadability) {
-        if ((dir = opendir(ABILITY_FILE_PATH)) != NULL) {
-            while ((ent = readdir(dir)) != NULL) {
-                if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
-                    continue;
-                }
-                ability_file_names.emplace_back(ent->d_name);
-            }
-            closedir(dir);
-            for (int i = 0; i < ability_file_names.size(); i++) {
-                std::string file_path = std::string(ABILITY_FILE_PATH) + "/" + ability_file_names[i];
-                if (!resource_manager->AddAbilityInstance(file_path, true)) {
-                    DLOG(ERROR) << "add ability fail from file : " << file_path;
-                }
-            }
-        } else {
-            DLOG(ERROR) << "Could not open directory : " << ABILITY_FILE_PATH;
-        }
-    }
-
-    resource_manager->Run();
-    discovery_manager->Run();
-    lifecycle_manager->Run();
-    controller_manager->run();
-    http_server->Run();
-    return 0;
+  resource_mgr.Run();
+  lifeCycle_mgr.Run();
+  ability_mgr.Run();
+  broadcast_mgr.Run();
+  http_svr.Run();
+  return 0;
 }

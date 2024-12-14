@@ -1,5 +1,0 @@
-LoadCrdFile: true #true will load from file
-LoadDeviceFile: true
-LoadAbilityFile: true
-CleanDB: true #true will clean db
-LogIntoFile: true
