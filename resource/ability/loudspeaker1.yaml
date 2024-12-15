@@ -1,0 +1,14 @@
+abilityName: loudspeaker1
+type: loudspeaker
+location:
+  x: 0.1
+  y: 0.1
+  z: 0.1
+  scene: room
+control:
+  play: off
+  url: "http://music.163.com/song/media/outer/url?id=447925558.mp3"
+QoS:
+  response: 20
+  reliability: 0.8
+  availability: 0.9

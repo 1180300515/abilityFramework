@@ -14,7 +14,8 @@ public:
             std::function<std::optional<std::string>(const Json::Value &)>
                 set_abilityCommand_,
             std::function<std::string ()> get_abilityList_,
-            std::function<std::string (const std::string&)> get_abilityStatus_);
+            std::function<std::string (const std::string&)> get_abilityStatus_,
+           std::function<int(const std::string&)> get_abilityPort_);
   void Run();
 
 private:
@@ -23,6 +24,7 @@ private:
       set_abilityCommand;
   std::function<std::string ()> get_abilityList;
   std::function<std::string (const std::string&)> get_abilityStatus;
+  std::function<int(const std::string&)> get_abilityPort;
 
   httplib::Server server;
 };

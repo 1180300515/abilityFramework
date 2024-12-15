@@ -33,10 +33,52 @@ add_executable(${PROJECT_NAME} src/main.cpp
 target_include_directories(${PROJECT_NAME} PRIVATE ${JSONCPP_INCLUDE_DIRS})
 target_link_libraries(AbilityFramework sqlite3 jsoncpp glog yaml-cpp)
 
-add_executable(camera1 mock_ability/camera/camera.cpp
+add_executable(camera1 mock_ability/camera/camera1.cpp
         src/lifecyclemgr/heartbeat_info.cpp
         src/abilitymgr/ability_message.cpp)
 target_include_directories(camera1 PRIVATE ${JSONCPP_INCLUDE_DIRS})
 target_link_libraries(camera1 glog jsoncpp)
 
+add_executable(camera2 mock_ability/camera/camera2.cpp
+        src/lifecyclemgr/heartbeat_info.cpp
+        src/abilitymgr/ability_message.cpp)
+target_include_directories(camera2 PRIVATE ${JSONCPP_INCLUDE_DIRS})
+target_link_libraries(camera2 glog jsoncpp)
+
 add_executable(httpserver test/http_server.cpp)
+
+add_executable(display1 mock_ability/display/display1.cpp
+        src/lifecyclemgr/heartbeat_info.cpp
+        src/abilitymgr/ability_message.cpp)
+target_include_directories(display1 PRIVATE ${JSONCPP_INCLUDE_DIRS})
+target_link_libraries(display1 glog jsoncpp)
+
+add_executable(loudspeaker1 mock_ability/loudspeaker/loudspeaker1.cpp
+        src/lifecyclemgr/heartbeat_info.cpp
+        src/abilitymgr/ability_message.cpp)
+target_include_directories(loudspeaker1 PRIVATE ${JSONCPP_INCLUDE_DIRS})
+target_link_libraries(loudspeaker1 glog jsoncpp)
+
+add_executable(light1 mock_ability/light/light1.cpp
+        src/lifecyclemgr/heartbeat_info.cpp
+        src/abilitymgr/ability_message.cpp)
+target_include_directories(light1 PRIVATE ${JSONCPP_INCLUDE_DIRS})
+target_link_libraries(light1 glog jsoncpp)
+
+add_executable(light2 mock_ability/light/light2.cpp
+        src/lifecyclemgr/heartbeat_info.cpp
+        src/abilitymgr/ability_message.cpp)
+target_include_directories(light2 PRIVATE ${JSONCPP_INCLUDE_DIRS})
+target_link_libraries(light2 glog jsoncpp)
+
+add_executable(light3 mock_ability/light/light3.cpp
+        src/lifecyclemgr/heartbeat_info.cpp
+        src/abilitymgr/ability_message.cpp)
+target_include_directories(light3 PRIVATE ${JSONCPP_INCLUDE_DIRS})
+target_link_libraries(light3 glog jsoncpp)
+
+add_executable(light4 mock_ability/light/light4.cpp
+        src/lifecyclemgr/heartbeat_info.cpp
+        src/abilitymgr/ability_message.cpp)
+target_include_directories(light4 PRIVATE ${JSONCPP_INCLUDE_DIRS})
+target_link_libraries(light4 glog jsoncpp)

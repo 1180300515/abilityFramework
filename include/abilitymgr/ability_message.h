@@ -11,7 +11,7 @@
 namespace AbilityMessage {
 struct desireProp {
   std::string controlName;
-  std::string value;
+  std::string controlIntent;
 };
 
 //
@@ -26,6 +26,10 @@ struct AbilityCommand {
 
   bool parseJson(const Json::Value &root);
   [[nodiscard]] Json::Value toJson() const;
+
+  int priority = 0;
+
+  bool operator<(const AbilityCommand& other) const;
 };
 
 struct AbilityStatus {

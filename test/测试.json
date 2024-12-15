@@ -1,0 +1,12 @@
+{
+  "abilityName": "display1",
+  "type": "display",
+  "ip": "127.0.0.1",
+  "depend": {
+    "camera": {
+      "abilityName": "camera2",
+      "type": "camera",
+      "ip": "0.0.0.0"
+    }
+  }
+}

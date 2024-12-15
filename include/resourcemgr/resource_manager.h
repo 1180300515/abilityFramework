@@ -20,6 +20,8 @@ class resourceManager {
 
     std::unordered_map<std::string, Ability> getAbilityList();
 
+    Ability::locationDef getLocation(const std::string& abilityName);
+
    private:
     void parseYamlFile(const std::string& filePath);
 

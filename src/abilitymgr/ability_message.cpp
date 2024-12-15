@@ -16,23 +16,23 @@ Json::Value AbilityStatus::toJson() const {
     root["location"]["scene"] = location.scene;
   }
 
-  if (!depend.isNull()){
+  if (!depend.isNull()) {
     root["depend"] = depend;
   }
-  for(const auto& [name , value] : control) {
+  for (const auto& [name, value] : control) {
     root["control"][name] = value;
   }
-  for(const auto& [name, value] : obs) {
+  for (const auto& [name, value] : obs) {
     root["obs"][name] = value;
   }
   return root;
 }
 
-bool AbilityStatus::parseJson(const Json::Value &root) {
+bool AbilityStatus::parseJson(const Json::Value& root) {
   abilityName = root["abilityName"].asString();
   // 解析location
   if (root.isMember("location") && root["location"].isObject()) {
-    const Json::Value &locationObj = root["location"];
+    const Json::Value& locationObj = root["location"];
     location.x = locationObj["x"].asFloat();
     location.y = locationObj["y"].asFloat();
     location.z = locationObj["z"].asFloat();
@@ -40,15 +40,15 @@ bool AbilityStatus::parseJson(const Json::Value &root) {
   }
   // 解析control
   if (root.isMember("control") && root["control"].isObject()) {
-    const Json::Value &controlObj = root["control"];
-    for (const auto &member : controlObj.getMemberNames()) {
+    const Json::Value& controlObj = root["control"];
+    for (const auto& member : controlObj.getMemberNames()) {
       control[member] = controlObj[member].asString();
     }
   }
   // 解析obs
   if (root.isMember("obs") && root["obs"].isObject()) {
-    const Json::Value &obsObj = root["obs"];
-    for (const auto &member : obsObj.getMemberNames()) {
+    const Json::Value& obsObj = root["obs"];
+    for (const auto& member : obsObj.getMemberNames()) {
       obs[member] = obsObj[member].asString();
     }
   }
@@ -60,7 +60,11 @@ bool AbilityStatus::parseJson(const Json::Value &root) {
   return true; // 解析成功
 }
 
-bool AbilityCommand::parseJson(const Json::Value &root) {
+bool AbilityCommand::operator<(const AbilityCommand& other) const {
+  return priority < other.priority; ;
+}
+
+bool AbilityCommand::parseJson(const Json::Value& root) {
   abilityName = root["abilityName"].asString();
   type = root["type"].asString();
   ip = root["ip"].asString();
@@ -68,11 +72,11 @@ bool AbilityCommand::parseJson(const Json::Value &root) {
   if (root.isMember("stateParam")) {
     stateParam = root["stateParam"];
   }
-  if (root.isMember("intent")) {
-    for (auto &item : root["intent"]) {
+  if (root.isMember("desire")) {
+    for (auto& item : root["desire"]) {
       desireProp new_d;
       new_d.controlName = item["controlName"].asString();
-      new_d.value = item["controlIntent"].asString();
+      new_d.controlIntent = item["controlIntent"].asString();
       desire.push_back(new_d);
     }
   }
@@ -93,17 +97,17 @@ Json::Value AbilityCommand::toJson() const {
   // Serialize "intent" array
   if (!desire.empty()) {
     Json::Value desireArray(Json::arrayValue);
-    for (const auto &prop : desire) {
+    for (const auto& prop : desire) {
       Json::Value item;
       if (!prop.controlName.empty()) {
         item["controlName"] = prop.controlName;
       }
-      if (!prop.value.empty()) {
-        item["controlIntent"] = prop.value;
+      if (!prop.controlIntent.empty()) {
+        item["controlIntent"] = prop.controlIntent;
       }
       desireArray.append(item);
     }
-    root["intent"] = desireArray;
+    root["desire"] = desireArray;
   }
   return root;
 }

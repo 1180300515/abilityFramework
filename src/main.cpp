@@ -2,12 +2,17 @@
 #include <iostream>
 
 #include "ability_manager.h"
+#include "broadcast_manager.h"
 #include "http_server.h"
 #include "lifecycle_manager.h"
 #include "resource_manager.h"
-#include "broadcast_manager.h"
+#include <glog/logging.h>
 
 int main() {
+  google::InitGoogleLogging("AbilityFramework");
+  // 将日志输出到stderr（即控制台）
+  FLAGS_alsologtostderr = true;
+
   resourceManager resource_mgr;
   abilityManager ability_mgr;
   lifeCycleManager lifeCycle_mgr;
@@ -16,32 +21,38 @@ int main() {
 
   resource_mgr.Init();
   ability_mgr.Init(
-      [&lifeCycle_mgr](const std::string &name) -> std::string {
+      [&lifeCycle_mgr](const std::string& name) -> std::string {
         return lifeCycle_mgr.getState(name);
       },
-      [&lifeCycle_mgr](const std::string &name) -> int {
+      [&lifeCycle_mgr](const std::string& name) -> int {
         return lifeCycle_mgr.getAbilityPort(name);
       },
-      [&lifeCycle_mgr](const AbilityMessage::AbilityCommand &cmd) {
+      [&lifeCycle_mgr](const AbilityMessage::AbilityCommand& cmd) {
         lifeCycle_mgr.lifeCycleCommand(cmd);
       },
       [&resource_mgr]() -> std::unordered_map<std::string, Ability> {
         return resource_mgr.getAbilityList();
+      },
+      [&resource_mgr](const std::string& name) -> Ability::locationDef {
+        return resource_mgr.getLocation(name);
       });
   lifeCycle_mgr.Init();
   http_svr.Init(
-      [&lifeCycle_mgr](const Json::Value &value) -> bool {
+      [&lifeCycle_mgr](const Json::Value& value) -> bool {
         return lifeCycle_mgr.handleAbilityHeartbeat(
             value); // Return true on success, false on failure
       },
-      [&ability_mgr](const Json::Value &value) -> auto {
+      [&ability_mgr](const Json::Value& value) -> auto {
         // Implement ability command processing logic here
         // ...
         return ability_mgr.handleAbilityCommand(value);
       },
       [&ability_mgr]() -> auto { return ability_mgr.handleAbilityList(); },
-      [&ability_mgr](const std::string &name) {
+      [&ability_mgr](const std::string& name) {
         return ability_mgr.handleAbilityStatus(name);
+      },
+      [&lifeCycle_mgr](const std::string& abilityName) -> int{
+        return lifeCycle_mgr.getAbilityPort(abilityName);
       });
 
   resource_mgr.Run();

@@ -8,8 +8,8 @@
 
 struct HeartbeatInfo {
     std::string abilityName;  // 能力名称
-    int IPCPort;              // 能力控制端口
-    int abilityPort;          // 能力服务端口
+    int IPCPort = -1;              // 能力控制端口
+    int abilityPort = -1;          // 能力服务端口
     std::string state;       // 当前状态
     std::chrono::steady_clock::time_point last_update;
 

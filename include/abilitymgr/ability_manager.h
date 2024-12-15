@@ -18,8 +18,10 @@ public:
   void Init(std::function<std::string(const std::string&)> get_state_ ,
             std::function<int(const std::string&)> get_ability_port_,
             std::function<void(const AbilityMessage::AbilityCommand&)> set_state_,
-            std::function<std::unordered_map<std::string, Ability>()> get_ability_list_);
+            std::function<std::unordered_map<std::string, Ability>()> get_ability_list_,
+            std::function<Ability::locationDef(const std::string&)> get_location_);
 
+  // 只会处理声明周期 + 根能力的desire
   std::optional<std::string> handleAbilityCommand(const Json::Value& root);
 
   std::string handleAbilityList();
@@ -37,7 +39,7 @@ private:
   std::function<std::unordered_map<std::string, Ability>()> get_ability_list;
   std::function<Ability::locationDef(const std::string&)> get_location;
 
-  std::queue<AbilityMessage::AbilityCommand> taskQueue;
+  std::priority_queue<AbilityMessage::AbilityCommand> taskQueue;
   std::mutex lock_queue;
 
   std::condition_variable cv;

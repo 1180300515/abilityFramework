@@ -53,6 +53,7 @@ void resourceManager::parseYamlFile(const std::string &filePath) {
     }
     // 不读control
     ability_list.emplace(ability.abilityName , ability);
+    DLOG(INFO) << "读取成功: " << filePath;
   } else {
     DLOG(ERROR) << "Failed to parse YAML file: " << filePath;
   }
@@ -124,4 +125,14 @@ void resourceManager::changeLocation(const Json::Value &value) {
 std::unordered_map<std::string, Ability> resourceManager::getAbilityList() {
   std::shared_lock<std::shared_mutex> lock(lock_list);
   return ability_list;
+}
+
+Ability::locationDef resourceManager::getLocation(const std::string &abilityName) {
+    std::shared_lock<std::shared_mutex> lock(lock_list);
+    auto it = ability_list.find(abilityName);
+    if (it == ability_list.end()) {
+        DLOG(ERROR) << "能力不存在: " << abilityName;
+        return {};
+    }
+    return it->second.location;
 }

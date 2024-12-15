@@ -1,5 +1,5 @@
-abilityName: camera2
-type: camera
+abilityName: light4
+type: light
 location:
   x: 0.1
   y: 0.1
@@ -7,6 +7,7 @@ location:
   scene: parlor
 control:
   power: off
+  light: 10
 QoS:
   response: 20
   reliability: 0.8

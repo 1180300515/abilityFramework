@@ -1,10 +1,12 @@
-abilityName: camera2
-type: camera
+abilityName: display1
+type: display
+depend:
+  - camera
 location:
   x: 0.1
   y: 0.1
   z: 0.1
-  scene: parlor
+  scene: room
 control:
   power: off
 QoS:
