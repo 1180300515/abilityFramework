@@ -55,7 +55,7 @@ Json::Value Ability::toJson() const {
   root["QoS"] = qosObj;
 
   // 将abilityDepend vector转换为JSON数组
-  if (abilityDepend.empty()) {
+  if (!abilityDepend.empty()) {
     Json::Value abilityDependArray;
     for (const auto& depend : abilityDepend) {
       abilityDependArray.append(depend);

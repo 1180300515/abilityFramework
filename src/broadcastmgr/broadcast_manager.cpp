@@ -34,6 +34,7 @@ void broadcastManager::broadcastInfo() {
   char hostname[40];
   gethostname(hostname, sizeof(hostname));
   std::string message = std::string(hostname) + "+" + std::to_string(std::time(nullptr));
+  // DLOG(INFO) << message;
 
   while(true) {
     if (sendto(sock, message.c_str(), message.size(), 0, (struct sockaddr *)&addr, sizeof(addr)) < 0) {

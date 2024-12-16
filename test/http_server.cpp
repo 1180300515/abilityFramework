@@ -11,46 +11,51 @@
 //  });
 //  server.listen("0.0.0.0" , 8080);
 //}
-
 #include <iostream>
-#include <queue>
 #include <vector>
+#include <unordered_map>
+#include <map>
 
-using namespace std;
+std::vector<std::map<std::string, std::string>> CartesianProduct(
+    const std::unordered_map<std::string, std::vector<std::string>>& child_record) {
+  std::vector<std::map<std::string, std::string>> result;
 
-// 定义一个结构体
-struct Task {
-  int id;
-  int priority;
-
-  Task(int id, int priority) : id(id), priority(priority) {}
-
-  // 自定义比较器，使得优先级高的任务排在队列前面
-  bool operator<(const Task& other) const {
-    return priority < other.priority;  // 大的优先级排在前面
+  for (const auto& [key, values] : child_record) {
+    if (result.empty()) {
+      for (const auto& value : values) {
+        std::map<std::string, std::string> new_map;
+        new_map[key] = value;
+        result.push_back(std::move(new_map));
+      }
+    } else {
+      std::vector<std::map<std::string, std::string>> new_result;
+      for (auto& map : result) {
+        for (const auto& value : values) {
+          map[key] = value;
+          new_result.push_back(map);
+        }
+      }
+      result = std::move(new_result);
+    }
   }
-};
+
+  return result;
+}
 
 int main() {
-  // 使用自定义结构体创建优先级队列
-  priority_queue<Task> pq;
+  std::unordered_map<std::string, std::vector<std::string>> child_record = {
+      {"color", {"red", "green", "blue"}},
+      {"size", {"small", "large"}}
+  };
 
-  // 插入任务
-  pq.push(Task(1, 5));   // id = 1, priority = 5
-  pq.push(Task(2, 1));   // id = 2, priority = 1
-  pq.push(Task(3, 3));   // id = 3, priority = 3
+  auto result = CartesianProduct(child_record);
 
-  // 输出并删除优先级队列的元素
-  while (!pq.empty()) {
-    Task t = pq.top();
-    cout << "Task ID: " << t.id << ", Priority: " << t.priority << endl;
-    pq.pop();
+  for (const auto& map : result) {
+    for (const auto& [key, value] : map) {
+      std::cout << key << ": " << value << " ";
+    }
+    std::cout << std::endl;
   }
-
-  // 输出:
-  // Task ID: 1, Priority: 5
-  // Task ID: 3, Priority: 3
-  // Task ID: 2, Priority: 1
 
   return 0;
 }

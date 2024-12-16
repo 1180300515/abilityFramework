@@ -1,0 +1,13 @@
+abilityName: motionTrigger1
+type: motionTrigger
+location:
+  x: 0.1
+  y: 0.1
+  z: 0.1
+  scene: room
+control:
+  trigger: off
+QoS:
+  response: 20
+  reliability: 0.8
+  availability: 0.9

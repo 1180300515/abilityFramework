@@ -21,28 +21,26 @@ void httpServer::Init(
   get_abilityStatus = std::move(get_abilityStatus_);
   get_abilityPort = std::move(get_abilityPort_);
 
-  this->server.Put("/ability/abilityHeartbeat", [this](
-                                                    const httplib::Request& req,
-                                                    httplib::Response& res) {
-    DLOG(INFO)
-        << "httpserver receive: method: Post   URL: /ability/abilityHeartbeat";
+  this->server.Put("/ability/abilityHeartbeat",
+                   [this](const httplib::Request& req, httplib::Response& res) {
+                     // DLOG(INFO) << "收到ability/abilityHeartbeat";
 
-    Json::Reader reader;
-    Json::Value root;
-    bool success = reader.parse(req.body, root);
-    if (!success) {
-      DLOG(ERROR) << "json parse fail";
-      res.status = 400;
-      return;
-    }
-    auto result = set_heartbeat(root);
-    if (!result) {
-      res.status = 500;
-      return;
-    }
-    res.status = 200;
-    res.set_content("OK", "text/plain");
-  });
+                     Json::Reader reader;
+                     Json::Value root;
+                     bool success = reader.parse(req.body, root);
+                     if (!success) {
+                       DLOG(ERROR) << "json parse fail";
+                       res.status = 400;
+                       return;
+                     }
+                     auto result = set_heartbeat(root);
+                     if (!result) {
+                       res.status = 500;
+                       return;
+                     }
+                     res.status = 200;
+                     res.set_content("OK", "text/plain");
+                   });
 
   this->server.Put("/ability/abilityCommand", [this](
                                                   const httplib::Request& req,
@@ -76,8 +74,7 @@ void httpServer::Init(
 
   this->server.Get("/ability/abilityPort", [this](const httplib::Request& req,
                                                   httplib::Response& res) {
-    DLOG(INFO)
-        << "httpserver receive: method: GET   URL: /ability/abilityPort";
+    DLOG(INFO) << "httpserver receive: method: GET   URL: /ability/abilityPort";
     std::string abilityName = req.get_param_value("abilityName");
     // DLOG(INFO) << "查询目标为： " << abilityName;
     if (abilityName.empty()) {
@@ -106,7 +103,7 @@ void httpServer::Init(
       return;
     }
     auto result = get_abilityStatus(name);
-    DLOG(INFO) << "完整能力状态： " << result;
+    // DLOG(INFO) << "完整能力状态： " << result;
     res.status = 200;
     res.set_content(result, "application/json");
   });

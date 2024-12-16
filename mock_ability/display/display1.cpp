@@ -114,7 +114,7 @@ void onTerminate(bool mode) {
     ability_thread.join();
   }
   state = "TERMINATE";
-  if (mode) {
+  if (!mode) {
     DLOG(INFO) << "只终止自身模式";
   } else {
     DLOG(INFO) << "终止依赖模式";

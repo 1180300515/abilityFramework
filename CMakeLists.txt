@@ -46,6 +46,8 @@ target_include_directories(camera2 PRIVATE ${JSONCPP_INCLUDE_DIRS})
 target_link_libraries(camera2 glog jsoncpp)
 
 add_executable(httpserver test/http_server.cpp)
+target_include_directories(httpserver PRIVATE ${JSONCPP_INCLUDE_DIRS})
+target_link_libraries(httpserver glog jsoncpp)
 
 add_executable(display1 mock_ability/display/display1.cpp
         src/lifecyclemgr/heartbeat_info.cpp
@@ -82,3 +84,9 @@ add_executable(light4 mock_ability/light/light4.cpp
         src/abilitymgr/ability_message.cpp)
 target_include_directories(light4 PRIVATE ${JSONCPP_INCLUDE_DIRS})
 target_link_libraries(light4 glog jsoncpp)
+
+add_executable(motionTrigger1 mock_ability/motionTrigger/motionTrigger1.cpp
+        src/lifecyclemgr/heartbeat_info.cpp
+        src/abilitymgr/ability_message.cpp)
+target_include_directories(motionTrigger1 PRIVATE ${JSONCPP_INCLUDE_DIRS})
+target_link_libraries(motionTrigger1 glog jsoncpp)
