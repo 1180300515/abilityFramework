@@ -33,6 +33,7 @@ void httpServer::Init(
                        res.status = 400;
                        return;
                      }
+                     // DLOG(INFO) << req.body;
                      auto result = set_heartbeat(root);
                      if (!result) {
                        res.status = 500;

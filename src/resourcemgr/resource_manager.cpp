@@ -1,9 +1,9 @@
 #include "resource_manager.h"
 
-#include <sys/socket.h>
 #include <filesystem>
 #include <fstream>
 #include <glog/logging.h>
+#include <httplib.h>
 #include <json/json.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -61,45 +61,61 @@ void resourceManager::parseYamlFile(const std::string &filePath) {
 
 void resourceManager::Run() {
   loop_thread = std::thread([this](){
-    int udp_socket = socket(AF_INET, SOCK_DGRAM, 0);
-    if (udp_socket < 0) {
-      DLOG(ERROR) << "Cannot open socket" << std::endl;
-      exit(-1);
-    }
-    struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(8082); // 监听8082端口
-    server_addr.sin_addr.s_addr = INADDR_ANY; // 监听所有网络接口
-    if (bind(udp_socket, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-      DLOG(ERROR) << "Bind failed" << std::endl;
-      close(udp_socket);
-      exit(-1);
-    }
-    const size_t MAX_BUF_SIZE = 1024;
-    char buffer[MAX_BUF_SIZE];
-    struct sockaddr_in client_addr;
-    socklen_t client_addr_len = sizeof(client_addr);
-    while (true) {
-      ssize_t bytes_received = recvfrom(udp_socket, buffer, MAX_BUF_SIZE, 0, (struct sockaddr*)&client_addr, &client_addr_len);
-      if (bytes_received < 0) {
-        DLOG(ERROR) << "Recvfrom failed" << std::endl;
-        continue;
-      }
-
-      buffer[bytes_received] = '\0'; // 确保字符串以空字符结尾
-      std::string payload(buffer);
-      DLOG(INFO) << "收到位置更新数据" << payload << std::endl;
-
-      // 解析JSON消息
-      Json::Reader reader;
-      Json::Value root;
-      if (!reader.parse(payload, root)) {
-        DLOG(ERROR) << "JSON Parsing error" << std::endl;
-        continue;
-      }
-      this->changeLocation(root);
-    }
+//    int udp_socket = socket(AF_INET, SOCK_DGRAM, 0);
+//    if (udp_socket < 0) {
+//      DLOG(ERROR) << "Cannot open socket" << std::endl;
+//      exit(-1);
+//    }
+//    struct sockaddr_in server_addr;
+//    memset(&server_addr, 0, sizeof(server_addr));
+//    server_addr.sin_family = AF_INET;
+//    server_addr.sin_port = htons(8082); // 监听8082端口
+//    server_addr.sin_addr.s_addr = INADDR_ANY; // 监听所有网络接口
+//    if (bind(udp_socket, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+//      DLOG(ERROR) << "Bind failed" << std::endl;
+//      close(udp_socket);
+//      exit(-1);
+//    }
+//    const size_t MAX_BUF_SIZE = 1024;
+//    char buffer[MAX_BUF_SIZE];
+//    struct sockaddr_in client_addr;
+//    socklen_t client_addr_len = sizeof(client_addr);
+//    while (true) {
+//      ssize_t bytes_received = recvfrom(udp_socket, buffer, MAX_BUF_SIZE, 0, (struct sockaddr*)&client_addr, &client_addr_len);
+//      if (bytes_received < 0) {
+//        DLOG(ERROR) << "Recvfrom failed" << std::endl;
+//        continue;
+//      }
+//
+//      buffer[bytes_received] = '\0'; // 确保字符串以空字符结尾
+//      std::string payload(buffer);
+//      DLOG(INFO) << "收到位置更新数据" << payload << std::endl;
+//
+//      // 解析JSON消息
+//      Json::Reader reader;
+//      Json::Value root;
+//      if (!reader.parse(payload, root)) {
+//        DLOG(ERROR) << "JSON Parsing error" << std::endl;
+//        continue;
+//      }
+//      this->changeLocation(root);
+//    }
+      httplib::Server location_svr;
+      location_svr.Put("/location" , [this](const httplib::Request& req, httplib::Response& res){
+        DLOG(INFO) << "收到位置变化";
+        Json::Reader reader;
+        Json::Value root;
+        bool success = reader.parse(req.body, root);
+        if (!success) {
+          DLOG(ERROR) << "json parse fail";
+          res.status = 400;
+          return;
+        }
+        this->changeLocation(root);
+        res.status = 200;
+        res.set_content("OK", "text/plain");
+      });
+      location_svr.listen("0.0.0.0" , 8082);
   });
 }
 

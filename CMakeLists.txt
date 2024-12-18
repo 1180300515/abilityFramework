@@ -55,6 +55,12 @@ add_executable(display1 mock_ability/display/display1.cpp
 target_include_directories(display1 PRIVATE ${JSONCPP_INCLUDE_DIRS})
 target_link_libraries(display1 glog jsoncpp)
 
+add_executable(display2 mock_ability/display/display2.cpp
+        src/lifecyclemgr/heartbeat_info.cpp
+        src/abilitymgr/ability_message.cpp)
+target_include_directories(display2 PRIVATE ${JSONCPP_INCLUDE_DIRS})
+target_link_libraries(display2 glog jsoncpp)
+
 add_executable(loudspeaker1 mock_ability/loudspeaker/loudspeaker1.cpp
         src/lifecyclemgr/heartbeat_info.cpp
         src/abilitymgr/ability_message.cpp)

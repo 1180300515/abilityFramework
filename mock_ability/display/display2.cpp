@@ -6,7 +6,7 @@
 #include "ability_message.h"
 #include <glog/logging.h>
 
-std::string abilityName = "display1";
+std::string abilityName = "display2";
 
 // 生命状态
 std::string state = "INIT";
