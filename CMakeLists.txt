@@ -85,8 +85,15 @@ add_executable(light4 mock_ability/light/light4.cpp
 target_include_directories(light4 PRIVATE ${JSONCPP_INCLUDE_DIRS})
 target_link_libraries(light4 glog jsoncpp)
 
+add_executable(light5 mock_ability/light/light4.cpp
+        src/lifecyclemgr/heartbeat_info.cpp
+        src/abilitymgr/ability_message.cpp)
+target_include_directories(light5 PRIVATE ${JSONCPP_INCLUDE_DIRS})
+target_link_libraries(light5 glog jsoncpp)
+
 add_executable(motionTrigger1 mock_ability/motionTrigger/motionTrigger1.cpp
         src/lifecyclemgr/heartbeat_info.cpp
         src/abilitymgr/ability_message.cpp)
 target_include_directories(motionTrigger1 PRIVATE ${JSONCPP_INCLUDE_DIRS})
 target_link_libraries(motionTrigger1 glog jsoncpp)
+

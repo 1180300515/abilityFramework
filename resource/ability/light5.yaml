@@ -1,0 +1,14 @@
+abilityName: light5
+type: light
+location:
+  x: 0.1
+  y: 0.1
+  z: 0.1
+  scene: room
+control:
+  power: off
+  light: 10
+QoS:
+  response: 20
+  reliability: 0.8
+  availability: 0.9
