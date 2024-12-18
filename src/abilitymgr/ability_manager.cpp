@@ -56,7 +56,7 @@ abilityManager::handleAbilityCommand(const Json::Value& root) {
 
 void abilityManager::pushTask(const AbilityMessage::AbilityCommand& cmd) {
   std::unique_lock<std::mutex> lock(lock_queue);
-  DLOG(INFO) << "推入任务: " << cmd.toJson().toStyledString();
+  // DLOG(INFO) << "推入任务: " << cmd.toJson().toStyledString();
   taskQueue.push(cmd);
   cv.notify_one();
 }
@@ -73,7 +73,7 @@ void abilityManager::Run() {
         task = taskQueue.top();
         taskQueue.pop();
       }
-      DLOG(INFO) << "当前任务: " << task.toJson().toStyledString();
+      // DLOG(INFO) << "当前任务: " << task.toJson().toStyledString();
       if (task.desireState.empty()) {
         // 属性控制指令
         if (get_state(task.abilityName) != "RUNNING") {
