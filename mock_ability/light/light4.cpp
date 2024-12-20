@@ -7,7 +7,12 @@
 #include "ability_message.h"
 #include <glog/logging.h>
 
+#include <wiringPi.h>
+
 std::string abilityName = "light4";
+
+// 绑定wPi
+const int ledPin = 0;
 
 // 生命状态
 std::string state = "INIT";
@@ -58,6 +63,13 @@ void report_loop() {
 void onStart() {
     DLOG(INFO) << "进入standby";
     state = "STANDBY";
+
+    if (wiringPiSetup() == -1) {
+        std::cerr << "WiringPi 初始化失败！" << std::endl;
+        return 1;
+    }
+    pinMode(ledPin, OUTPUT);
+
     heartbeatReport();
 }
 
@@ -69,6 +81,9 @@ void onConnect() {
     ability_thread = std::thread([&]() {
         ability_svr.listen_after_bind();
     });
+
+    digitalWrite(ledPin, LOW);
+
     heartbeatReport();
 }
 
@@ -80,6 +95,9 @@ void onDisconnect() {
         ability_thread.join();
     }
     state = "STANDBY";
+
+    digitalWrite(ledPin, LOW);
+
     heartbeatReport();
 }
 
@@ -110,6 +128,13 @@ void handleDesire(const AbilityMessage::AbilityCommand &cmd) {
     for(const auto& item : cmd.desire) {
         if (item.controlName == "power") {
             DLOG(INFO) << "设置power为: " << item.controlIntent;
+
+            if (item.controlIntent == "on") {
+                digitalWrite(ledPin, HIGH);
+            } else if (item.controlIntent == "off") {
+                digitalWrite(ledPin, LOW);
+            }
+
             power = item.controlIntent;
         } else if (item.controlName == "light") {
             DLOG(INFO) << "设置light为: " << item.controlIntent;

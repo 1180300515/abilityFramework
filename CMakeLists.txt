@@ -71,31 +71,31 @@ add_executable(light1 mock_ability/light/light1.cpp
         src/lifecyclemgr/heartbeat_info.cpp
         src/abilitymgr/ability_message.cpp)
 target_include_directories(light1 PRIVATE ${JSONCPP_INCLUDE_DIRS})
-target_link_libraries(light1 glog jsoncpp)
+target_link_libraries(light1 glog jsoncpp wiringPi)
 
 add_executable(light2 mock_ability/light/light2.cpp
         src/lifecyclemgr/heartbeat_info.cpp
         src/abilitymgr/ability_message.cpp)
 target_include_directories(light2 PRIVATE ${JSONCPP_INCLUDE_DIRS})
-target_link_libraries(light2 glog jsoncpp)
+target_link_libraries(light2 glog jsoncpp wiringPi)
 
 add_executable(light3 mock_ability/light/light3.cpp
         src/lifecyclemgr/heartbeat_info.cpp
         src/abilitymgr/ability_message.cpp)
 target_include_directories(light3 PRIVATE ${JSONCPP_INCLUDE_DIRS})
-target_link_libraries(light3 glog jsoncpp)
+target_link_libraries(light3 glog jsoncpp wiringPi)
 
 add_executable(light4 mock_ability/light/light4.cpp
         src/lifecyclemgr/heartbeat_info.cpp
         src/abilitymgr/ability_message.cpp)
 target_include_directories(light4 PRIVATE ${JSONCPP_INCLUDE_DIRS})
-target_link_libraries(light4 glog jsoncpp)
+target_link_libraries(light4 glog jsoncpp wiringPi)
 
 add_executable(light5 mock_ability/light/light5.cpp
         src/lifecyclemgr/heartbeat_info.cpp
         src/abilitymgr/ability_message.cpp)
 target_include_directories(light5 PRIVATE ${JSONCPP_INCLUDE_DIRS})
-target_link_libraries(light5 glog jsoncpp)
+target_link_libraries(light5 glog jsoncpp wiringPi)
 
 add_executable(motionTrigger1 mock_ability/motionTrigger/motionTrigger1.cpp
         src/lifecyclemgr/heartbeat_info.cpp
