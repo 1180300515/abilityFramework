@@ -65,8 +65,7 @@ void onStart() {
     state = "STANDBY";
 
     if (wiringPiSetup() == -1) {
-        std::cerr << "WiringPi 初始化失败！" << std::endl;
-        return 1;
+        DLOG(ERROR) << "WiringPi 初始化失败！" << std::endl;
     }
     pinMode(ledPin, OUTPUT);
 
